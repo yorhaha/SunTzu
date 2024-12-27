@@ -8,12 +8,4 @@ As a top-tier StarCraft II strategist, your task is to generate a query sentence
 
 
 class RagAgent(BaseAgent):
-    def __init__(self, model_name: str):
-        super().__init__(model_name)
-        self.rag_agent = ConversableAgent(
-            name="RagAgent",
-            llm_config=self.llm_config,
-        )
-
-    def generate_reply(self, messages: list):
-        return self.rag_agent.generate_reply(messages=messages)
+    pass

@@ -15,7 +15,7 @@ import pandas as pd
 
 from tools.logger import setup_logger
 from tools.format import extract_code
-from agents import ActionAgent, ActionDiscussAgent, PlanAgent, PlanDiscussAgent, PlanHumanAgent
+from agents import ActionAgent, PlanAgent
 
 ignore_actions = []
 
@@ -68,15 +68,37 @@ class LLMPlayer(BotAI):
         self._id_to_abilities = {}
         self.next_id = 1
 
-        service = ["", "siliconflow", "gptapi.us", "vllm"][3]
-        # self.model_name = "meta-llama/Meta-Llama-3.1-8B-Instruct"
-        self.model_name = "Qwen2.5-32B-Instruct"
+        # self.model_name = "deepseek-ai/DeepSeek-V2.5"
         # self.model_name = "glm-4-flash"
-        # self.model_name = "deepseek-chat"
+        self.model_name = "deepseek-chat"
         # self.model_name = "gpt-4o-mini"
         # self.model_name = "gpt-4o-2024-08-06"
-        self.plan_agent = PlanHumanAgent(self.model_name, service=service, temperature=1.0)
-        self.action_agent = ActionAgent(self.model_name, service=service, temperature=0.1)
+        service = ["", "siliconflow", "gptapi.us", "vllm"][3]
+        # self.model_name = "Qwen2.5-72B-Instruct"
+        self.plan_agent = PlanAgent(
+            self.model_name,
+            # service="vllm",
+            vllm_port=12001,
+            n=1,
+            max_tokens=8192,
+            temperature=0.7,
+            top_p=0.8,
+            top_k=20,
+            repetition_penalty=1.1,
+            presence_penalty=0.0,
+        )
+        self.action_agent = ActionAgent(
+            self.model_name,
+            # service="vllm",
+            vllm_port=12001,
+            n=1,
+            max_tokens=8192,
+            temperature=0.7,
+            top_p=0.8,
+            top_k=20,
+            repetition_penalty=1.1,
+            presence_penalty=0.0,
+        )
 
         self.name = self.model_name.split("/")[-1]
         time_str = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
@@ -87,6 +109,10 @@ class LLMPlayer(BotAI):
         self.last_action = []
         self.trace = {}
         self.action_history = {}
+
+        self.tag_to_health = {}
+        
+        self.surrender = False
 
     def logging(self, key: str, value: str, level="info", save_trace=False, save_file=False, print_log=True):
         idx = self.state.game_loop
@@ -130,33 +156,53 @@ class LLMPlayer(BotAI):
         with open(f"{self.log_path}/trace.json", "w") as f:
             json.dump(self.trace, f, indent=2, ensure_ascii=False)
 
+    def update_tag_to_health(self):
+        self.tag_to_health = {unit.tag: unit.health for unit in self.units}
+        self.tag_to_health.update({unit.tag: unit.health for unit in self.structures})
+    
+    def send_idle_scv_to_mineral(self):
+        scvs = self.units(UnitTypeId.SCV).idle
+        n_idle = len(scvs)
+        if n_idle > 0:
+            mineral_fields = self.mineral_field.closest_n_units(scvs.center, n_idle)
+            n_mineral = len(mineral_fields)
+            for i in range(n_mineral):
+                scvs[i].gather(mineral_fields[i % n_mineral])
+
     async def on_step(self, iteration: int):
-        if iteration < 10 or iteration % 50 != 0:  # 100 -> 17s
+        if self.surrender:
             return
-        # pdb.set_trace()
-        
-        self.logging("iteration", iteration, level="info", save_trace=True, print_log=False)
-        obs_text = await self.obs_to_text()
+        self.send_idle_scv_to_mineral()
+        command_center = [s for s in self.structures if s.type_id == UnitTypeId.COMMANDCENTER]
+        if len(command_center) == 0 or command_center[0].health_percentage < 0.2:
+            self.surrender = True
+            await self.chat_send("gg")
+            return
+        # 100 -> 17s
+        if iteration % 10 == 0 and self.minerals > 170:
+            self.logging("iteration", iteration, level="info", save_trace=True, print_log=False)
+            obs_text = await self.obs_to_text()
 
-        plans = self.plan_agent.run(obs_text)
-        plans = json.loads(extract_code(plans))
-        self.logging("plans", plans, save_trace=True)
-        plans = "\n".join([f"{i + 1}. {plan}" for i, plan in enumerate(plans)])
-        print(plans)
+            plans = self.plan_agent.run(obs_text)
+            self.logging("plans", plans, save_trace=True)
+            plans = "\n".join([f"{i + 1}. {plan}" for i, plan in enumerate(plans)])
 
-        actions = self.action_agent.run(obs_text, plans, verifier=self.verify_actions)
-        print(actions)
-        actions = json.loads(extract_code(actions))
+            actions = self.action_agent.run(obs_text, plans, verifier=self.verify_actions)
+            print(actions)
+            
+            # pdb.set_trace()
 
-        await self.run_actions(actions)
-        # pdb.set_trace()
+            await self.run_actions(actions)
+
+        if iteration % 15 == 0:
+            self.update_tag_to_health()
 
     def verify_actions(self, actions):
         if isinstance(actions, str):
             try:
                 actions = json.loads(extract_code(actions))
             except json.JSONDecodeError:
-                return False, "Action must be a json list"
+                return False, "Action must be a json list wrapped with triple backticks and without comments"
         if not isinstance(actions, list):
             return False, "Action must be a list"
 
@@ -235,6 +281,8 @@ class LLMPlayer(BotAI):
                 return False, "`units` must be a list of integers"
             if unit_id not in self._id_to_tag:
                 return False, f"Unit with id {unit_id} not found"
+            if unit_id not in self._id_to_abilities:
+                return False, f"Unit with id {unit_id} not found"
             unit = self.get_unit_by_id(unit_id)
             if not unit:
                 return False, f"Unit {unit_id} doesn't exist"
@@ -251,7 +299,25 @@ class LLMPlayer(BotAI):
                 f"Resource is not enough for action {action['action']}. Cost: {cost.minerals} minerals, {cost.vespene} vespene.",
             )
 
+        ### action_name check
+        building_units = self.get_building_units()
+        building_units = [name.lower() for name in building_units]
+        if action_name.startswith("TERRANBUILD_") or action_name.startswith("BUILD_"):
+            build_name = action_name.split("_")[1].lower()
+            if build_name in building_units:
+                return False, f"[{action['units'][0]}]{self.units[0].name} is already under construction"
+        if action_name == "TERRANBUILD_SUPPLYDEPOT":
+            if self.supply_cap - self.supply_used >= 7:
+                return False, "There is still space for supply depot, no need to build new Supply Depot."
+
         return True, "Valid action"
+
+    def get_building_units(self):
+        building_units = []
+        for unit in self.units:
+            if unit.build_progress < 1.0:
+                building_units.append(unit)
+        return [unit.name for unit in building_units]
 
     ################ tag id mapping
     def tag_to_id(self, tag: int):
@@ -302,7 +368,6 @@ class LLMPlayer(BotAI):
 
         self.logging("actions", "\n" + json.dumps(actions, indent=2, ensure_ascii=False))
         self.logging("actions", actions, save_trace=True, print_log=False)
-        # pdb.set_trace()
         self.last_action = [json.dumps(action, ensure_ascii=False) for action in actions if action.get("is_valid", True)]
         return self.last_action
 
@@ -332,13 +397,16 @@ class LLMPlayer(BotAI):
                 action_desc = TerranAbility[action]["description"]
                 action_keys = TerranAbility[action]["target"]
                 desc.append(f"{action}(target: {action_keys}): {action_desc}")
-                cost = self.units[0]._bot_object.game_data.calculate_ability_cost(AbilityId[action])
-                if cost.minerals and cost.vespene:
-                    desc[-1] += f" Cost: {cost.minerals} minerals, {cost.vespene} vespene."
-                elif cost.vespene:
-                    desc[-1] += f" Cost: {cost.vespene} vespene."
-                elif cost.minerals:
-                    desc[-1] += f" Cost: {cost.minerals} minerals."
+                try:
+                    cost = self.units[0]._bot_object.game_data.calculate_ability_cost(AbilityId[action])
+                    if cost.minerals and cost.vespene:
+                        desc[-1] += f" Cost: {cost.minerals} minerals, {cost.vespene} vespene."
+                    elif cost.vespene:
+                        desc[-1] += f" Cost: {cost.vespene} vespene."
+                    elif cost.minerals:
+                        desc[-1] += f" Cost: {cost.minerals} minerals."
+                except Exception as e:
+                    pass
         return "\n".join(desc)
 
     async def structures_to_text(self, structures: Units):
@@ -352,9 +420,10 @@ class LLMPlayer(BotAI):
         text += "Race: {}\n".format(self.race.name)
         text += "Minerals: {}\n".format(self.minerals)
         text += "Vespene: {}\n".format(self.vespene)
-        text += "Supply used: {}/{}\n".format(self.supply_used, self.supply_cap)
+        # text += "Supply used: {}/{}\n".format(self.supply_used, self.supply_cap)
         text += "Supply army: {}\n".format(self.supply_army)
         text += "Supply workers: {}\n".format(self.supply_workers)
+        text += "Supply unused: {}".format(self.supply_cap - self.supply_used)
 
         return text.strip()
 
@@ -381,26 +450,42 @@ class LLMPlayer(BotAI):
             if int(unit.health_max) and unit.build_progress == 1.0:
                 text += f"Health: {int(unit.health)}/{int(unit.health_max)} ({int(unit.health_percentage * 100)}%)\n"
             if unit.shield_max > 0.0:
-                text += f"Shield: {unit.shield}/{unit.shield_max}\n"
+                text += f"Shield: {int(unit.shield)}/{int(unit.shield_max)}\n"
             if unit.energy_max > 0.0:
-                text += f"Energy: {unit.energy}/{unit.energy_max}\n"
-            states = self.unit_state_to_text(unit)
-            if states:
-                text += f"State: {states}\n"
-            if unit.ideal_harvesters > 0:
-                if unit.surplus_harvesters > 0:
-                    text += (
-                        f"Harvesters: {unit.assigned_harvesters}/{unit.ideal_harvesters} (surplus {unit.surplus_harvesters})\n"
-                    )
-                else:
-                    text += f"Harvesters: {unit.assigned_harvesters}/{unit.ideal_harvesters}\n"
+                text += f"Energy: {int(unit.energy)}/{int(unit.energy_max)}\n"
+            if unit.is_mine:
+                states = self.unit_state_to_text(unit)
+                if states:
+                    text += f"State: {states}\n"
 
+                assigned = unit.assigned_harvesters
+                ideal = unit.ideal_harvesters
+                surplus = unit.surplus_harvesters
+                if ideal > 0:
+                    if surplus > 0:
+                        text += f"Harvesters: {assigned}/{ideal} (no more SCV accepted, surplus {surplus})\n"
+                    elif surplus == 0:
+                        text += f"Harvesters: {assigned}/{ideal} (no more SCV accepted)\n"
+                    else:
+                        text += f"Harvesters: {assigned}/{ideal}\n"
+
+                # Production list
+                if unit.is_structure:
+                    production_list = []
+                    unit_orders = unit.orders
+                    for unit_order in unit_orders:
+                        if "Train " in unit_order.ability.friendly_name:
+                            production_list.append(unit_order.ability.friendly_name[6:])
+                    if production_list:
+                        text += f"Production list: {', '.join(production_list)}\n"
         return text.strip()
 
     async def abilities_to_text(self, units: Units):
         unit_name_to_abilities = {}
         text = ""
         for unit in units:
+            if not unit.build_progress == 1.0:
+                continue
             abilities = await self.unit_ability_to_text(unit)
             if unit.name not in unit_name_to_abilities:
                 unit_name_to_abilities[unit.name] = abilities
@@ -411,19 +496,24 @@ class LLMPlayer(BotAI):
 
     async def unit_ability_to_text(self, unit: Unit):
         abilities = []
-        aibility_ids = await self.get_available_abilities([unit])
-        valid_aibility_ids = []
-        for ability_id in aibility_ids[0]:
+        ability_ids = await self.get_available_abilities([unit], ignore_resource_requirements=True)
+        # if unit.name == "Barracks":
+        #     pdb.set_trace()
+        valid_ability_ids = []
+        for ability_id in ability_ids[0]:
+            if ability_id.name == "NULL_NULL":
+                continue
             if ability_id.name not in TerranAbility:
                 ignore_actions.append(ability_id.name)
                 print(f"Unknown ability: {ability_id.name}")
-                unit(ability_id)
                 pdb.set_trace()
             elif TerranAbility[ability_id.name].get("enabled", False):
-                valid_aibility_ids.append(ability_id)
-        abilities = [ability_id.name for ability_id in valid_aibility_ids]
+                valid_ability_ids.append(ability_id)
+        abilities = [ability_id.name for ability_id in valid_ability_ids]
+        if unit.name == "SCV":
+            abilities = [a for a in abilities if a not in ["MOVE_MOVE", "ATTACK_ATTACK", "EFFECT_REPAIR_SCV"]]
         self._id_to_abilities[self.tag_to_id(unit.tag)] = abilities
-        abilities = ", ".join([ability_id.name for ability_id in valid_aibility_ids])
+        abilities = ", ".join(abilities)
 
         return abilities
 
@@ -455,29 +545,30 @@ class LLMPlayer(BotAI):
                 states.append(f"repairing [{order_target}]{order_target_name}")
             else:
                 states.append("repairing")
-        # if unit.is_collecting:
-        #     if order_target:
-        #         states.append(f"collecting [{order_target}]{order_target_name}")
-        #     else:
-        #         states.append("collecting")
         if unit.is_gathering:
             if order_target:
                 states.append(f"gathering [{order_target}]{order_target_name}")
             else:
                 states.append("gathering")
-        if unit.is_carrying_minerals:
-            states.append("carrying minerals")
-        if unit.is_carrying_vespene:
-            states.append("carrying vespene")
 
         if unit.is_idle:
             states.append("idle")
+        # if unit.is_carrying_minerals:
+        #     states.append("carrying minerals")
+        #     if "idle" not in states:
+        #         states.remove("idle")
+        # if unit.is_carrying_vespene:
+        #     states.append("carrying vespene")
+        #     if "idle" not in states:
+        #         states.remove("idle")
         if unit.is_flying:
             states.append("flying")
         if unit.is_transforming:
             states.append("transforming")
         if unit.is_patrolling:
             states.append("patrolling")
+        if unit.tag in self.tag_to_health and unit.health < self.tag_to_health[unit.tag]:
+            states.append("under attack")
 
         if unit.is_constructing_scv:
             states.append("constructing")
@@ -487,7 +578,8 @@ class LLMPlayer(BotAI):
     def miner_to_text(self):
         center = self.start_location
         miners = []
-        cloest_miners = self.mineral_field.closest_n_units(center, 10)
+        num_SCV = len([unit for unit in self.units if unit.name == "SCV"])
+        cloest_miners = self.mineral_field.closest_n_units(center, num_SCV + 1)
         for mineral in cloest_miners:
             miners.append(f"[{self.tag_to_id(mineral.tag)}]({int(mineral.position.x)}, {int(mineral.position.y)})")
         if len(miners) == 0:

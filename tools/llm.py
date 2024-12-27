@@ -1,14 +1,17 @@
 import time
 import random
 import os
+import json
 from threading import Thread
 from tqdm import tqdm
 from openai import OpenAI
 
+from tools.format import extract_code
 
-def get_client(model_name, service=""):
+
+def get_client(model_name, service="", vllm_ip="localhost", vllm_port=12001):
     if service == "vllm":
-        base_url = "http://localhost:12001/v1"
+        base_url = f"http://{vllm_ip}:{vllm_port}/v1"
         api_key = os.getenv("VLLM_API_KEY")
     elif service == "siliconflow":
         base_url = "https://api.siliconflow.cn/v1"
@@ -42,12 +45,18 @@ def call_openai(
     n=1,
     temperature=0.8,
     top_p=1,
+    top_k=40,
+    repetition_penalty=1.0,
+    presence_penalty=0.0,
     timeout=60,
     system_message="You are a helpful assistant.",
     service="",
-    retry_times=3,
+    retry_times=10,
+    vllm_ip="localhost",
+    vllm_port=12001,
+    need_json=False,
 ):
-    client = get_client(model_name, service)
+    client = get_client(model_name, service, vllm_ip, vllm_port)
     messages = [
         {"role": "system", "content": system_message},
         *history,
@@ -63,13 +72,20 @@ def call_openai(
                 n=n,
                 temperature=temperature,
                 top_p=top_p,
+                # top_k=top_k,
+                # repetition_penalty=repetition_penalty,
+                # presence_penalty=presence_penalty,
                 timeout=timeout,
             )
 
             response = [choice.message.content.strip() for choice in completion.choices]
+            if need_json:
+                json.loads(extract_code(response[0]))
 
             return response
         except Exception as e:
+            print("Error:", e)
+            time.sleep(random.random() * 5)
             continue
     raise ValueError("Fail to connect LLM service:", client.base_url)
 

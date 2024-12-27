@@ -11,6 +11,12 @@ def extract_code(text):
     return ""
 
 
+def json_to_markdown(content, language=""):
+    if isinstance(content, str):
+        content = json.loads(content)
+    content = json.dumps(content, indent=2)
+    return f"```{language}\n{content}\n```"
+
 def parse_function_call(function_call):
     pattern = r"(?P<name>\w+)\((?P<params>.*)\)"
     match = re.match(pattern, function_call.strip())
