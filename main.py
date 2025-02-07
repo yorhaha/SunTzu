@@ -21,5 +21,5 @@ res = run_game(
     [host_player, join_player],
     realtime=False,
     rgb_render_config=None,
-    save_replay_as=llm_player.log_path + ".SC2Replay"
+    save_replay_as=llm_player.log_path + ".SC2Replay",
 )

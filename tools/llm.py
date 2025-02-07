@@ -9,9 +9,9 @@ from openai import OpenAI
 from tools.format import extract_code
 
 
-def get_client(model_name, service="", vllm_ip="localhost", vllm_port=12001):
+def get_client(model_name, service="", vllm_base_url=""):
     if service == "vllm":
-        base_url = f"http://{vllm_ip}:{vllm_port}/v1"
+        base_url = vllm_base_url
         api_key = os.getenv("VLLM_API_KEY")
     elif service == "siliconflow":
         base_url = "https://api.siliconflow.cn/v1"
@@ -52,11 +52,10 @@ def call_openai(
     system_message="You are a helpful assistant.",
     service="",
     retry_times=10,
-    vllm_ip="localhost",
-    vllm_port=12001,
+    vllm_base_url="",
     need_json=False,
 ):
-    client = get_client(model_name, service, vllm_ip, vllm_port)
+    client = get_client(model_name, service, vllm_base_url)
     messages = [
         {"role": "system", "content": system_message},
         *history,

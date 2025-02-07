@@ -4,6 +4,12 @@ from tools.llm import call_openai
 from tools.format import extract_code, json_to_markdown
 import json
 
+
+def construct_ordered_list(items: list[str]) -> str:
+    return "\n".join([f"{i+1}. {item}" for i, item in enumerate(items)])
+
+
+# Define reusable prompts
 tech_tree_prompt = f"""
 Technology tree:
 {TERRANN_TECH_TREE}
@@ -12,29 +18,28 @@ Technology tree:
 strategy_prompt = """
 Our final aim: destroy all enemies as soon as possible.
 Our strategy:
-- Resource collection: produce SCVs (< 20); construct and gather Refinery
+- Resource collection: produce SCVs; construct and gather Refinery
 - Development: build attacking units and structures
 - Attacking: concentrate forces to search and destroy enemies proactively
 """.strip()
 
 rules = [
     "Commands should be natural language, instead of code.",
+    "Base structures development: Supply Depot -> Refinery -> 2 Barracks ...",
+    "Attacking units development: 3 Marines -> Tech lab -> many Marauder and Marine ...",
+    "Marauder is the key to gain victory, which needs a Tech lab based on an idle Barracks. So it's wrong to use all Barracks to train Marine.",
     "The total cost of all commands should not exceed the current resources (minerals and gas).",
+    "Vespene Geyser cannot be harvested by SCV directly. A Refinery is precondition.",
+    "Commands should not train too many SCVs, whose number should not exceed the capacity of CommandCenter and Refinery.",
+    "Commands should not allocate SCVs beyond the harvesters limit for Refinery.",
     "Commands should not build a structure which is already under construction.",
+    "Commands should not build redundant structures(e.g. more than 2 Barracks).",
+    "Commands should not use abilities that are not supported by the unit or structure.",
+    "Commands should not build a structure that is not needed now (e.g. build a Missile Turret when there is no enemy air unit).",
+    "The production list capacity of Barracks is 5. If the list is full, do not use it to train units.",
     "Only when the remaining unused supply is less than 6, construct a new one Supply Depot.",
-    "Commands should not command some units to perform actions that are already being performed (e.g. harvesting resources).",
-    "Commands should not build redundant buildings or units (e.g. >20 SCVs, or more than 1 Barracks).",
-    "Commands cannot use abilities that are not supported by the unit or structure.",
-    "Vespene Geyser cannot be harvested by SCV directly. A Refinery is needed.",
-    # "If some SCVs are idle, command them to gather resources.",
-    "Once we have more than 3 attackers, we should attack enemies proactively and immediately.",
-    "Do not command SCVs to attack enemies.",
-    "Build a structure that is not needed now (e.g. build a Missile Turret when there is no enemy air unit).",
-    "Structure sequence: Supply Depot -> Refinery -> Barracks -> Tech lab -> Train many Marauder and Marine ...",
-    "At least 5 Marines are needed once the Barracks is built.",
 ]
-rules_prompt = "\n".join([f"{i+1}. {rule}" for i, rule in enumerate(rules)])
-rules_prompt = "Rule checklist:\n" + rules_prompt
+rules_prompt = "Rule checklist:\n" + construct_ordered_list(rules)
 
 plan_example_prompt = """
 Following are some examples:
@@ -47,8 +52,17 @@ Following are some examples:
 - ...
 """.strip()
 
+
 ############## Plan Role Prompt ###############
-plan_role_prompt = f"""
+def create_plan_prompt(with_cot=True):
+    cot_prompt = """
+### Analysis for the current game state ###
+1. Resource analysis
+2. Technology tree analysis
+3. Our situation of being attacked and where it comes from
+4. What should we do now
+    """
+    return f"""
 As a top-tier StarCraft II strategist, your task is to give one or more commands based on the current game state. Only give commands which can be executed immediately, instead of waiting for certain events.
 {plan_example_prompt}
 
@@ -59,38 +73,9 @@ As a top-tier StarCraft II strategist, your task is to give one or more commands
 {rules_prompt}
 
 Response format:
-<Response start>
-### Analysis for the current game state ###
-1. Resource analysis
-2. Technology tree analysis
-3. Whether we are attacked and how to deal with it
-4. Do we have a team (>= 3) of attackers to find and destroy the enemy? If so, attack enemy units/structures immediately.
-5. What should we do now?
-
+<Response start>{cot_prompt if with_cot else ""}
 ### Commands ###
-Your commands should be a list json in the following format wrapped with triple backticks:
-```
-[
-    "<command_1>",
-    "<command_2>",
-    ...
-]
-```
-And the length of the command list should be less than 5.
-<Response end>
-""".strip()
-
-plan_refine_role_prompt = f"""
-As a top-tier StarCraft II strategist, your task is to give one or more commands based on the current game state. Only give commands which can be executed immediately, instead of waiting for certain events.
-{plan_example_prompt}
-
-{tech_tree_prompt}
-
-{strategy_prompt}
-
-{rules_prompt}
-
-Your commands should be a list json in the following format wrapped with triple backticks:
+Your commands should be a list JSON in the following format wrapped with triple backticks:
 ```
 [
     "<command_1>",
@@ -99,11 +84,13 @@ Your commands should be a list json in the following format wrapped with triple 
 ]
 ```
 <Response end>
-""".strip()
+    """.strip()
+
 
 ############## Plan Critic Role Prompt ###############
-plan_critic_role_prompt = (
-    """
+def create_plan_critic_prompt():
+    return (
+        """
 As a top-tier StarCraft II player, your task is to verify that they have violated given rules. If so, please point out the errors and provide suggestions for improvement or removal. If OK, just tell it to output again.
 %s
 
@@ -118,15 +105,18 @@ Analyze the given rules one by one, and then provide a summary for errors at the
     "error_number": 0/1/2/...
 }
 ```
-""".strip()
-    % rules_prompt
-)
+    """.strip()
+        % rules_prompt
+    )
 
 
 class PlanHumanAgent(BaseAgent):
     def run(self, obs_text: str):
-        human_plan = str(input("Please provide a plan: \n"))
-        human_plan = human_plan.strip().split("; ")
+        human_plan = input("Please provide a plan: \n").strip()
+        human_plan = human_plan.split("; ") if human_plan else []
+        if not human_plan:
+            print("No valid commands provided!")
+            return []
         return "```\n" + json.dumps(human_plan, indent=2) + "\n```"
 
 
@@ -136,7 +126,7 @@ class PlanAgent(BaseAgent):
         self.max_refine_times = 3
 
     def gene_new_plan(self, obs_text: str):
-        prompt = plan_role_prompt + "\n\n" + construct_text({"Observation": obs_text})
+        prompt = create_plan_prompt() + "\n\n" + construct_text({"Observation": obs_text})
         prompt += "\nEach command should be natural language like examples."
         response = call_openai(**self.generation_config, prompt=prompt, need_json=True)[0]
         print("========= Plan =========")
@@ -144,7 +134,7 @@ class PlanAgent(BaseAgent):
         return json.loads(extract_code(response))
 
     def critic_plan(self, plan: list[str], obs_text: str):
-        prompt = plan_critic_role_prompt + "\n\n"
+        prompt = create_plan_critic_prompt() + "\n\n"
         prompt += construct_text(
             {
                 "Observation": obs_text,
@@ -157,27 +147,32 @@ class PlanAgent(BaseAgent):
         return response
 
     def refine_plan(self, obs_text: str, plan: list[str], critic: str):
-        gene_prompt = plan_refine_role_prompt + "\n\n" + construct_text({"Observation": obs_text})
+        gene_prompt = create_plan_prompt(with_cot=False) + "\n\n" + construct_text({"Observation": obs_text})
         history = [
             {"role": "user", "content": gene_prompt},
             {"role": "assistant", "content": json_to_markdown(plan)},
         ]
         prompt = (
-            critic
-            + "\nAnalyze every error and provide revised commands. Each command should be natural language like examples."
+            "Errors:\n"
+            + critic
+            + "\nAnalyze every error step by step. Fix them by adding, removing, or modifying commands. Give new commands finally."
         )
         response = call_openai(**self.generation_config, prompt=prompt, history=history, need_json=True)[0]
         print("========= Refine =========")
         print(response)
         return json.loads(extract_code(response))
 
-    def run(self, obs_text: str):
-        plan = self.gene_new_plan(obs_text)
+    def refine_plan_until_ready(self, obs_text: str, plan: list[str]):
         for _ in range(self.max_refine_times):
             critic = self.critic_plan(plan, obs_text)
             critic = json.loads(extract_code(critic))
-            if critic["error_number"] == 0:
-                break
-            critic = "\n".join(critic["errors"])
+            if critic.get("error_number", 0) == 0:
+                return plan
+            critic = construct_ordered_list(critic.get("errors", []))
             plan = self.refine_plan(obs_text, plan, critic)
+        return plan
+
+    def run(self, obs_text: str):
+        plan = self.gene_new_plan(obs_text)
+        plan = self.refine_plan_until_ready(obs_text, plan)
         return plan

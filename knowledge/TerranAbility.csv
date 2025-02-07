@@ -115,6 +115,7 @@ enabled,ability,description
 0,LAND_BARRACKS,
 0,LAND_ORBITALCOMMAND,
 0,LAND,
+0,SALVAGEEFFECT_SALVAGE,
 1,ATTACK_ATTACK,Attack some unit or structure.
 1,ATTACK_ATTACKTOWARDS,Attack towards target position.
 1,ATTACK_ATTACKBARRAGE,Attack barrage.

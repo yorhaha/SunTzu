@@ -12,6 +12,7 @@ import os
 import json
 import pdb
 import pandas as pd
+import random
 
 from tools.logger import setup_logger
 from tools.format import extract_code
@@ -38,7 +39,8 @@ def load_knowledge():
         description = item["description"]
         ability_data = [item for item in game_data["Ability"] if item["name"] == ability]
         if len(ability_data) == 0:
-            pdb.set_trace()
+            print("Ignored ability:", ability)
+            continue
         ability_data = ability_data[0]
         target = ability_data["target"]
         if not isinstance(target, str):
@@ -70,34 +72,42 @@ class LLMPlayer(BotAI):
 
         # self.model_name = "deepseek-ai/DeepSeek-V2.5"
         # self.model_name = "glm-4-flash"
-        self.model_name = "deepseek-chat"
+        # self.model_name = "deepseek-chat"
         # self.model_name = "gpt-4o-mini"
         # self.model_name = "gpt-4o-2024-08-06"
-        service = ["", "siliconflow", "gptapi.us", "vllm"][3]
         # self.model_name = "Qwen2.5-72B-Instruct"
+        self.model_name = "DeepSeek-R1-Distill-Qwen-32B"
+
+        # service = ["", "siliconflow", "gptapi.us", "vllm"][3]
+        vllm_base_url_list = [
+            # "http://172.18.30.165:12001/v1",
+            "http://172.18.30.73:12001/v1",
+        ]
+        random.seed(time.time())
+        vllm_base_url = random.choice(vllm_base_url_list)
+        print("Use VLLM:", vllm_base_url)
+
+        generation_config = {
+            "n": 1,
+            "max_tokens": 8192,
+            "temperature": 0.7,
+            "top_p": 0.8,
+            "top_k": 20,
+            "repetition_penalty": 1.1,
+            "presence_penalty": 0.0,
+        }
+
         self.plan_agent = PlanAgent(
             self.model_name,
-            # service="vllm",
-            vllm_port=12001,
-            n=1,
-            max_tokens=8192,
-            temperature=0.7,
-            top_p=0.8,
-            top_k=20,
-            repetition_penalty=1.1,
-            presence_penalty=0.0,
+            service="vllm",
+            vllm_base_url=vllm_base_url,
+            **generation_config,
         )
         self.action_agent = ActionAgent(
             self.model_name,
-            # service="vllm",
-            vllm_port=12001,
-            n=1,
-            max_tokens=8192,
-            temperature=0.7,
-            top_p=0.8,
-            top_k=20,
-            repetition_penalty=1.1,
-            presence_penalty=0.0,
+            service="vllm",
+            vllm_base_url=vllm_base_url,
+            **generation_config,
         )
 
         self.name = self.model_name.split("/")[-1]
@@ -108,11 +118,8 @@ class LLMPlayer(BotAI):
         self.logger = setup_logger(self.name, log_dir=self.log_path)
         self.last_action = []
         self.trace = {}
-        self.action_history = {}
 
         self.tag_to_health = {}
-        
-        self.surrender = False
 
     def logging(self, key: str, value: str, level="info", save_trace=False, save_file=False, print_log=True):
         idx = self.state.game_loop
@@ -159,7 +166,7 @@ class LLMPlayer(BotAI):
     def update_tag_to_health(self):
         self.tag_to_health = {unit.tag: unit.health for unit in self.units}
         self.tag_to_health.update({unit.tag: unit.health for unit in self.structures})
-    
+
     def send_idle_scv_to_mineral(self):
         scvs = self.units(UnitTypeId.SCV).idle
         n_idle = len(scvs)
@@ -170,13 +177,8 @@ class LLMPlayer(BotAI):
                 scvs[i].gather(mineral_fields[i % n_mineral])
 
     async def on_step(self, iteration: int):
-        if self.surrender:
-            return
         self.send_idle_scv_to_mineral()
-        command_center = [s for s in self.structures if s.type_id == UnitTypeId.COMMANDCENTER]
-        if len(command_center) == 0 or command_center[0].health_percentage < 0.2:
-            self.surrender = True
-            await self.chat_send("gg")
+        if len(self.units) == 0 or len(self.structures) == 0:
             return
         # 100 -> 17s
         if iteration % 10 == 0 and self.minerals > 170:
@@ -189,7 +191,7 @@ class LLMPlayer(BotAI):
 
             actions = self.action_agent.run(obs_text, plans, verifier=self.verify_actions)
             print(actions)
-            
+
             # pdb.set_trace()
 
             await self.run_actions(actions)
@@ -292,7 +294,10 @@ class LLMPlayer(BotAI):
                 return False, f"[{unit_id}]{unit.name} cannot perform action {action['action']} or resource is not enough"
             if unit.is_constructing_scv:
                 return False, f"[{unit_id}]{unit.name} is constructing, cannot perform other actions"
-        cost = self.units[0]._bot_object.game_data.calculate_ability_cost(AbilityId[action_name])
+        try:
+            cost = self.structures[0]._bot_object.game_data.calculate_ability_cost(AbilityId[action_name])
+        except Exception as e:
+            pdb.set_trace()
         if cost.minerals > self.minerals or cost.vespene > self.vespene:
             return (
                 False,
@@ -368,8 +373,8 @@ class LLMPlayer(BotAI):
 
         self.logging("actions", "\n" + json.dumps(actions, indent=2, ensure_ascii=False))
         self.logging("actions", actions, save_trace=True, print_log=False)
-        self.last_action = [json.dumps(action, ensure_ascii=False) for action in actions if action.get("is_valid", True)]
-        return self.last_action
+        valid_actions = [json.dumps(action, ensure_ascii=False) for action in actions if action.get("is_valid", True)]
+        self.last_action.extend(valid_actions)
 
     ################ obs to text
     async def obs_to_text(self):
@@ -430,7 +435,7 @@ class LLMPlayer(BotAI):
     def action_history_to_text(self):
         if len(self.last_action) == 0:
             return "[Empty]"
-        return "\n".join(self.last_action)
+        return "\n".join(self.last_action[-10:])
 
     async def units_to_text(self, units: Units):
         if len(units) == 0:
@@ -506,7 +511,7 @@ class LLMPlayer(BotAI):
             if ability_id.name not in TerranAbility:
                 ignore_actions.append(ability_id.name)
                 print(f"Unknown ability: {ability_id.name}")
-                pdb.set_trace()
+                # pdb.set_trace()
             elif TerranAbility[ability_id.name].get("enabled", False):
                 valid_ability_ids.append(ability_id)
         abilities = [ability_id.name for ability_id in valid_ability_ids]
