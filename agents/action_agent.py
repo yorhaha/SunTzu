@@ -57,6 +57,8 @@ class ActionAgent(BaseAgent):
 
         try:
             actions = extract_code(response)
-            return json.loads(actions)
+            actions = json.loads(actions)
+            assert isinstance(actions, list)
+            return actions
         except Exception as e:
             return []

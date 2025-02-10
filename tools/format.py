@@ -5,9 +5,9 @@ code_pattern = re.compile(r"```.*?\n(.*?)\n```", re.DOTALL)
 
 
 def extract_code(text):
-    code = code_pattern.search(text)
-    if code:
-        return code.group(1).strip()
+    codes = code_pattern.findall(text)
+    if codes:
+        return codes[-1].strip()  # 返回最后一个匹配的代码块
     return ""
 
 
@@ -16,6 +16,7 @@ def json_to_markdown(content, language=""):
         content = json.loads(content)
     content = json.dumps(content, indent=2)
     return f"```{language}\n{content}\n```"
+
 
 def parse_function_call(function_call):
     pattern = r"(?P<name>\w+)\((?P<params>.*)\)"
