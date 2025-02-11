@@ -215,7 +215,8 @@ class BasePlayer(BotAI):
             if action["target_unit"] not in self._id_to_tag:
                 return False, f"Unit with id {action['target_unit']} not found"
             target_unit = self.get_unit_by_id(action["target_unit"])
-            assert target_unit is not None, f"Unit with id {action['target_unit']} not found"
+            if target_unit is None:
+                return False, f"Unit with id {action['target_unit']} not found"
             if action_name == "HARVEST_GATHER_SCV":
                 if target_unit.name not in ["MineralField", "MineralField750", "Refinery"]:
                     return (
