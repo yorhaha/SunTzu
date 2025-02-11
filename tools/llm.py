@@ -86,6 +86,8 @@ def call_openai(
             print("Error:", e)
             time.sleep(random.random() * 5)
             continue
+    if service == "vllm":
+        raise ValueError("请求LLM API失败，可能原因：API服务挂了；不在内网；超出上下文；模型不存在。")
     raise ValueError("Fail to connect LLM service:", client.base_url)
 
 
