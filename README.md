@@ -2,21 +2,17 @@
 
 ## Setup
 
-Only test on Windows python 3.9.17.
+Only tested on Windows python 3.9.
 
-```
-pip install -r requirements.txt
-.\venv\Scripts\activate
-```
-
-Setup StarCraft II: https://github.com/BurnySc2/python-sc2
-
-Setup `.env` file as `.env_template`.
-
-Choose model from `player/llm_player.py`.
+1. Install StarCraft II: https://starcraft2.blizzard.com/. (Optional) Change language to be English.
+2. Download maps from https://github.com/Blizzard/s2client-proto?tab=readme-ov-file#map-packs (Melee is required) and install them.
+3. Clone repo and setup python environment: `pip install -r requirements.txt`
+4. Setup python-sc2: https://github.com/BurnySc2/python-sc2?tab=readme-ov-file#starcraft-ii
+5. Setup `.env` file as `.env_template`.
+6. Choose player from `main.py`. Setup `llm_config`.
 
 ## Run
 
 ```
-python main.py Flat64 1
+python main.py Flat32 1
 ```

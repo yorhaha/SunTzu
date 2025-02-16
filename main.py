@@ -16,7 +16,7 @@ llm_config = {
     "model_name": "DeepSeek-R1-Distill-Qwen-32B",
     "generation_config": {
         "n": 1,
-        "max_tokens": 6000,
+        "max_tokens": 4096,
         "temperature": 0.7,
         "top_p": 0.8,
         "top_k": 20,
