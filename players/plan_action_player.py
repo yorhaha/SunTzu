@@ -28,12 +28,14 @@ class PlanActionPlayer(BasePlayer):
             self.logging("iteration", iteration, level="info", save_trace=True, print_log=False)
             obs_text = await self.obs_to_text()
 
-            plans = self.plan_agent.run(obs_text)
+            plans, plan_think = self.plan_agent.run(obs_text)
             self.logging("plans", plans, save_trace=True)
+            self.logging("plan_think", plan_think, save_trace=True, print_log=False)
             plans = "\n".join([f"{i + 1}. {plan}" for i, plan in enumerate(plans)])
 
-            actions = self.action_agent.run(obs_text, plans, verifier=self.verify_actions)
-            print(actions)
+            actions, action_think = self.action_agent.run(obs_text, plans, verifier=self.verify_actions)
+            self.logging("actions", actions, save_trace=True)
+            self.logging("action_think", action_think, save_trace=True, print_log=False)
 
             await self.run_actions(actions)
 

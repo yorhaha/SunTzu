@@ -161,7 +161,7 @@ class BasePlayer(BotAI):
         for action in actions:
             ok, message = self.check_action(action)
             if not ok:
-                errors.append("Verify failed: " + message + "\n" + json.dumps(action, indent=2, ensure_ascii=False))
+                errors.append(json.dumps(action, indent=2, ensure_ascii=False) + "\n>> Error: " + message)
         if errors:
             return False, "\n\n".join(errors)
         return True, ""
@@ -322,8 +322,8 @@ class BasePlayer(BotAI):
                 action["is_valid"] = False
                 action["error"] = str(e)
 
-        self.logging("actions", "\n" + json.dumps(actions, indent=2, ensure_ascii=False))
-        self.logging("actions", actions, save_trace=True, print_log=False)
+        self.logging("valid_actions", "\n" + json.dumps(actions, indent=2, ensure_ascii=False))
+        self.logging("valid_actions", actions, save_trace=True, print_log=False)
         valid_actions = [json.dumps(action, ensure_ascii=False) for action in actions if action.get("is_valid", True)]
         self.last_action.extend(valid_actions)
 

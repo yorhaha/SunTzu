@@ -31,12 +31,14 @@ class SingleAgent(BaseAgent):
             + construct_text({"Observation": obs_text})
             + f"\n\nYour response should be an action JSON in the following format wrapped with triple backticks:\n{format_prompt}"
         )
-        response = call_openai(**self.generation_config, prompt=prompt, need_json=True)[0]
+        response = call_openai(prompt=prompt, **self.generation_config, need_json=True)[0]
+        self.save_think(response)
+        print(response)
         if verifier:
             for try_time in range(self.max_retry_attempts):
                 ok, verification_message = verifier(response)
                 if not ok:
-                    print(response)
+                    self.save_think(verification_message)
                     print(verification_message)
                     history = [
                         {
@@ -48,7 +50,9 @@ class SingleAgent(BaseAgent):
                             "content": response,
                         },
                     ]
-                    response = call_openai(prompt="Verify failed: " + verification_message, history=history, **self.generation_config)[0]
+                    response = call_openai(prompt=verification_message, history=history, **self.generation_config, need_json=True)[0]
+                    self.save_think(response)
+                    print(response)
 
         try:
             actions = extract_code(response)

@@ -12,11 +12,14 @@ load_dotenv()
 
 map_name = sys.argv[1]
 
+# DeepSeek-R1-Distill-Qwen-32B
+# Qwen2.5-72B-Instruct
+
 llm_config = {
-    "model_name": "DeepSeek-R1-Distill-Qwen-32B",
+    "model_name": "Qwen2.5-72B-Instruct",
     "generation_config": {
         "n": 1,
-        "max_tokens": 4096,
+        "max_tokens": 3072,
         "temperature": 0.7,
         "top_p": 0.8,
         "top_k": 20,

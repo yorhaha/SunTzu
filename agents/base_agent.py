@@ -25,6 +25,10 @@ class BaseAgent:
             "repetition_penalty": repetition_penalty,
             "presence_penalty": presence_penalty,
         }
+        self.think = []
 
     def run(self):
         raise NotImplementedError()
+
+    def save_think(self, think):
+        self.think.append(think)

@@ -7,6 +7,7 @@ from tqdm import tqdm
 from openai import OpenAI
 
 from tools.format import extract_code
+from tools.common import pause_for_continue
 
 
 def get_client(model_name, service="", vllm_base_url=""):
@@ -49,105 +50,55 @@ def call_openai(
     repetition_penalty=1.0,
     presence_penalty=0.0,
     timeout=60,
-    system_message="You are a helpful assistant.",
+    system_message=None,
     service="",
     retry_times=10,
     vllm_base_url="",
     need_json=False,
 ):
     client = get_client(model_name, service, vllm_base_url)
-    messages = [
-        {"role": "system", "content": system_message},
-        *history,
-        {"role": "user", "content": prompt},
-    ]
+    
+    messages = []
+    if system_message:
+        messages.append({"role": "system", "content": system_message})
+    if history:
+        messages.extend(history)
+    messages.append({"role": "user", "content": prompt})
+    
+    def call_openai_thread():
+        completion = client.chat.completions.create(
+            model=model_name,
+            messages=messages,
+            max_tokens=max_tokens,
+            n=n,
+            temperature=temperature,
+            top_p=top_p,
+            # top_k=top_k,
+            # repetition_penalty=repetition_penalty,
+            # presence_penalty=presence_penalty,
+            timeout=timeout,
+        )
 
-    for _ in range(retry_times):
-        try:
-            completion = client.chat.completions.create(
-                model=model_name,
-                messages=messages,
-                max_tokens=max_tokens,
-                n=n,
-                temperature=temperature,
-                top_p=top_p,
-                # top_k=top_k,
-                # repetition_penalty=repetition_penalty,
-                # presence_penalty=presence_penalty,
-                timeout=timeout,
-            )
+        response = [choice.message.content.strip() for choice in completion.choices]
+        if need_json:
+            json.loads(extract_code(response[0]))
+        return response
 
-            response = [choice.message.content.strip() for choice in completion.choices]
-            if need_json:
-                json.loads(extract_code(response[0]))
-
-            return response
-        except Exception as e:
-            print("Error:", e)
-            time.sleep(random.random() * 5)
-            continue
+    while True:
+        for _ in range(retry_times):
+            try:
+                response = call_openai_thread()
+                return response
+            except Exception as e:
+                print("Error while calling LLM service:", e)
+                time.sleep(random.random() * 5)
+                continue
+        
+        print("Connect LLM service failed.")
+        print("Retry after 5 minutes or press Enter to retry immediately.")
+        print("Use Ctrl+C to exit.")
+        pause_for_continue(300)
+    
     if service == "vllm":
         raise ValueError("请求LLM API失败，可能原因：API服务挂了；不在内网；超出上下文；模型不存在。")
     raise ValueError("Fail to connect LLM service:", client.base_url)
-
-
-def batch_call_openai(
-    n_thread: int,
-    model_name: str,
-    prompts,
-    temperature=0.2,
-    max_tokens=2000,
-    retry_times=5,
-    show_progress=True,
-    print_response=False,
-    service="",
-):
-    client = get_client(model_name, service)
-
-    responses = [""] * n
-    n = len(prompts)
-    batch_size = n // n_thread
-
-    def call_openai_thread(start, end):
-        for i, prompt in tqdm(enumerate(prompts[start:end]), total=end - start, disable=not show_progress):
-            content = ""
-            for _ in range(retry_times):
-                try:
-                    response = client.chat.completions.create(
-                        model=model_name,
-                        messages=[
-                            {
-                                "role": "system",
-                                "content": "You are a helpful assistant.",
-                            },
-                            {"role": "user", "content": prompt},
-                        ],
-                        temperature=temperature,
-                        max_tokens=max_tokens,
-                    )
-                    content = response.choices[0].message.content
-
-                    if n_thread == 1 or print_response:
-                        tqdm.write("\033[91m" + "==== Response ====" + "\033[0m")
-                        tqdm.write(content)
-
-                    assert content, "Empty response"
-                    break
-                except Exception as e:
-                    tqdm.write(f"Error: {e}")
-                    time.sleep(random.random() * 5)
-
-            responses[start + i] = content
-
-    threads = []
-
-    for i in range(n_thread):
-        start = i * batch_size
-        end = n if i == n_thread - 1 else (i + 1) * batch_size
-        thread = Thread(target=call_openai_thread, args=(start, end))
-        threads.append(thread)
-        thread.start()
-
-    for thread in threads:
-        thread.join()
-    return responses

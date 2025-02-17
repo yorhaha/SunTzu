@@ -36,13 +36,15 @@ class ActionAgent(BaseAgent):
 
     def run(self, obs_text: str, command: str, verifier=None):
         prompt = create_action_prompt() + "\n\n" + construct_text({"Observation": obs_text, "Command": command})
-        response = call_openai(prompt=prompt, **self.generation_config)[0]
+        response = call_openai(prompt=prompt, **self.generation_config, need_json=True)[0]
+        self.save_think(response)
+        print(response)
         if verifier:
             for try_time in range(self.max_retry_attempts):
-                ok, message = verifier(response)
+                ok, verification_message = verifier(response)
                 if not ok:
-                    print(response)
-                    print(message)
+                    self.save_think(verification_message)
+                    print(verification_message)
                     history = [
                         {
                             "role": "user",
@@ -53,12 +55,14 @@ class ActionAgent(BaseAgent):
                             "content": response,
                         },
                     ]
-                    response = call_openai(prompt="Verify failed: " + message, history=history, **self.generation_config)[0]
+                    response = call_openai(prompt=verification_message, history=history, **self.generation_config, need_json=True)[0]
+                    self.save_think(response)
+                    print(response)
 
         try:
             actions = extract_code(response)
             actions = json.loads(actions)
             assert isinstance(actions, list)
-            return actions
+            return actions, self.think
         except Exception as e:
-            return []
+            return [], self.think

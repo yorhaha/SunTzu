@@ -129,6 +129,7 @@ class PlanAgent(BaseAgent):
         prompt = create_plan_prompt() + "\n\n" + construct_text({"Observation": obs_text})
         prompt += "\nEach command should be natural language like examples."
         response = call_openai(**self.generation_config, prompt=prompt, need_json=True)[0]
+        self.save_think(response)
         print("========= Plan =========")
         print(response)
         return json.loads(extract_code(response))
@@ -142,6 +143,7 @@ class PlanAgent(BaseAgent):
             }
         )
         response = call_openai(**self.generation_config, prompt=prompt, need_json=True)[0]
+        self.save_think(response)
         print("========= Critic =========")
         print(response)
         return response
@@ -158,6 +160,7 @@ class PlanAgent(BaseAgent):
             + "\nAnalyze every error step by step. Fix them by adding, removing, or modifying commands. Give new commands finally."
         )
         response = call_openai(**self.generation_config, prompt=prompt, history=history, need_json=True)[0]
+        self.save_think(response)
         print("========= Refine =========")
         print(response)
         return json.loads(extract_code(response))
@@ -175,4 +178,4 @@ class PlanAgent(BaseAgent):
     def run(self, obs_text: str):
         plan = self.gene_new_plan(obs_text)
         plan = self.refine_plan_until_ready(obs_text, plan)
-        return plan
+        return plan, self.think
