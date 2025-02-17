@@ -140,7 +140,9 @@ class BasePlayer(BotAI):
         scvs = self.units(UnitTypeId.SCV).idle
         n_idle = len(scvs)
         if n_idle > 0:
-            mineral_fields = self.mineral_field.closest_n_units(scvs.center, n_idle)
+            mineral_fields = self.mineral_field.closest_n_units(scvs.center, 100)
+            mineral_fields = [mineral for mineral in mineral_fields if mineral.mineral_contents > 0]
+            mineral_fields = mineral_fields[:n_idle]
             n_mineral = len(mineral_fields)
             for i in range(n_mineral):
                 scvs[i].gather(mineral_fields[i % n_mineral])
@@ -535,7 +537,9 @@ class BasePlayer(BotAI):
         center = self.start_location
         miners = []
         num_SCV = len([unit for unit in self.units if unit.name == "SCV"])
-        cloest_miners = self.mineral_field.closest_n_units(center, num_SCV + 1)
+        cloest_miners = self.mineral_field.closest_n_units(center, 100)
+        cloest_miners = [mineral for mineral in cloest_miners if mineral.mineral_contents > 0]
+        cloest_miners = cloest_miners[:2 * num_SCV]
         for mineral in cloest_miners:
             miners.append(f"[{self.tag_to_id(mineral.tag)}]({int(mineral.position.x)}, {int(mineral.position.y)})")
         if len(miners) == 0:
@@ -545,7 +549,9 @@ class BasePlayer(BotAI):
     def gas_to_text(self):
         center = self.start_location
         gases = []
-        cloest_gases = self.vespene_geyser.closest_n_units(center, 10)
+        cloest_gases = self.vespene_geyser.closest_n_units(center, 100)
+        cloest_gases = [gas for gas in cloest_gases if gas.vespene_contents > 0]
+        cloest_gases = cloest_gases[:10]
         for gas in cloest_gases:
             gases.append(f"[{self.tag_to_id(gas.tag)}]({int(gas.position.x)}, {int(gas.position.y)})")
         if len(gases) == 0:

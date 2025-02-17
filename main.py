@@ -16,7 +16,7 @@ map_name = sys.argv[1]
 # Qwen2.5-72B-Instruct
 
 llm_config = {
-    "model_name": "Qwen2.5-72B-Instruct",
+    "model_name": "DeepSeek-R1-Distill-Qwen-32B",
     "generation_config": {
         "n": 1,
         "max_tokens": 3072,
