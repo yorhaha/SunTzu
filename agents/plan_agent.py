@@ -176,6 +176,7 @@ class PlanAgent(BaseAgent):
         return plan
 
     def run(self, obs_text: str):
+        self.clear_think()
         plan = self.gene_new_plan(obs_text)
         plan = self.refine_plan_until_ready(obs_text, plan)
         return plan, self.think

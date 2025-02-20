@@ -35,6 +35,7 @@ class ActionAgent(BaseAgent):
         self.max_retry_attempts = 5
 
     def run(self, obs_text: str, command: str, verifier=None):
+        self.clear_think()
         prompt = create_action_prompt() + "\n\n" + construct_text({"Observation": obs_text, "Command": command})
         response = call_openai(prompt=prompt, **self.generation_config, need_json=True)[0]
         self.save_think(response)

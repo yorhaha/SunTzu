@@ -25,6 +25,7 @@ class SingleAgent(BaseAgent):
         self.max_retry_attempts = 3
 
     def run(self, obs_text: str, verifier=None):
+        self.clear_think()
         prompt = (
             create_single_prompt()
             + "\n\n"

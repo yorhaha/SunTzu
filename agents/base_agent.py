@@ -32,3 +32,6 @@ class BaseAgent:
 
     def save_think(self, think):
         self.think.append(think)
+        
+    def clear_think(self):
+        self.think = []
