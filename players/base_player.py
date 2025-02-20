@@ -110,11 +110,11 @@ class BasePlayer(BotAI):
                 self.trace[idx][key].append(value)
             else:
                 self.trace[idx][key] = value
-            with open(f"{self.log_path}/trace.json", "w") as f:
+            with open(f"{self.log_path}/trace.json", "w", encoding="utf-8") as f:
                 json.dump(self.trace, f, indent=2, ensure_ascii=False)
 
         if save_file:
-            with open(f"{self.log_path}/{idx}-{key}.txt", "w") as f:
+            with open(f"{self.log_path}/{idx}-{key}.txt", "w", encoding="utf-8") as f:
                 if isinstance(value, list) or isinstance(value, dict):
                     value = json.dumps(value, indent=2, ensure_ascii=False)
                 f.write(value)
@@ -129,7 +129,7 @@ class BasePlayer(BotAI):
         enemy_units = [[unit.name, unit.health] for unit in self.enemy_units]
         self.logging("enemy_units", enemy_units, save_trace=True)
         self.logging("model", self.real_model_name, save_trace=True)
-        with open(f"{self.log_path}/trace.json", "w") as f:
+        with open(f"{self.log_path}/trace.json", "w", encoding="utf-8") as f:
             json.dump(self.trace, f, indent=2, ensure_ascii=False)
 
     def update_tag_to_health(self):
