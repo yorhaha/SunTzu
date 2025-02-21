@@ -227,7 +227,7 @@ class BasePlayer(BotAI):
                     )
                 if target_unit.build_progress < 1.0:
                     return False, f"Unit [{action['target_unit']}]{target_unit.name} is still building"
-                if target_unit.assigned_harvesters >= target_unit.ideal_harvesters:
+                if target_unit.ideal_harvesters > 0 and target_unit.assigned_harvesters >= target_unit.ideal_harvesters:
                     return False, f"Unit [{action['target_unit']}]{target_unit.name} is fully harvested"
 
         ### unit checks
