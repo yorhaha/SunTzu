@@ -2,7 +2,7 @@ from agents.base_agent import BaseAgent
 from agents.common import construct_text, format_prompt
 import json
 from tools.llm import call_openai
-from tools.format import extract_code
+from tools.format import extract_code, constrcut_openai_qa
 
 
 # Define reusable rules
@@ -40,25 +40,22 @@ class ActionAgent(BaseAgent):
         response = call_openai(prompt=prompt, **self.generation_config, need_json=True)[0]
         self.save_think(response)
         print(response)
+        
         if verifier:
+            history = constrcut_openai_qa(prompt, response)
             for try_time in range(self.max_retry_attempts):
                 ok, verification_message = verifier(response)
                 if not ok:
                     self.save_think(verification_message)
                     print(verification_message)
-                    history = [
-                        {
-                            "role": "user",
-                            "content": prompt,
-                        },
-                        {
-                            "role": "assistant",
-                            "content": response,
-                        },
-                    ]
+                    
                     response = call_openai(prompt=verification_message, history=history, **self.generation_config, need_json=True)[0]
                     self.save_think(response)
                     print(response)
+                    
+                    history.extend(constrcut_openai_qa(verification_message, response))
+                else:
+                    break
 
         try:
             actions = extract_code(response)

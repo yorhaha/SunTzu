@@ -22,8 +22,9 @@ class SinglePlayer(BasePlayer):
             self.logging("iteration", iteration, level="info", save_trace=True, print_log=False)
             obs_text = await self.obs_to_text()
 
-            actions = self.agent.run(obs_text, verifier=self.verify_actions)
-            print(actions)
+            actions, action_think = self.agent.run(obs_text, verifier=self.verify_actions)
+            self.logging("actions", actions, save_trace=True)
+            self.logging("action_think", action_think, save_trace=True, print_log=False)
 
             await self.run_actions(actions)
 

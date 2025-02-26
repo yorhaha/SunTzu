@@ -58,6 +58,19 @@ def test_parse_function_call():
     print(json.dumps(parse_function_call(function_call), indent=2))
 
 
+def constrcut_openai_qa(query, response):
+    return [
+        {
+            "role": "user",
+            "content": query,
+        },
+        {
+            "role": "assistant",
+            "content": response,
+        },
+    ]
+
+
 if __name__ == "__main__":
     test_extract_code()
     test_parse_function_call()
