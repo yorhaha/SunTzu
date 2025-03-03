@@ -1,7 +1,7 @@
 from sc2 import maps
 from sc2.player import Bot, Computer
 from sc2.main import run_game
-from sc2.data import Race, Difficulty
+from sc2.data import Race, Difficulty, AIBuild
 from dotenv import load_dotenv
 
 from players import SinglePlayer, PlanActionPlayer
@@ -10,10 +10,47 @@ import sys
 
 load_dotenv()
 
-map_name = sys.argv[1]
+"""
+Difficulty:
+    VeryEasy
+    Easy
+    Medium
+    MediumHard
+    Hard
+    Harder
+    VeryHard
+    CheatVision
+    CheatMoney
+    CheatInsane
 
-# DeepSeek-R1-Distill-Qwen-32B
-# Qwen2.5-72B-Instruct
+AIBuild:
+    RandomBuild
+    Rush
+    Timing
+    Power
+    Macro
+    Air
+
+Model:
+    DeepSeek-R1-Distill-Qwen-32B
+    Qwen2.5-72B-Instruct
+
+Player:
+    SinglePlayerWithVerifier
+    PlanActionPlayerWithVerifier
+
+Map: (for Melee)
+    Flat32
+    Flat48
+    Flat64
+    Flat96
+    Flat128
+    Simple64
+    Simple96
+    Simple128
+"""
+
+map_name = sys.argv[1]
 
 llm_config = {
     "model_name": "DeepSeek-R1-Distill-Qwen-32B",
@@ -29,18 +66,15 @@ llm_config = {
     "service": "vllm",
     "vllm_base_url": "http://172.18.30.73:12001/v1",
 }
+join_player = Computer(Race.Terran, Difficulty.Medium, ai_build=AIBuild.RandomBuild)
 
-# ai_player = SinglePlayer(
-#     player_name="SinglePlayerWithVerifier",
-#     **llm_config,
-# )
 ai_player = PlanActionPlayer(
     player_name="PlanActionPlayerWithVerifier",
+    log_path=f"logs/{map_name}/{join_player.difficulty.name}",
     **llm_config,
 )
-
 host_player = Bot(Race.Terran, ai_player)
-join_player = Computer(Race.Terran, Difficulty.Easy)
+
 res = run_game(
     maps.get(map_name),
     [host_player, join_player],
@@ -48,3 +82,4 @@ res = run_game(
     rgb_render_config=None,
     save_replay_as=ai_player.log_path + "/replay.SC2Replay",
 )
+

@@ -62,7 +62,7 @@ TerranAbility = load_knowledge()
 
 
 class BasePlayer(BotAI):
-    def __init__(self, player_name, model_name, generation_config, service="", vllm_base_url=None):
+    def __init__(self, player_name, model_name, generation_config, log_path="logs", service="", vllm_base_url=None):
         super().__init__()
 
         if service == "vllm":
@@ -77,7 +77,7 @@ class BasePlayer(BotAI):
 
         time_str = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
         self.real_model_name = self.model_name.split("/")[-1]
-        self.log_path = f"logs/{player_name}/{self.real_model_name}/{time_str}"
+        self.log_path = f"{log_path}/{player_name}/{self.real_model_name}/{time_str}"
         os.makedirs(self.log_path, exist_ok=True)
         self.logger = setup_logger(f"{player_name}_{self.real_model_name}", log_dir=self.log_path)
 
