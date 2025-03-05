@@ -192,6 +192,9 @@ class BasePlayer(BotAI):
 
         if target_type != TargetType.POINT_OR_UNIT:
             unused_keys = [key for key in action.keys() if key not in required_keys]
+            for key in required_keys:
+                if key not in action:
+                    return False, f"Missing required key: {key}"
         else:
             if "target_position" in action and "target_unit" in action:
                 return False, "Cannot have both `target_position` and `target_unit`"
