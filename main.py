@@ -3,77 +3,97 @@ from sc2.player import Bot, Computer
 from sc2.main import run_game
 from sc2.data import Race, Difficulty, AIBuild
 from dotenv import load_dotenv
+from argparse import ArgumentParser
+import json
 
-from players import SinglePlayer, PlanActionPlayer
-
-import sys
+from players import LLMPlayer
 
 load_dotenv()
 
 """
-Difficulty:
-    VeryEasy
-    Easy
-    Medium
-    MediumHard
-    Hard
-    Harder
-    VeryHard
-    CheatVision
-    CheatMoney
-    CheatInsane
-
-AIBuild:
-    RandomBuild
-    Rush
-    Timing
-    Power
-    Macro
-    Air
+Usage example:
+python main.py --map Flat32 --difficulty VeryEasy --model DeepSeek-R1-Distill-Qwen-32B --ai_build RandomBuild
 
 Model:
     DeepSeek-R1-Distill-Qwen-32B
     Qwen2.5-72B-Instruct
 
 Player:
-    SinglePlayerWithVerifier
-    PlanActionPlayerWithVerifier
-
-Map: (for Melee)
-    Flat32
-    Flat48
-    Flat64
-    Flat96
-    Flat128
-    Simple64
-    Simple96
-    Simple128
+    SinglePlayer
+    PlanActionPlayer
 """
 
-map_name = sys.argv[1]
+parser = ArgumentParser()
+parser.add_argument(
+    "--map",
+    choices=["Flat32", "Flat48", "Flat64", "Flat96", "Flat128", "Simple64", "Simple96", "Simple128"],
+    help="Map name",
+    required=True,
+)
+parser.add_argument(
+    "--difficulty",
+    choices=[
+        "VeryEasy",
+        "Easy",
+        "Medium",
+        "MediumHard",
+        "Hard",
+        "Harder",
+        "VeryHard",
+        "CheatVision",
+        "CheatMoney",
+        "CheatInsane",
+    ],
+    help="Bot difficulty",
+    required=True,
+)
+parser.add_argument("--model", type=str, required=True, help="Model name")
+parser.add_argument(
+    "--ai_build", choices=["RandomBuild", "Rush", "Timing", "Power", "Macro", "Air"], help="AI build", default="RandomBuild"
+)
+parser.add_argument("--enable_rag", action="store_true", help="Enable RAG agent")
+parser.add_argument("--enable_plan", action="store_true", help="Enable Plan agent")
+parser.add_argument("--enable_plan_verifier", action="store_true", help="Enable Plan verifier agent")
+parser.add_argument("--enable_action_verifier", action="store_true", help="Enable Action verifier agent")
+args = parser.parse_args()
+
+map_name = args.map
+difficulty = args.difficulty
+model_name = args.model
+ai_build = args.ai_build
+
+player_name = "player_0317"
+log_path = f"logs/{player_name}/{map_name}/{difficulty}/{ai_build}"
 
 llm_config = {
-    "model_name": "DeepSeek-R1-Distill-Qwen-32B",
+    "service": "vllm",
+    "vllm_base_url": "http://172.18.30.73:12001/v1",
+    "model_name": model_name,
     "generation_config": {
         "n": 1,
-        "max_tokens": 3072,
+        "max_tokens": 4096,
         "temperature": 0.7,
         "top_p": 0.8,
         "top_k": 20,
         "repetition_penalty": 1.1,
         "presence_penalty": 0.0,
     },
-    "service": "vllm",
-    "vllm_base_url": "http://172.18.30.73:12001/v1",
 }
-join_player = Computer(Race.Terran, Difficulty.Medium, ai_build=AIBuild.RandomBuild)
-
-ai_player = PlanActionPlayer(
-    player_name="PlanActionPlayerWithVerifier",
-    log_path=f"logs/{map_name}/{join_player.difficulty.name}",
+join_player = Computer(
+    race=Race.Terran,
+    difficulty=getattr(Difficulty, difficulty),
+    ai_build=getattr(AIBuild, ai_build),
+)
+ai_player = LLMPlayer(
+    config=args,
+    player_name=player_name,
+    log_path=log_path,
     **llm_config,
 )
 host_player = Bot(Race.Terran, ai_player)
+
+with open(ai_player.log_path + "/config.json", "w", encoding="utf-8") as f:
+    json.dump(vars(args), f, indent=4)
 
 res = run_game(
     maps.get(map_name),
@@ -82,4 +102,3 @@ res = run_game(
     rgb_render_config=None,
     save_replay_as=ai_player.log_path + "/replay.SC2Replay",
 )
-

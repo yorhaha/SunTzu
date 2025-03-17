@@ -1,5 +1,6 @@
 import re
 import json
+from typing import List
 
 code_pattern = re.compile(r"```.*?\n(.*?)\n```", re.DOTALL)
 
@@ -36,6 +37,10 @@ def parse_function_call(function_call):
     result = {"name": function_name, "parameters": params_dict}
 
     return result
+
+
+def construct_ordered_list(items: List[str]) -> str:
+    return "\n".join([f"{i+1}. {item}" for i, item in enumerate(items)])
 
 
 def test_extract_code():

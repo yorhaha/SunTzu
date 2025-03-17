@@ -1,12 +1,8 @@
 from agents.common import construct_text, TERRANN_TECH_TREE
 from agents.base_agent import BaseAgent
 from tools.llm import call_openai
-from tools.format import extract_code, json_to_markdown
+from tools.format import extract_code, json_to_markdown, construct_ordered_list
 import json
-
-
-def construct_ordered_list(items: list[str]) -> str:
-    return "\n".join([f"{i+1}. {item}" for i, item in enumerate(items)])
 
 
 # Define reusable prompts
@@ -26,18 +22,19 @@ Our strategy:
 rules = [
     "Commands should be natural language, instead of code.",
     "Base structures development: Supply Depot -> Refinery -> 2 Barracks ...",
-    "Attacking units development: 3 Marines -> Tech lab -> many Marauder and Marine ...",
-    "Marauder is the key to gain victory, which needs a Tech lab based on an idle Barracks. So it's wrong to use all Barracks to train Marine.",
+    "Attacking units development: 3 Marine -> Tech lab -> many Marauder and Marine ...",
+    # "Structure upgrade needs it to be idle first. For example, training Marine will block the building of Tech lab.",
+    "Marauder is the key to gain victory, which needs a Tech lab based on an idle Barracks. So it's wrong to use all Barracks to train Marine. Build Marauder as soon as possible.",
     "The total cost of all commands should not exceed the current resources (minerals and gas).",
-    "Vespene Geyser cannot be harvested by SCV directly. A Refinery is precondition.",
+    "Commands should not send workers (SCV or MULE) to gather resources because the system will do it automatically.",
     "Commands should not train too many SCVs, whose number should not exceed the capacity of CommandCenter and Refinery.",
-    "Commands should not allocate SCVs beyond the harvesters limit for Refinery.",
-    "Commands should not build a structure which is already under construction.",
+    # "Commands should not build a structure which is already under construction.",
     "Commands should not build redundant structures(e.g. more than 2 Barracks).",
-    "Commands should not use abilities that are not supported by the unit or structure.",
-    "Commands should not build a structure that is not needed now (e.g. build a Missile Turret when there is no enemy air unit).",
-    "The production list capacity of Barracks is 5. If the list is full, do not use it to train units.",
+    "Commands should not use abilities that are not supported currently."
+    "Commands should not build a structure that is not needed now (e.g. build a Missile Turret but there is no enemy air unit).",
+    "The production list capacity of Barracks is 5. If the list is full, do not use it to train units anymore.",
     "Only when the remaining unused supply is less than 6, construct a new one Supply Depot.",
+    "While being attacked, counterattack is the priority.",
 ]
 rules_prompt = "Rule checklist:\n" + construct_ordered_list(rules)
 
@@ -47,7 +44,6 @@ Following are some examples:
 - Train 1/2/3/... SCV/Marine/Viking/...
 - Build a supply depot;
 - Upgrade to Orbital Command;
-- Command 2 SCV to gather Vespene Gas;
 - Attack visible enemies;
 - ...
 """.strip()
@@ -72,9 +68,6 @@ As a top-tier StarCraft II strategist, your task is to give one or more commands
 
 {rules_prompt}
 
-Response format:
-<Response start>{cot_prompt if with_cot else ""}
-### Commands ###
 Your commands should be a list JSON in the following format wrapped with triple backticks:
 ```
 [
@@ -83,7 +76,6 @@ Your commands should be a list JSON in the following format wrapped with triple 
     ...
 ]
 ```
-<Response end>
     """.strip()
 
 
@@ -124,14 +116,13 @@ class PlanAgent(BaseAgent):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.max_refine_times = 3
+        self.think = []
 
     def gene_new_plan(self, obs_text: str):
         prompt = create_plan_prompt() + "\n\n" + construct_text({"Observation": obs_text})
         prompt += "\nEach command should be natural language like examples."
         response = call_openai(**self.generation_config, prompt=prompt, need_json=True)[0]
-        self.save_think(response)
-        print("========= Plan =========")
-        print(response)
+        self.think.append([response])
         return json.loads(extract_code(response))
 
     def critic_plan(self, plan: list[str], obs_text: str):
@@ -143,9 +134,7 @@ class PlanAgent(BaseAgent):
             }
         )
         response = call_openai(**self.generation_config, prompt=prompt, need_json=True)[0]
-        self.save_think(response)
-        print("========= Critic =========")
-        print(response)
+        self.think[-1].append(response)
         return response
 
     def refine_plan(self, obs_text: str, plan: list[str], critic: str):
@@ -160,9 +149,7 @@ class PlanAgent(BaseAgent):
             + "\nAnalyze every error step by step. Fix them by adding, removing, or modifying commands. Give new commands finally."
         )
         response = call_openai(**self.generation_config, prompt=prompt, history=history, need_json=True)[0]
-        self.save_think(response)
-        print("========= Refine =========")
-        print(response)
+        self.think.append([response])
         return json.loads(extract_code(response))
 
     def refine_plan_until_ready(self, obs_text: str, plan: list[str]):
@@ -175,8 +162,9 @@ class PlanAgent(BaseAgent):
             plan = self.refine_plan(obs_text, plan, critic)
         return plan
 
-    def run(self, obs_text: str):
-        self.clear_think()
+    def run(self, obs_text: str, verifier=None):
+        self.think = []
         plan = self.gene_new_plan(obs_text)
-        plan = self.refine_plan_until_ready(obs_text, plan)
+        if verifier == "llm":
+            plan = self.refine_plan_until_ready(obs_text, plan)
         return plan, self.think

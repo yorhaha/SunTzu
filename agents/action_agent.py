@@ -33,12 +33,13 @@ class ActionAgent(BaseAgent):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.max_retry_attempts = 5
+        self.think = []
 
     def run(self, obs_text: str, command: str, verifier=None):
-        self.clear_think()
+        self.think = []
         prompt = create_action_prompt() + "\n\n" + construct_text({"Observation": obs_text, "Command": command})
         response = call_openai(prompt=prompt, **self.generation_config, need_json=True)[0]
-        self.save_think(response)
+        self.think.append([response])
         print(response)
         
         if verifier:
@@ -46,11 +47,11 @@ class ActionAgent(BaseAgent):
             for try_time in range(self.max_retry_attempts):
                 ok, verification_message = verifier(response)
                 if not ok:
-                    self.save_think(verification_message)
+                    self.think[-1].append(verification_message)
                     print(verification_message)
                     
                     response = call_openai(prompt=verification_message, history=history, **self.generation_config, need_json=True)[0]
-                    self.save_think(response)
+                    self.think.append([response])
                     print(response)
                     
                     history.extend(constrcut_openai_qa(verification_message, response))

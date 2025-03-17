@@ -10,13 +10,11 @@ from sc2.ids.unit_typeid import UnitTypeId
 import time
 import os
 import json
-import pdb
 import pandas as pd
-import random
 
 from tools.logger import setup_logger
 from tools.format import extract_code
-from agents import ActionAgent, PlanAgent
+from tools.ops import IterativeMean
 
 ignore_actions = []
 
@@ -77,8 +75,8 @@ class BasePlayer(BotAI):
 
         time_str = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
         self.real_model_name = self.model_name.split("/")[-1]
-        self.log_path = f"{log_path}/{player_name}/{self.real_model_name}/{time_str}"
-        os.makedirs(self.log_path, exist_ok=True)
+        self.log_path = f"{log_path}/{self.real_model_name}/{time_str}"
+        os.makedirs(f"{self.log_path}/info", exist_ok=True)
         self.logger = setup_logger(f"{player_name}_{self.real_model_name}", log_dir=self.log_path)
 
         self._tag_to_id = {}
@@ -90,10 +88,16 @@ class BasePlayer(BotAI):
         self.trace = {}
         self.tag_to_health = {}
 
-    def logging(self, key: str, value: str, level="info", save_trace=False, save_file=False, print_log=True):
+        self.sbr = IterativeMean()
+        self.resource_cost = 0
+        self.n_supply_army = []
+        self.n_supply_workers = []
+        self.n_structure = []
+
+    def logging(self, key: str, value, level="info", save_trace=False, save_file=False, print_log=True):
         idx = self.state.game_loop
         if level in ["info", "warning", "error"] and print_log:
-            text = f"({idx}) {key}: {value}"
+            text = f"({idx}) {key}: {str(value)}"
             if level == "info":
                 self.logger.info(text)
             elif level == "warning":
@@ -104,17 +108,12 @@ class BasePlayer(BotAI):
         if save_trace:
             if idx not in self.trace:
                 self.trace[idx] = {}
-            if key in self.trace[idx]:
-                if not isinstance(self.trace[idx][key], list):
-                    self.trace[idx][key] = [self.trace[idx][key]]
-                self.trace[idx][key].append(value)
-            else:
-                self.trace[idx][key] = value
+            self.trace[idx][key] = value
             with open(f"{self.log_path}/trace.json", "w", encoding="utf-8") as f:
                 json.dump(self.trace, f, indent=2, ensure_ascii=False)
 
         if save_file:
-            with open(f"{self.log_path}/{idx}-{key}.txt", "w", encoding="utf-8") as f:
+            with open(f"{self.log_path}/info/{idx}-{key}.txt", "w", encoding="utf-8") as f:
                 if isinstance(value, list) or isinstance(value, dict):
                     value = json.dumps(value, indent=2, ensure_ascii=False)
                 f.write(value)
@@ -122,13 +121,17 @@ class BasePlayer(BotAI):
     async def on_end(self, game_result):
         game_result = game_result.name
         self.logging("game_result", game_result, save_trace=True)
-        map_name = self.game_info.local_map_path.split("/")[-1]
-        self.logging("map", map_name, save_trace=True)
-        units = [[unit.name, unit.health] for unit in self.units]
-        self.logging("units", units, save_trace=True)
-        enemy_units = [[unit.name, unit.health] for unit in self.enemy_units]
-        self.logging("enemy_units", enemy_units, save_trace=True)
-        self.logging("model", self.real_model_name, save_trace=True)
+        self.logging("SBR", round(self.sbr.mean, 4), save_trace=True)
+        
+        time_cost = self.time_formatted.split(":")
+        time_cost = int(time_cost[0]) * 60 + int(time_cost[1])
+        self.logging("time_cost", time_cost, save_trace=True)
+        self.logging("RUR", round(self.resource_cost / time_cost, 4), save_trace=True)
+        
+        self.logging("n_supply_army", self.n_supply_army, save_trace=True, print_log=False)
+        self.logging("n_supply_workers", self.n_supply_workers, save_trace=True, print_log=False)
+        self.logging("n_structure", self.n_structure, save_trace=True, print_log=False)
+
         with open(f"{self.log_path}/trace.json", "w", encoding="utf-8") as f:
             json.dump(self.trace, f, indent=2, ensure_ascii=False)
 
@@ -136,18 +139,24 @@ class BasePlayer(BotAI):
         self.tag_to_health = {unit.tag: unit.health for unit in self.units}
         self.tag_to_health.update({unit.tag: unit.health for unit in self.structures})
 
-    def send_idle_scv_to_mineral(self):
-        scvs = self.units(UnitTypeId.SCV).idle
-        n_idle = len(scvs)
-        if n_idle > 0:
-            mineral_fields = self.mineral_field.closest_n_units(scvs.center, 100)
-            mineral_fields = [mineral for mineral in mineral_fields if mineral.mineral_contents > 0]
-            mineral_fields = mineral_fields[:n_idle]
-            n_mineral = len(mineral_fields)
-            for i in range(n_mineral):
-                scvs[i].gather(mineral_fields[i % n_mineral])
-
     async def on_step(self, iteration: int):
+        # before run
+        if len(self.units) == 0 or len(self.structures) == 0:
+            return
+        self.sbr.update(int(self.supply_used == self.supply_cap))
+        
+        if iteration % 10 == 0:
+            self.n_supply_army.append(self.supply_army)
+            self.n_supply_workers.append(self.supply_workers)
+            self.n_structure.append(len(self.structures))
+
+        await self.run(iteration)
+
+        # after run
+        if iteration % 15 == 0:
+            self.update_tag_to_health()
+
+    async def run(self, iteration: int):
         raise NotImplementedError
 
     def verify_actions(self, actions):
@@ -160,10 +169,23 @@ class BasePlayer(BotAI):
             return False, "Action must be a list"
 
         errors = []
+        cost_minerals, cost_vespene, cost_supply = 0, 0, 0
         for action in actions:
-            ok, message = self.check_action(action)
+            ok, message_or_cost = self.check_action(action)
             if not ok:
-                errors.append(json.dumps(action, indent=2, ensure_ascii=False) + "\n>> Error: " + message)
+                errors.append(json.dumps(action, indent=2, ensure_ascii=False) + "\n>> Error: " + message_or_cost)
+            else:
+                cost_minerals += message_or_cost[0]
+                cost_vespene += message_or_cost[1]
+                cost_supply += message_or_cost[2]
+        
+        if self.minerals < cost_minerals:
+            errors.append(">>>> Total actions error: minerals is not enough for executing all actions")
+        if self.vespene < cost_vespene:
+            errors.append(">>>> Total actions error: vespene is not enough for executing all actions")
+        if self.supply_left < cost_supply:
+            errors.append(">>>> Total actions error: supply is not enough for executing all actions")
+            
         if errors:
             return False, "\n\n".join(errors)
         return True, ""
@@ -247,18 +269,9 @@ class BasePlayer(BotAI):
             if not unit.is_mine:
                 return False, f"Unit {unit_id} is not mine"
             if action_name not in self._id_to_abilities[unit_id]:
-                return False, f"[{unit_id}]{unit.name} cannot perform action {action['action']} or resource is not enough"
+                return False, f"[{unit_id}]{unit.name} cannot perform action {action_name} or resource is not enough"
             if unit.is_constructing_scv:
                 return False, f"[{unit_id}]{unit.name} is constructing, cannot perform other actions"
-        try:
-            cost = self.structures[0]._bot_object.game_data.calculate_ability_cost(AbilityId[action_name])
-        except Exception as e:
-            pdb.set_trace()
-        if cost.minerals > self.minerals or cost.vespene > self.vespene:
-            return (
-                False,
-                f"Resource is not enough for action {action['action']}. Cost: {cost.minerals} minerals, {cost.vespene} vespene.",
-            )
 
         ### action_name check
         building_units = self.get_building_units()
@@ -270,8 +283,18 @@ class BasePlayer(BotAI):
         if action_name == "TERRANBUILD_SUPPLYDEPOT":
             if self.supply_cap - self.supply_used >= 7:
                 return False, "There is still space for supply depot, no need to build new Supply Depot."
+        
+        ### resource check
+        cost = self.calculate_cost(AbilityId[action_name]) * len(action["units"])
+        if self.minerals < cost.minerals:
+            return False, f"Minerals is not enough for action {action_name}"
+        if self.vespene < cost.vespene:
+            return False, f"Vespene is not enough for action {action_name}"
+        supply_cost = self.calculate_supply_cost(AbilityId[action_name]) * len(action["units"])
+        if self.supply_left < supply_cost:
+            return False, f"Supply is not enough for action {action_name}"
 
-        return True, "Valid action"
+        return True, [cost.minerals, cost.vespene, supply_cost]
 
     def get_building_units(self):
         building_units = []
@@ -316,13 +339,19 @@ class BasePlayer(BotAI):
                     for unit_id in action["units"]:
                         ability = AbilityId[action["action"]]
                         target = None
+                        available_abilities = await self.get_available_abilities([self.get_unit_by_id(unit_id)])
+                        assert ability in available_abilities[0], f"Unit {unit_id} cannot perform action {action['action']}"
                         if "target_unit" in action:
                             target = self.get_unit_by_id(action["target_unit"])
+                            assert target is not None, f"Unit with id {action['target_unit']} not found"
                         elif "target_position" in action:
                             target = Point2(action["target_position"])
                             if "BUILD_" in ability.name:
-                                target = await self.find_placement(ability, target)
+                                target = await self.find_placement(ability, target, max_distance=1000)
+                            assert target is not None, f"Invalid target position: {action['target_position']}"
                         self.get_unit_by_id(unit_id)(ability=ability, target=target)
+                        cost = self.calculate_cost(ability)
+                        self.resource_cost += cost.minerals + cost.vespene
             except Exception as e:
                 action["is_valid"] = False
                 action["error"] = str(e)
@@ -377,11 +406,10 @@ class BasePlayer(BotAI):
 
     def round_state_to_text(self):
         text = ""
-        text += "Round: {}\n".format(self.state.game_loop)
+        text += "Time: {}\n".format(self.time_formatted)
         text += "Race: {}\n".format(self.race.name)
         text += "Minerals: {}\n".format(self.minerals)
         text += "Vespene: {}\n".format(self.vespene)
-        # text += "Supply used: {}/{}\n".format(self.supply_used, self.supply_cap)
         text += "Supply army: {}\n".format(self.supply_army)
         text += "Supply workers: {}\n".format(self.supply_workers)
         text += "Supply unused: {}".format(self.supply_cap - self.supply_used)
@@ -458,8 +486,6 @@ class BasePlayer(BotAI):
     async def unit_ability_to_text(self, unit: Unit):
         abilities = []
         ability_ids = await self.get_available_abilities([unit], ignore_resource_requirements=True)
-        # if unit.name == "Barracks":
-        #     pdb.set_trace()
         valid_ability_ids = []
         for ability_id in ability_ids[0]:
             if ability_id.name == "NULL_NULL":
@@ -471,8 +497,8 @@ class BasePlayer(BotAI):
             elif TerranAbility[ability_id.name].get("enabled", False):
                 valid_ability_ids.append(ability_id)
         abilities = [ability_id.name for ability_id in valid_ability_ids]
-        if unit.name == "SCV":
-            abilities = [a for a in abilities if a not in ["MOVE_MOVE", "ATTACK_ATTACK", "EFFECT_REPAIR_SCV"]]
+        # if unit.name == "SCV":
+        #     abilities = [a for a in abilities if a not in ["MOVE_MOVE", "ATTACK_ATTACK", "EFFECT_REPAIR_SCV"]]
         self._id_to_abilities[self.tag_to_id(unit.tag)] = abilities
         abilities = ", ".join(abilities)
 
@@ -506,22 +532,14 @@ class BasePlayer(BotAI):
                 states.append(f"repairing [{order_target}]{order_target_name}")
             else:
                 states.append("repairing")
-        if unit.is_gathering:
-            if order_target:
-                states.append(f"gathering [{order_target}]{order_target_name}")
-            else:
-                states.append("gathering")
+        # if unit.is_gathering:
+        #     if order_target:
+        #         states.append(f"gathering [{order_target}]{order_target_name}")
+        #     else:
+        #         states.append("gathering")
 
         if unit.is_idle:
             states.append("idle")
-        # if unit.is_carrying_minerals:
-        #     states.append("carrying minerals")
-        #     if "idle" not in states:
-        #         states.remove("idle")
-        # if unit.is_carrying_vespene:
-        #     states.append("carrying vespene")
-        #     if "idle" not in states:
-        #         states.remove("idle")
         if unit.is_flying:
             states.append("flying")
         if unit.is_transforming:
@@ -542,7 +560,7 @@ class BasePlayer(BotAI):
         num_SCV = len([unit for unit in self.units if unit.name == "SCV"])
         cloest_miners = self.mineral_field.closest_n_units(center, 100)
         cloest_miners = [mineral for mineral in cloest_miners if mineral.mineral_contents > 0]
-        cloest_miners = cloest_miners[:2 * num_SCV]
+        cloest_miners = cloest_miners[: 2 * num_SCV]
         for mineral in cloest_miners:
             miners.append(f"[{self.tag_to_id(mineral.tag)}]({int(mineral.position.x)}, {int(mineral.position.y)})")
         if len(miners) == 0:

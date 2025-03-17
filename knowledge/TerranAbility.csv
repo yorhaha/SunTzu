@@ -184,9 +184,9 @@ enabled,ability,description
 1,FACTORYTRAIN_SIEGETANK,Train a Siege Tank.
 1,FACTORYTRAIN_THOR,Train a Thor.
 1,FACTORYTRAIN_WIDOWMINE,Train a Widow Mine.
-1,HARVEST_GATHER_MULE,Let MULE start gather resources.
+0,HARVEST_GATHER_MULE,Let MULE start gather resources.
 0,HARVEST_RETURN_MULE,
-1,HARVEST_GATHER_SCV,Let SCV start gather resources.
+0,HARVEST_GATHER_SCV,Let SCV start gather resources.
 0,HOLDPOSITION,
 1,KD8CHARGE_KD8CHARGE,"Explodes after a short delay, dealing 5 damage and knocking back nearby units."
 0,LOADALL_COMMANDCENTER,

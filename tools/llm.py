@@ -2,8 +2,6 @@ import time
 import random
 import os
 import json
-from threading import Thread
-from tqdm import tqdm
 from openai import OpenAI
 
 from tools.format import extract_code
@@ -49,7 +47,7 @@ def call_openai(
     top_k=40,
     repetition_penalty=1.0,
     presence_penalty=0.0,
-    timeout=60,
+    timeout=180,
     system_message=None,
     service="",
     retry_times=10,

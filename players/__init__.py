@@ -1,2 +1,2 @@
-from .single_player import SinglePlayer
-from .plan_action_player import PlanActionPlayer
+from .llm_player import LLMPlayer
+from .no_player import NoPlayer
