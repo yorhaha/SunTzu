@@ -285,14 +285,17 @@ class BasePlayer(BotAI):
                 return False, "There is still space for supply depot, no need to build new Supply Depot."
         
         ### resource check
-        cost = self.calculate_cost(AbilityId[action_name]) * len(action["units"])
-        if self.minerals < cost.minerals:
-            return False, f"Minerals is not enough for action {action_name}"
-        if self.vespene < cost.vespene:
-            return False, f"Vespene is not enough for action {action_name}"
-        supply_cost = self.calculate_supply_cost(AbilityId[action_name]) * len(action["units"])
-        if self.supply_left < supply_cost:
-            return False, f"Supply is not enough for action {action_name}"
+        try:
+            cost = self.calculate_cost(AbilityId[action_name]) * len(action["units"])
+            if self.minerals < cost.minerals:
+                return False, f"Minerals is not enough for action {action_name}"
+            if self.vespene < cost.vespene:
+                return False, f"Vespene is not enough for action {action_name}"
+            supply_cost = self.calculate_supply_cost(AbilityId[action_name]) * len(action["units"])
+            if self.supply_left < supply_cost:
+                return False, f"Supply is not enough for action {action_name}"
+        except KeyError:
+            pass
 
         return True, [cost.minerals, cost.vespene, supply_cost]
 
