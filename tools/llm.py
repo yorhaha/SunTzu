@@ -79,7 +79,8 @@ def call_openai(
 
         response = [choice.message.content.strip() for choice in completion.choices]
         if need_json:
-            json.loads(extract_code(response[0]))
+            resp_json = json.loads(extract_code(response[0]))
+            assert isinstance(resp_json, dict) or isinstance(resp_json, list)
         return response
 
     while True:
