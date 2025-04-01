@@ -1,4 +1,6 @@
-# SC2 LLM Agent
+# SC2Arena
+
+A StarCraft II benchmark for LLMs!
 
 ## Setup
 
