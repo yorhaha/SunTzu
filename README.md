@@ -20,11 +20,19 @@ pip install --upgrade --force-reinstall https://github.com/BurnySc2/python-sc2/a
 
 ```
 python main.py ^
---map Flat32 ^
+--map_name Flat32 ^
 --difficulty Easy ^
 --model Qwen2.5-32B-Instruct ^
 --ai_build RandomBuild ^
 --enable_rag ^
 --enable_plan_verifier ^
 --enable_action_verifier
+```
+
+## GUI
+
+```
+pip install streamlit
+
+streamlit run gui.py
 ```

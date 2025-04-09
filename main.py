@@ -12,20 +12,12 @@ load_dotenv()
 
 """
 Usage example:
-python main.py --map Flat32 --difficulty VeryEasy --model DeepSeek-R1-Distill-Qwen-32B --ai_build RandomBuild
-
-Model:
-    DeepSeek-R1-Distill-Qwen-32B
-    Qwen2.5-72B-Instruct
-
-Player:
-    SinglePlayer
-    PlanActionPlayer
+python main.py --map_name Flat32 --difficulty VeryEasy --model DeepSeek-R1-Distill-Qwen-32B --ai_build RandomBuild
 """
 
 parser = ArgumentParser()
 parser.add_argument(
-    "--map",
+    "--map_name",
     choices=["Flat32", "Flat48", "Flat64", "Flat96", "Flat128", "Simple64", "Simple96", "Simple128"],
     help="Map name",
     required=True,
@@ -47,27 +39,28 @@ parser.add_argument(
     help="Bot difficulty",
     required=True,
 )
-parser.add_argument("--model", type=str, required=True, help="Model name")
+parser.add_argument("--model_name", type=str, required=True, help="Model name")
 parser.add_argument(
     "--ai_build", choices=["RandomBuild", "Rush", "Timing", "Power", "Macro", "Air"], help="AI build", default="RandomBuild"
 )
+parser.add_argument("--player_name", type=str, help="Player name", default="player")
 parser.add_argument("--enable_rag", action="store_true", help="Enable RAG agent")
 parser.add_argument("--enable_plan", action="store_true", help="Enable Plan agent")
 parser.add_argument("--enable_plan_verifier", action="store_true", help="Enable Plan verifier agent")
 parser.add_argument("--enable_action_verifier", action="store_true", help="Enable Action verifier agent")
 args = parser.parse_args()
 
-map_name = args.map
+map_name = args.map_name
 difficulty = args.difficulty
-model_name = args.model
+model_name = args.model_name
 ai_build = args.ai_build
+player_name = args.player_name
 
-player_name = "player_0317"
 log_path = f"logs/{player_name}/{map_name}/{difficulty}/{ai_build}"
 
 llm_config = {
     "service": "vllm",
-    "vllm_base_url": "http://172.18.30.73:12001/v1",
+    "vllm_base_url": "http://172.18.30.162:12001/v1",
     "model_name": model_name,
     "generation_config": {
         "n": 1,
