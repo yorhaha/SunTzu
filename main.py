@@ -12,7 +12,15 @@ load_dotenv()
 
 """
 Usage example:
-python main.py --map_name Flat32 --difficulty VeryEasy --model DeepSeek-R1-Distill-Qwen-32B --ai_build RandomBuild
+python main.py \
+    --map_name Flat32 \
+    --difficulty VeryEasy \
+    --model $MODEL_NAME \
+    --ai_build RandomBuild \
+    --player_name player_test \
+    --enable_plan \
+    --enable_plan_verifier \
+    --enable_action_verifier
 """
 
 parser = ArgumentParser()
