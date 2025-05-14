@@ -68,10 +68,6 @@ As a top-tier StarCraft II strategist, your task is to give one or more commands
 
 {rules_prompt}
 
-Response format:
-<Response start>{cot_prompt if with_cot else ""}
-### Commands ###
-
 Your commands should be a list JSON in the following format wrapped with triple backticks:
 ```
 [
@@ -80,7 +76,6 @@ Your commands should be a list JSON in the following format wrapped with triple 
     ...
 ]
 ```
-<Response end>
     """.strip()
 
 
