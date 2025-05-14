@@ -27,8 +27,8 @@ class LLMPlayer(BasePlayer):
         self.action_verifier = self.verify_actions if self.config.enable_action_verifier else None
         
         # 连续k次决策，最多调一次人类介入
-        self.human_intervention = 0
-        self.human_intervention_limit = 3
+        self.k = 3
+        self.next_k = 0
 
     async def run(self, iteration: int):
         if iteration % 5 == 0:
@@ -49,8 +49,7 @@ class LLMPlayer(BasePlayer):
                 self.logging("plans", plans, save_trace=True)
                 self.logging("plan_think", plan_think, save_trace=True, print_log=False)
                 
-                if self.config.enable_human and self.human_intervention < self.human_intervention_limit:
-                    self.human_intervention += 1
+                if self.config.enable_human and self.next_k == 0:
                     print("=== 决策介入 ===")
                     print("输入0：直接执行规划")
                     print("输入1：反馈修改意见")
@@ -58,14 +57,17 @@ class LLMPlayer(BasePlayer):
 
                     op = input("请输入操作：")
                     if op == "0":
-                        pass
+                        if self.next_k > 0:
+                            self.next_k -= 1
                     elif op == "1":
+                        self.next_k = self.k
                         print("请输入修改意见：")
                         feedback = input()
                         self.logging("human_feedback", feedback, save_trace=True)
                         plans = self.plan_agent.refine_plan(obs_text, plans, feedback)
                         self.logging("human_refine_plan", plans, save_trace=True)
                     elif op == "2":
+                        self.next_k = self.k
                         print("请输入新规划（用英文分号间隔多条规划）：")
                         new_plan = input()
                         plans = new_plan.split(";")
