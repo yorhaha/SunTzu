@@ -427,7 +427,21 @@ class BasePlayer(BotAI):
     async def units_to_text(self, units: Units):
         if len(units) == 0:
             return "[Empty]"
-        return "\n".join([await self.unit_to_text(unit) for unit in units])
+        
+        units_text = []
+        
+        mining_judge = lambda unit: unit.name == "SCV" and unit.is_mine and not (unit.is_constructing_scv or unit.is_repairing or unit.is_attacking)
+        scv_units = units.filter(mining_judge)
+        if len(scv_units) > 0:
+            scv_ids = [self.tag_to_id(unit.tag) for unit in scv_units]
+            scv_ids = ", ".join(map(str, scv_ids))
+            scv_text = f"[{scv_ids}]SCV\nState: collecting resources automatically"
+            units_text.append(scv_text)
+        other_units = units.filter(lambda unit: not mining_judge(unit))
+
+        units_text += [await self.unit_to_text(unit) for unit in other_units]
+        units_text = "\n".join(units_text)
+        return units_text
 
     async def unit_to_text(self, unit: Unit):
         text = ""
@@ -500,8 +514,8 @@ class BasePlayer(BotAI):
             elif TerranAbility[ability_id.name].get("enabled", False):
                 valid_ability_ids.append(ability_id)
         abilities = [ability_id.name for ability_id in valid_ability_ids]
-        # if unit.name == "SCV":
-        #     abilities = [a for a in abilities if a not in ["MOVE_MOVE", "ATTACK_ATTACK", "EFFECT_REPAIR_SCV"]]
+        if unit.name == "SCV":
+            abilities = [a for a in abilities if a not in ["MOVE_MOVE"]]
         self._id_to_abilities[self.tag_to_id(unit.tag)] = abilities
         abilities = ", ".join(abilities)
 
