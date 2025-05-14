@@ -28,12 +28,12 @@ rules = [
     "The total cost of all commands should not exceed the current resources (minerals and gas).",
     "Commands should not send workers (SCV or MULE) to gather resources because the system will do it automatically.",
     "Commands should not train too many SCVs, whose number should not exceed the capacity of CommandCenter and Refinery.",
-    # "Commands should not build a structure which is already under construction.",
+    "Commands should not build a structure which is already under construction.",
     "Commands should not build redundant structures(e.g. more than 2 Barracks).",
     "Commands should not use abilities that are not supported currently."
     "Commands should not build a structure that is not needed now (e.g. build a Missile Turret but there is no enemy air unit).",
     "The production list capacity of Barracks is 5. If the list is full, do not use it to train units anymore.",
-    "Only when the remaining unused supply is less than 6, construct a new one Supply Depot.",
+    "Commands can construct a new one Supply Depot only when the remaining unused supply is less than 6.",
     "While being attacked, counterattack is the priority.",
 ]
 rules_prompt = "Rule checklist:\n" + construct_ordered_list(rules)
@@ -68,6 +68,10 @@ As a top-tier StarCraft II strategist, your task is to give one or more commands
 
 {rules_prompt}
 
+Response format:
+<Response start>{cot_prompt if with_cot else ""}
+### Commands ###
+
 Your commands should be a list JSON in the following format wrapped with triple backticks:
 ```
 [
@@ -76,6 +80,7 @@ Your commands should be a list JSON in the following format wrapped with triple 
     ...
 ]
 ```
+<Response end>
     """.strip()
 
 

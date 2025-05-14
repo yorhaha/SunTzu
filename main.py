@@ -12,7 +12,7 @@ load_dotenv()
 
 """
 Usage example:
-python main.py --map_name Flat32 --difficulty VeryEasy --model DeepSeek-R1-Distill-Qwen-32B --ai_build RandomBuild
+python main.py --player_name spb --map_name Flat32 --difficulty Easy --model Qwen2.5-32B-Instruct --ai_build RandomBuild --enable_human --enable_plan --enable_plan_verifier --enable_action_verifier --enable_action_verifier
 """
 
 parser = ArgumentParser()
@@ -48,6 +48,7 @@ parser.add_argument("--enable_rag", action="store_true", help="Enable RAG agent"
 parser.add_argument("--enable_plan", action="store_true", help="Enable Plan agent")
 parser.add_argument("--enable_plan_verifier", action="store_true", help="Enable Plan verifier agent")
 parser.add_argument("--enable_action_verifier", action="store_true", help="Enable Action verifier agent")
+parser.add_argument("--enable_human", action="store_true", help="Enable human agent")
 args = parser.parse_args()
 
 map_name = args.map_name

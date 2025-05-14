@@ -25,6 +25,10 @@ class LLMPlayer(BasePlayer):
         
         self.plan_verifier = "llm" if config.enable_plan_verifier else None
         self.action_verifier = self.verify_actions if self.config.enable_action_verifier else None
+        
+        # 连续k次决策，最多调一次人类介入
+        self.human_intervention = 0
+        self.human_intervention_limit = 3
 
     async def run(self, iteration: int):
         if iteration % 5 == 0:
@@ -44,8 +48,31 @@ class LLMPlayer(BasePlayer):
                 plans, plan_think = self.plan_agent.run(obs_text, verifier=self.plan_verifier)
                 self.logging("plans", plans, save_trace=True)
                 self.logging("plan_think", plan_think, save_trace=True, print_log=False)
-                plans = "\n".join([f"{i + 1}. {plan}" for i, plan in enumerate(plans)])
+                
+                if self.config.enable_human and self.human_intervention < self.human_intervention_limit:
+                    self.human_intervention += 1
+                    print("=== 决策介入 ===")
+                    print("输入0：直接执行规划")
+                    print("输入1：反馈修改意见")
+                    print("输入2：输入新规划并执行")
 
+                    op = input("请输入操作：")
+                    if op == "0":
+                        pass
+                    elif op == "1":
+                        print("请输入修改意见：")
+                        feedback = input()
+                        self.logging("human_feedback", feedback, save_trace=True)
+                        plans = self.plan_agent.refine_plan(obs_text, plans, feedback)
+                        self.logging("human_refine_plan", plans, save_trace=True)
+                    elif op == "2":
+                        print("请输入新规划（用英文分号间隔多条规划）：")
+                        new_plan = input()
+                        plans = new_plan.split(";")
+                        self.logging("human_plan", new_plan, save_trace=True)
+                    else:
+                        print("输入错误，直接执行规划")
+                plans = "\n".join([f"{i + 1}. {plan}" for i, plan in enumerate(plans)])
                 
                 actions, action_think = self.action_agent.run(obs_text, plans, verifier=self.action_verifier)
                 self.logging("actions", actions, save_trace=True)
