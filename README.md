@@ -1,10 +1,10 @@
 # SC2Arena
 
-A StarCraft II benchmark for LLMs!
+A StarCraft II battle arena for LLMs!
 
 ## Setup
 
-Only tested on Windows python 3.9.
+Python 3.9+ is recommended.
 
 1. Install StarCraft II: https://starcraft2.blizzard.com/. (Optional) Change language to be English.
 2. Download maps from https://github.com/Blizzard/s2client-proto?tab=readme-ov-file#map-packs (Melee is required) and install them.

@@ -38,7 +38,7 @@ class ActionAgent(BaseAgent):
     def run(self, obs_text: str, command: str, verifier=None):
         self.think = []
         prompt = create_action_prompt() + "\n\n" + construct_text({"Observation": obs_text, "Command": command})
-        response = call_openai(prompt=prompt, **self.generation_config, need_json=True)[0]
+        response = call_openai(prompt=prompt, **self.generation_config, need_json=True)
         self.think.append([response])
         print(response)
         
@@ -50,7 +50,7 @@ class ActionAgent(BaseAgent):
                     self.think[-1].append(verification_message)
                     print(verification_message)
                     
-                    response = call_openai(prompt=verification_message, history=history, **self.generation_config, need_json=True)[0]
+                    response = call_openai(prompt=verification_message, history=history, **self.generation_config, need_json=True)
                     self.think.append([response])
                     print(response)
                     

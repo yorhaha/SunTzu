@@ -12,7 +12,7 @@ load_dotenv()
 
 """
 Usage example:
-python main.py --player_name spb --map_name Flat32 --difficulty Easy --model Qwen2.5-32B-Instruct --ai_build RandomBuild --enable_human --enable_plan --enable_plan_verifier --enable_action_verifier
+python main.py --player_name spb --map_name Flat32 --difficulty Medium --model Qwen2.5-32B-Instruct --ai_build RandomBuild --enable_plan --enable_plan_verifier --enable_action_verifier
 """
 
 parser = ArgumentParser()
@@ -65,7 +65,7 @@ llm_config = {
     "model_name": model_name,
     "generation_config": {
         "n": 1,
-        "max_tokens": 4096,
+        "max_tokens": 8192,
         "temperature": 0.7,
         "top_p": 0.8,
         "top_k": 20,

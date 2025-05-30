@@ -342,17 +342,27 @@ class BasePlayer(BotAI):
                     for unit_id in action["units"]:
                         ability = AbilityId[action["action"]]
                         target = None
-                        available_abilities = await self.get_available_abilities([self.get_unit_by_id(unit_id)])
+                        curr_unit = self.get_unit_by_id(unit_id)
+                        available_abilities = await self.get_available_abilities([curr_unit])
                         assert ability in available_abilities[0], f"Unit {unit_id} cannot perform action {action['action']}"
                         if "target_unit" in action:
                             target = self.get_unit_by_id(action["target_unit"])
                             assert target is not None, f"Unit with id {action['target_unit']} not found"
                         elif "target_position" in action:
                             target = Point2(action["target_position"])
+                            need_addon = ability in [AbilityId.TERRANBUILD_BARRACKS]
                             if "BUILD_" in ability.name:
-                                target = await self.find_placement(ability, target, max_distance=1000)
+                                target = await self.find_placement(ability, target, max_distance=100, random_alternative=False, addon_place=need_addon)
                             assert target is not None, f"Invalid target position: {action['target_position']}"
-                        self.get_unit_by_id(unit_id)(ability=ability, target=target)
+                        # Chat send
+                        curr_unit(ability=ability, target=target)
+                        target_str = "None"
+                        if isinstance(target, Unit):
+                            target_str = target.name
+                        elif isinstance(target, Point2):
+                            target_str = f"({int(target.x)}, {int(target.y)})"
+                        await self.chat_send(f"{action['action']}({curr_unit.name} -> {target_str})")
+                        # update cost
                         cost = self.calculate_cost(ability)
                         self.resource_cost += cost.minerals + cost.vespene
             except Exception as e:
@@ -515,7 +525,7 @@ class BasePlayer(BotAI):
                 valid_ability_ids.append(ability_id)
         abilities = [ability_id.name for ability_id in valid_ability_ids]
         if unit.name == "SCV":
-            abilities = [a for a in abilities if a not in ["MOVE_MOVE"]]
+            abilities = [a for a in abilities if a not in ["MOVE_MOVE", "TERRANBUILD_ENGINEERINGBAY"]]
         self._id_to_abilities[self.tag_to_id(unit.tag)] = abilities
         abilities = ", ".join(abilities)
 

@@ -19,24 +19,27 @@ Our strategy:
 - Attacking: concentrate forces to search and destroy enemies proactively
 """.strip()
 
-rules = [
+default_rules = [
     "Commands should be natural language, instead of code.",
-    "Base structures development: Supply Depot -> Refinery -> 2 Barracks ...",
-    "Attacking units development: 3 Marine -> Tech lab -> many Marauder and Marine ...",
+    # "Necessary structures before 02:00: Supply Depot, Refinery, a Barracks for Marine and a Barracks for upgrading to Tech lab.",
+    "Produce as many units with the strongest attack power as possible."
+    # "Base structures development: Supply Depot -> Refinery -> 2 Barracks ...",
+    # "Attacking units development: 3 Marine -> Tech lab -> many Marauder and Marine ...",
     # "Structure upgrade needs it to be idle first. For example, training Marine will block the building of Tech lab.",
-    "Marauder is the key to gain victory, which needs a Tech lab based on an idle Barracks. So it's wrong to use all Barracks to train Marine. Build Marauder as soon as possible.",
+    # "Marauder is the key to gain victory, which needs a Tech lab based on an idle Barracks. So it's wrong to use all Barracks to train Marine. Build Marauder as soon as possible.",
+    # "Engineering Bay is not needed before 05:00.",
+    "The enemy will start a fierce attack at 03:00, so you need to start producing a large number of attack units, such as Marauder, at least at 02:30.",
     "The total cost of all commands should not exceed the current resources (minerals and gas).",
     "Commands should not send workers (SCV or MULE) to gather resources because the system will do it automatically.",
     "Commands should not train too many SCVs, whose number should not exceed the capacity of CommandCenter and Refinery.",
-    "Commands should not build a structure which is already under construction.",
+    # "Commands should not build a structure which is already under construction.",
     "Commands should not build redundant structures(e.g. more than 2 Barracks).",
     "Commands should not use abilities that are not supported currently."
     "Commands should not build a structure that is not needed now (e.g. build a Missile Turret but there is no enemy air unit).",
     "The production list capacity of Barracks is 5. If the list is full, do not use it to train units anymore.",
     "Commands can construct a new one Supply Depot only when the remaining unused supply is less than 6.",
-    "While being attacked, counterattack is the priority.",
+    # "While being attacked, counterattack is the priority.",
 ]
-rules_prompt = "Rule checklist:\n" + construct_ordered_list(rules)
 
 plan_example_prompt = """
 Following are some examples:
@@ -50,7 +53,8 @@ Following are some examples:
 
 
 ############## Plan Role Prompt ###############
-def create_plan_prompt(with_cot=True):
+def create_plan_prompt(rules: list[str] = default_rules, with_cot=True):
+    rules_prompt = "Rule checklist:\n" + construct_ordered_list(rules)
     cot_prompt = """
 ### Analysis for the current game state ###
 1. Resource analysis
@@ -80,13 +84,14 @@ Your commands should be a list JSON in the following format wrapped with triple 
 
 
 ############## Plan Critic Role Prompt ###############
-def create_plan_critic_prompt():
+def create_plan_critic_prompt(rules: list[str] = default_rules):
+    rules_prompt = "Rule checklist:\n" + construct_ordered_list(rules)
     return (
         """
 As a top-tier StarCraft II player, your task is to verify that they have violated given rules. If so, please point out the errors and provide suggestions for improvement or removal. If OK, just tell it to output again.
 %s
 
-Analyze the given rules one by one, and then provide a summary for errors at the end as follows:
+Analyze the given rules one by one, and then provide a summary for errors at the end as follows, wrapped with triple backticks::
 ```
 {
     "errors": [
@@ -118,27 +123,27 @@ class PlanAgent(BaseAgent):
         self.max_refine_times = 3
         self.think = []
 
-    def gene_new_plan(self, obs_text: str):
-        prompt = create_plan_prompt() + "\n\n" + construct_text({"Observation": obs_text})
+    def gene_new_plan(self, obs_text: str, rules: list[str]):
+        prompt = create_plan_prompt(rules) + "\n\n" + construct_text({"Observation": obs_text})
         prompt += "\nEach command should be natural language like examples."
-        response = call_openai(**self.generation_config, prompt=prompt, need_json=True)[0]
+        response = call_openai(**self.generation_config, prompt=prompt, need_json=True)
         self.think.append([response])
         return json.loads(extract_code(response))
 
-    def critic_plan(self, plan: list[str], obs_text: str):
-        prompt = create_plan_critic_prompt() + "\n\n"
+    def critic_plan(self, plan: list[str], obs_text: str, rules: list[str] = default_rules):
+        prompt = create_plan_critic_prompt(rules) + "\n\n"
         prompt += construct_text(
             {
                 "Observation": obs_text,
                 "Plan": plan,
             }
         )
-        response = call_openai(**self.generation_config, prompt=prompt, need_json=True)[0]
+        response = call_openai(**self.generation_config, prompt=prompt, need_json=True)
         self.think[-1].append(response)
         return response
 
-    def refine_plan(self, obs_text: str, plan: list[str], critic: str):
-        gene_prompt = create_plan_prompt(with_cot=False) + "\n\n" + construct_text({"Observation": obs_text})
+    def refine_plan(self, obs_text: str, plan: list[str], critic: str, rules: list[str] = default_rules):
+        gene_prompt = create_plan_prompt(rules, with_cot=False) + "\n\n" + construct_text({"Observation": obs_text})
         history = [
             {"role": "user", "content": gene_prompt},
             {"role": "assistant", "content": json_to_markdown(plan)},
@@ -148,23 +153,24 @@ class PlanAgent(BaseAgent):
             + critic
             + "\nAnalyze every error step by step. Fix them by adding, removing, or modifying commands. Give new commands finally."
         )
-        response = call_openai(**self.generation_config, prompt=prompt, history=history, need_json=True)[0]
+        response = call_openai(**self.generation_config, prompt=prompt, history=history, need_json=True)
         self.think.append([response])
         return json.loads(extract_code(response))
 
-    def refine_plan_until_ready(self, obs_text: str, plan: list[str]):
+    def refine_plan_until_ready(self, obs_text: str, plan: list[str], rules: list[str] = default_rules):
         for _ in range(self.max_refine_times):
-            critic = self.critic_plan(plan, obs_text)
+            critic = self.critic_plan(plan, obs_text, rules)
             critic = json.loads(extract_code(critic))
             if critic.get("error_number", 0) == 0:
                 return plan
             critic = construct_ordered_list(critic.get("errors", []))
-            plan = self.refine_plan(obs_text, plan, critic)
+            plan = self.refine_plan(obs_text, plan, critic, rules)
         return plan
 
-    def run(self, obs_text: str, verifier=None):
+    def run(self, obs_text: str, verifier=None, suggestions: list[str] = []):
         self.think = []
-        plan = self.gene_new_plan(obs_text)
+        rules = default_rules + suggestions
+        plan = self.gene_new_plan(obs_text, rules)
         if verifier == "llm":
-            plan = self.refine_plan_until_ready(obs_text, plan)
+            plan = self.refine_plan_until_ready(obs_text, plan, rules)
         return plan, self.think

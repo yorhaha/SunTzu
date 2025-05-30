@@ -61,6 +61,8 @@ def call_openai(
         messages.append({"role": "system", "content": system_message})
     if history:
         messages.extend(history)
+    # if not prompt.endswith("/think") and not prompt.endswith("/no_think"):
+    #     prompt += "/no_think"
     messages.append({"role": "user", "content": prompt})
     
     def call_openai_thread():
@@ -77,22 +79,25 @@ def call_openai(
             timeout=timeout,
         )
 
-        response = [choice.message.content.strip() for choice in completion.choices]
-        if need_json:
-            resp_json = json.loads(extract_code(response[0]))
-            assert isinstance(resp_json, dict) or isinstance(resp_json, list)
+        response = completion.choices[0].message.content.strip()
         return response
 
     while True:
         for _ in range(retry_times):
             try:
                 response = call_openai_thread()
+                # import pdb; pdb.set_trace()
+                if need_json:
+                    resp_json = json.loads(extract_code(response))
+                    assert isinstance(resp_json, dict) or isinstance(resp_json, list), f"Response is not a valid JSON: {response}"
                 return response
             except Exception as e:
                 print("Error while calling LLM service:", e)
+                # import pdb; pdb.set_trace()
                 time.sleep(random.random() * 5)
                 continue
         
+        return "```\n[]\n```"
         print("Connect LLM service failed.")
         print("Retry after 5 minutes or press Enter to retry immediately.")
         print("Use Ctrl+C to exit.")

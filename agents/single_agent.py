@@ -1,13 +1,13 @@
 from agents.common import construct_text, format_prompt
 from agents.base_agent import BaseAgent
-from agents.plan_agent import tech_tree_prompt, strategy_prompt, rules
+from agents.plan_agent import tech_tree_prompt, strategy_prompt, default_rules
 from tools.llm import call_openai
 from tools.format import extract_code, constrcut_openai_qa
 import json
 
 
 def create_single_prompt():
-    rules_prompt = "Rule checklist:\n" + "\n".join([f"{i+1}. {rule}" for i, rule in enumerate(rules[1:])])
+    rules_prompt = "Rule checklist:\n" + "\n".join([f"{i+1}. {rule}" for i, rule in enumerate(default_rules[1:])])
     return f"""
 As a top-tier StarCraft II strategist, your task is to give one or more commands based on the current game state. Only give commands which can be executed immediately, instead of waiting for certain events.
 
@@ -33,7 +33,7 @@ class SingleAgent(BaseAgent):
             + construct_text({"Observation": obs_text})
             + f"\n\nYour response should be an action JSON in the following format wrapped with triple backticks:\n{format_prompt}"
         )
-        response = call_openai(prompt=prompt, **self.generation_config, need_json=True)[0]
+        response = call_openai(prompt=prompt, **self.generation_config, need_json=True)
         self.think.append([response])
         print(response)
         
@@ -45,7 +45,7 @@ class SingleAgent(BaseAgent):
                     self.think[-1].append(verification_message)
                     print(verification_message)
                     
-                    response = call_openai(prompt=verification_message, history=history, **self.generation_config, need_json=True)[0]
+                    response = call_openai(prompt=verification_message, history=history, **self.generation_config, need_json=True)
                     self.think.append([response])
                     print(response)
                     
