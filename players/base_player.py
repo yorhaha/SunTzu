@@ -44,7 +44,7 @@ def load_knowledge():
         if not isinstance(target, str):
             if "Build" in target:
                 target = TargetType.POINT
-            elif "BuildOnUnit" in target:
+            elif "BuildOnUnit" in target or "Unit" in target:
                 target = TargetType.UNIT
             else:
                 target = TargetType.NONE
@@ -90,9 +90,6 @@ class BasePlayer(BotAI):
 
         self.sbr = IterativeMean()
         self.resource_cost = 0
-        self.n_supply_army = []
-        self.n_supply_workers = []
-        self.n_structure = []
 
     def logging(self, key: str, value, level="info", save_trace=False, save_file=False, print_log=True):
         idx = self.state.game_loop
@@ -127,10 +124,6 @@ class BasePlayer(BotAI):
         time_cost = int(time_cost[0]) * 60 + int(time_cost[1])
         self.logging("time_cost", time_cost, save_trace=True)
         self.logging("RUR", round(self.resource_cost / time_cost, 4), save_trace=True)
-        
-        self.logging("n_supply_army", self.n_supply_army, save_trace=True, print_log=False)
-        self.logging("n_supply_workers", self.n_supply_workers, save_trace=True, print_log=False)
-        self.logging("n_structure", self.n_structure, save_trace=True, print_log=False)
 
         with open(f"{self.log_path}/trace.json", "w", encoding="utf-8") as f:
             json.dump(self.trace, f, indent=2, ensure_ascii=False)
@@ -144,11 +137,6 @@ class BasePlayer(BotAI):
         if len(self.units) == 0 or len(self.structures) == 0:
             return
         self.sbr.update(int(self.supply_used == self.supply_cap))
-        
-        if iteration % 10 == 0:
-            self.n_supply_army.append(self.supply_army)
-            self.n_supply_workers.append(self.supply_workers)
-            self.n_structure.append(len(self.structures))
 
         await self.run(iteration)
 
@@ -525,7 +513,7 @@ class BasePlayer(BotAI):
                 valid_ability_ids.append(ability_id)
         abilities = [ability_id.name for ability_id in valid_ability_ids]
         if unit.name == "SCV":
-            abilities = [a for a in abilities if a not in ["MOVE_MOVE", "TERRANBUILD_ENGINEERINGBAY"]]
+            abilities = [a for a in abilities if a not in ["MOVE_MOVE", "TERRANBUILD_ENGINEERINGBAY", "ATTACK_ATTACK"]]
         self._id_to_abilities[self.tag_to_id(unit.tag)] = abilities
         abilities = ", ".join(abilities)
 

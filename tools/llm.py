@@ -90,14 +90,17 @@ def call_openai(
                 if need_json:
                     resp_json = json.loads(extract_code(response))
                     assert isinstance(resp_json, dict) or isinstance(resp_json, list), f"Response is not a valid JSON: {response}"
-                return response
+                messages.append({"role": "assistant", "content": response})
+                return response, messages
             except Exception as e:
                 print("Error while calling LLM service:", e)
                 # import pdb; pdb.set_trace()
                 time.sleep(random.random() * 5)
                 continue
         
-        return "```\n[]\n```"
+        response = "```\n[]\n```"
+        messages.append({"role": "assistant", "content": response})
+        return response, messages
         print("Connect LLM service failed.")
         print("Retry after 5 minutes or press Enter to retry immediately.")
         print("Use Ctrl+C to exit.")

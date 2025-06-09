@@ -190,8 +190,8 @@ enabled,ability,description
 0,HOLDPOSITION,
 1,KD8CHARGE_KD8CHARGE,"Explodes after a short delay, dealing 5 damage and knocking back nearby units."
 0,LOADALL_COMMANDCENTER,
-0,LOAD_BUNKER,
-0,LOAD_MEDIVAC,
+1,LOAD_BUNKER,Load a unit into a Bunker.
+0,LOAD_MEDIVAC,Load a unit into a Medivac.
 1,LOCKON_LOCKON,"Locks the Cyclone's weapons on the target unit, increasing the Cyclone's range to 9 and allowing it to move while firing. Canceled if the target moves out of range (9) or vision."
 1,MEDIVACHEAL_HEAL,Enables a Medivac to heal nearby injured units.
 1,MORPH_HELLBAT,"Transforms the Hellion into its Hellbat form, short-range defense mode."
