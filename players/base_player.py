@@ -11,6 +11,7 @@ import time
 import os
 import json
 import pandas as pd
+import warnings
 
 from tools.logger import setup_logger
 from tools.format import extract_code
@@ -37,7 +38,7 @@ def load_knowledge():
         description = item["description"]
         ability_data = [item for item in game_data["Ability"] if item["name"] == ability]
         if len(ability_data) == 0:
-            print("Ignored ability:", ability)
+            # warnings.warn(f"Ignored ability: {ability}")
             continue
         ability_data = ability_data[0]
         target = ability_data["target"]
@@ -60,23 +61,18 @@ TerranAbility = load_knowledge()
 
 
 class BasePlayer(BotAI):
-    def __init__(self, player_name, model_name, generation_config, log_path="logs", service="", vllm_base_url=None):
+    def __init__(self, player_name, model_name, generation_config, llm_client, log_path="logs"):
         super().__init__()
-
-        if service == "vllm":
-            assert vllm_base_url is not None, "vllm_base_url must be provided for vllm service"
-        assert isinstance(generation_config, dict), "generation_config must be a dictionary"
 
         self.player_name = player_name
         self.model_name = model_name
         self.generation_config = generation_config
-        self.service = service
-        self.vllm_base_url = vllm_base_url
+        self.llm_client = llm_client
 
-        time_str = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+        time_str = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())
         self.real_model_name = self.model_name.split("/")[-1]
         self.log_path = f"{log_path}/{self.real_model_name}/{time_str}"
-        os.makedirs(f"{self.log_path}/info", exist_ok=True)
+        os.makedirs(f"{self.log_path}/observation", exist_ok=True)
         self.logger = setup_logger(f"{player_name}_{self.real_model_name}", log_dir=self.log_path)
 
         self._tag_to_id = {}
@@ -110,7 +106,7 @@ class BasePlayer(BotAI):
                 json.dump(self.trace, f, indent=2, ensure_ascii=False)
 
         if save_file:
-            with open(f"{self.log_path}/info/{idx}-{key}.txt", "w", encoding="utf-8") as f:
+            with open(f"{self.log_path}/observation/{idx}-{key}.txt", "w", encoding="utf-8") as f:
                 if isinstance(value, list) or isinstance(value, dict):
                     value = json.dumps(value, indent=2, ensure_ascii=False)
                 f.write(value)
@@ -133,14 +129,14 @@ class BasePlayer(BotAI):
         self.tag_to_health.update({unit.tag: unit.health for unit in self.structures})
 
     async def on_step(self, iteration: int):
-        # before run
         if len(self.units) == 0 or len(self.structures) == 0:
             return
         self.sbr.update(int(self.supply_used == self.supply_cap))
 
+        #### before run
         await self.run(iteration)
+        #### after run
 
-        # after run
         if iteration % 15 == 0:
             self.update_tag_to_health()
 
@@ -357,9 +353,11 @@ class BasePlayer(BotAI):
                 action["is_valid"] = False
                 action["error"] = str(e)
 
-        self.logging("valid_actions", "\n" + json.dumps(actions, indent=2, ensure_ascii=False))
-        self.logging("valid_actions", actions, save_trace=True, print_log=False)
-        valid_actions = [json.dumps(action, ensure_ascii=False) for action in actions if action.get("is_valid", True)]
+        valid_actions = [action for action in actions if action.get("is_valid", True)]
+        self.logging("valid_actions", valid_actions, save_trace=True, print_log=False)
+        self.logging("valid_actions", "\n" + json.dumps(valid_actions, indent=2, ensure_ascii=False))
+
+        valid_actions = [json.dumps(action, ensure_ascii=False) for action in valid_actions]
         self.last_action.extend(valid_actions)
 
     ################ obs to text

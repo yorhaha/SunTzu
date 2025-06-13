@@ -58,7 +58,7 @@ thanks
 
 
 def test_parse_function_call():
-    function_call = 'call_openai(max_tokens=2048, n=1, temperature=0.8, top_p=1, name="yes")'
+    function_call = 'call(max_tokens=2048, n=1, temperature=0.8, top_p=1, name="yes")'
 
     print(json.dumps(parse_function_call(function_call), indent=2))
 

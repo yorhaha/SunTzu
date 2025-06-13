@@ -1,7 +1,6 @@
 from agents.common import construct_text, format_prompt
 from agents.base_agent import BaseAgent
 from agents.plan_agent import tech_tree_prompt, strategy_prompt, default_rules
-from tools.llm import call_openai
 from tools.format import extract_code, constrcut_openai_qa
 import json
 
@@ -33,7 +32,7 @@ class SingleAgent(BaseAgent):
             + construct_text({"Observation": obs_text})
             + f"\n\nYour response should be an action JSON in the following format wrapped with triple backticks:\n{format_prompt}"
         )
-        response = call_openai(prompt=prompt, **self.generation_config, need_json=True)
+        response, messages = self.llm_client.call(prompt=prompt, **self.generation_config, need_json=True)
         self.think.append([response])
         print(response)
         
@@ -45,7 +44,7 @@ class SingleAgent(BaseAgent):
                     self.think[-1].append(verification_message)
                     print(verification_message)
                     
-                    response = call_openai(prompt=verification_message, history=history, **self.generation_config, need_json=True)
+                    response, messages = self.llm_client.call(prompt=verification_message, history=history, **self.generation_config, need_json=True)
                     self.think.append([response])
                     print(response)
                     

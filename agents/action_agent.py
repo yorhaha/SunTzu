@@ -1,7 +1,6 @@
 from agents.base_agent import BaseAgent
 from agents.common import construct_text, format_prompt
 import json
-from tools.llm import call_openai
 from tools.format import extract_code, constrcut_openai_qa
 
 
@@ -41,7 +40,7 @@ class ActionAgent(BaseAgent):
         self.think = []
         self.chat_history = []
         prompt = create_action_prompt() + "\n\n" + construct_text({"Observation": obs_text, "Command": command})
-        response, messages = call_openai(prompt=prompt, **self.generation_config, need_json=True)
+        response, messages = self.llm_client.call(prompt=prompt, **self.generation_config, need_json=True)
         self.think.append([response])
         self.chat_history.append(messages)
         # print(response)
@@ -54,7 +53,7 @@ class ActionAgent(BaseAgent):
                     self.think[-1].append(verification_message)
                     # print(verification_message)
                     
-                    response, messages = call_openai(prompt=verification_message, history=history, **self.generation_config, need_json=True)
+                    response, messages = self.llm_client.call(prompt=verification_message, history=history, **self.generation_config, need_json=True)
                     self.think.append([response])
                     self.chat_history.append(messages)
                     # print(response)

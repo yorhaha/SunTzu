@@ -14,9 +14,8 @@ class LLMPlayer(BasePlayer):
 
         agent_config = {
             "model_name": self.model_name,
-            "service": self.service,
-            "vllm_base_url": self.vllm_base_url,
-            **self.generation_config,
+            "generation_config": self.generation_config,
+            "llm_client": self.llm_client,
         }
 
         if config.enable_rag:
@@ -217,12 +216,12 @@ class LLMPlayer(BasePlayer):
         decision_minerals = 170
         if (
             iteration % decision_iteration == 0 and self.minerals >= decision_minerals
-            # or iteration == self.next_decision_time
+            or iteration == self.next_decision_time
         ):
-            # self.next_decision_time = iteration + 5 * decision_iteration
+            self.next_decision_time = iteration + 8 * decision_iteration
+
             print(f"================ iteration {iteration} ================")
             self.logging("iteration", iteration, level="info", save_trace=True, print_log=True)
-            obs_text = await self.obs_to_text()
             self.logging("time_seconds", int(self.time), level="info", save_trace=True, print_log=True)
             self.logging("minerals", self.minerals, level="info", save_trace=True, print_log=True)
             self.logging("vespene", self.vespene, level="info", save_trace=True, print_log=True)
@@ -237,6 +236,7 @@ class LLMPlayer(BasePlayer):
             self.logging("n_unit_types", len(unit_types), level="info", save_trace=True, print_log=True)
             self.logging("n_structure_types", len(structure_types), level="info", save_trace=True, print_log=True)
 
+            obs_text = await self.obs_to_text()
             if self.config.enable_rag:
                 rag_summary, rag_think = self.rag_agent.run(obs_text)
                 self.logging("rag_summary", rag_summary, save_trace=True)

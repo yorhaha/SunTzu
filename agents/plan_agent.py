@@ -1,6 +1,5 @@
 from agents.common import construct_text, TERRANN_TECH_TREE
 from agents.base_agent import BaseAgent
-from tools.llm import call_openai
 from tools.format import extract_code, json_to_markdown, construct_ordered_list
 import json
 
@@ -126,7 +125,7 @@ class PlanAgent(BaseAgent):
     def gene_new_plan(self, obs_text: str, rules: list[str]):
         prompt = create_plan_prompt(rules) + "\n\n" + construct_text({"Observation": obs_text})
         prompt += "\nEach command should be natural language like examples. Think step by step."
-        response, messages = call_openai(**self.generation_config, prompt=prompt, need_json=True)
+        response, messages = self.llm_client.call(**self.generation_config, prompt=prompt, need_json=True)
         self.think.append([response])
         self.chat_history.append(messages)
         return json.loads(extract_code(response))
@@ -139,7 +138,7 @@ class PlanAgent(BaseAgent):
                 "Plan": plan,
             }
         )
-        response, messages = call_openai(**self.generation_config, prompt=prompt, need_json=True)
+        response, messages = self.llm_client.call(**self.generation_config, prompt=prompt, need_json=True)
         self.think[-1].append(response)
         self.chat_history.append(messages)
         return response
@@ -155,7 +154,7 @@ class PlanAgent(BaseAgent):
             + critic
             + "\nAnalyze every error step by step. Fix them by adding, removing, or modifying commands. Give new commands finally."
         )
-        response, messages = call_openai(**self.generation_config, prompt=prompt, history=history, need_json=True)
+        response, messages = self.llm_client.call(**self.generation_config, prompt=prompt, history=history, need_json=True)
         self.think.append([response])
         self.chat_history.append(messages)
         return json.loads(extract_code(response))
