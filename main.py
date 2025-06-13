@@ -65,8 +65,8 @@ llm_config = {
     "model_name": model_name,
     "generation_config": {
         "n": 1,
-        "max_tokens": 8192,
-        "temperature": 0.7,
+        "max_tokens": 4096,
+        "temperature": 0.1,
         "top_p": 0.8,
         "top_k": 20,
         "repetition_penalty": 1.1,

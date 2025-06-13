@@ -29,9 +29,8 @@ class LLMPlayer(BasePlayer):
 
         self.plan_verifier = "llm" if config.enable_plan_verifier else None
         self.action_verifier = self.verify_actions if self.config.enable_action_verifier else None
-
-        self.k = 5
-        self.next_k = 0
+        
+        self.next_decision_time = -1
 
     def get_lowest_health_enemy(self, units: Units):
         """Get the enemy unit with the lowest health."""
@@ -196,50 +195,47 @@ class LLMPlayer(BasePlayer):
     async def run(self, iteration: int):
         # send idle workers to minerals or gas automatically
         await self.distribute_workers()
-
         for unit in self.units:
-            if unit.type_id in [UnitTypeId.SCV, UnitTypeId.MULE]:
+            if unit.type_id in [UnitTypeId.MULE] or unit.is_constructing_scv:
                 continue
             enemies_in_range = self.enemy_units.in_attack_range_of(unit)
             if enemies_in_range.exists:
                 target = self.get_lowest_health_enemy(enemies_in_range)
                 if target:
                     unit.attack(target)
-                    # await self.chat_send(f"{unit.type_id} attacking {target.type_id}")
-                    # self.last_action.append(
-                    #     f"[System] {unit.type_id}[{self.tag_to_id(unit.tag)}] attacking {target.type_id}[{self.tag_to_id(target.tag)}]"
-                    # )
-            # else:
-            #     structures_in_range = self.enemy_structures.in_attack_range_of(unit)
-            #     if structures_in_range.exists:
-            #         target = self.get_lowest_health_enemy(structures_in_range)
-            #         if target:
-            #             unit.attack(target)
-            #             await self.chat_send(f"{unit.type_id} attacking {target.type_id}")
-            #             self.last_action.append(
-            #                 f"[System] {unit.type_id}[{self.tag_to_id(unit.tag)}] attacking {target.type_id}[{self.tag_to_id(target.tag)}]"
-            #             )
+            else:
+                near_by_enemies = self.enemy_units.closer_than(10, unit.position)
+                near_by_enemies = near_by_enemies.closer_than(10, self.start_location)
+                target_enemy = self.get_lowest_health_enemy(near_by_enemies)
+                if unit.type_id in [UnitTypeId.SCV] and self.time < 240 and target_enemy:
+                    unit.attack(target_enemy)
+                
         # 100 -> 17s
         # decision_iteration = random.randint(8, 12)
         # decision_minerals = random.randint(130, 200)
         decision_iteration = 10
         decision_minerals = 170
-        if iteration % decision_iteration == 0 and self.minerals >= decision_minerals:
-            self.logging("iteration", iteration, level="info", save_trace=True, print_log=False)
+        if (
+            iteration % decision_iteration == 0 and self.minerals >= decision_minerals
+            # or iteration == self.next_decision_time
+        ):
+            # self.next_decision_time = iteration + 5 * decision_iteration
+            print(f"================ iteration {iteration} ================")
+            self.logging("iteration", iteration, level="info", save_trace=True, print_log=True)
             obs_text = await self.obs_to_text()
-            self.logging("time_seconds", int(self.time), level="info", save_trace=True, print_log=False)
-            self.logging("minerals", self.minerals, level="info", save_trace=True, print_log=False)
-            self.logging("vespene", self.vespene, level="info", save_trace=True, print_log=False)
-            self.logging("supply_army", self.supply_army, level="info", save_trace=True, print_log=False)
-            self.logging("supply_workers", self.supply_workers, level="info", save_trace=True, print_log=False)
-            self.logging("supply_left", self.supply_left, level="info", save_trace=True, print_log=False)
-            self.logging("n_structures", len(self.structures), level="info", save_trace=True, print_log=False)
-            self.logging("n_enemy_units", len(self.enemy_units), level="info", save_trace=True, print_log=False)
-            self.logging("n_enemy_structures", len(self.enemy_structures), level="info", save_trace=True, print_log=False)
+            self.logging("time_seconds", int(self.time), level="info", save_trace=True, print_log=True)
+            self.logging("minerals", self.minerals, level="info", save_trace=True, print_log=True)
+            self.logging("vespene", self.vespene, level="info", save_trace=True, print_log=True)
+            self.logging("supply_army", self.supply_army, level="info", save_trace=True, print_log=True)
+            self.logging("supply_workers", self.supply_workers, level="info", save_trace=True, print_log=True)
+            self.logging("supply_left", self.supply_left, level="info", save_trace=True, print_log=True)
+            self.logging("n_structures", len(self.structures), level="info", save_trace=True, print_log=True)
+            self.logging("n_enemy_units", len(self.enemy_units), level="info", save_trace=True, print_log=True)
+            self.logging("n_enemy_structures", len(self.enemy_structures), level="info", save_trace=True, print_log=True)
             unit_types = set(unit.type_id for unit in self.units)
             structure_types = set(unit.type_id for unit in self.structures)
-            self.logging("n_unit_types", len(unit_types), level="info", save_trace=True, print_log=False)
-            self.logging("n_structure_types", len(structure_types), level="info", save_trace=True, print_log=False)
+            self.logging("n_unit_types", len(unit_types), level="info", save_trace=True, print_log=True)
+            self.logging("n_structure_types", len(structure_types), level="info", save_trace=True, print_log=True)
 
             if self.config.enable_rag:
                 rag_summary, rag_think = self.rag_agent.run(obs_text)
@@ -256,32 +252,6 @@ class LLMPlayer(BasePlayer):
                 self.logging("plan_think", plan_think, save_trace=True, print_log=False)
                 self.logging("plan_chat_history", plan_chat_history, save_trace=True, print_log=False)
 
-                # if self.next_k > 0:
-                #     self.next_k -= 1
-                # if self.config.enable_human and self.next_k == 0:
-                # print("=== 决策介入 ===")
-                # print("输入0：直接执行规划")
-                # print("输入1：反馈修改意见")
-                # print("输入2：输入新规划并执行")
-
-                # op = input("请输入操作：")
-                # if op == "0":
-                #     pass
-                # elif op == "1":
-                #     self.next_k = self.k
-                #     print("请输入修改意见：")
-                #     feedback = input()
-                #     self.logging("human_feedback", feedback, save_trace=True)
-                #     plans = self.plan_agent.refine_plan(obs_text, plans, feedback)
-                #     self.logging("human_refine_plan", plans, save_trace=True)
-                # elif op == "2":
-                #     self.next_k = self.k
-                #     print("请输入新规划（用英文分号间隔多条规划）：")
-                #     new_plan = input()
-                #     plans = new_plan.split(";")
-                #     self.logging("human_plan", new_plan, save_trace=True)
-                # else:
-                #     print("输入错误，直接执行规划")
                 plans = "\n".join([f"{i + 1}. {plan}" for i, plan in enumerate(plans)])
 
                 actions, action_think, action_chat_history = self.action_agent.run(obs_text, plans, verifier=self.action_verifier)

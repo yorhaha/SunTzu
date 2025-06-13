@@ -44,7 +44,7 @@ class ActionAgent(BaseAgent):
         response, messages = call_openai(prompt=prompt, **self.generation_config, need_json=True)
         self.think.append([response])
         self.chat_history.append(messages)
-        print(response)
+        # print(response)
         
         if verifier:
             history = constrcut_openai_qa(prompt, response)
@@ -52,12 +52,12 @@ class ActionAgent(BaseAgent):
                 ok, verification_message = verifier(response)
                 if not ok:
                     self.think[-1].append(verification_message)
-                    print(verification_message)
+                    # print(verification_message)
                     
                     response, messages = call_openai(prompt=verification_message, history=history, **self.generation_config, need_json=True)
                     self.think.append([response])
                     self.chat_history.append(messages)
-                    print(response)
+                    # print(response)
                     
                     history.extend(constrcut_openai_qa(verification_message, response))
                 else:
