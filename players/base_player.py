@@ -5,13 +5,12 @@ from sc2.units import Units
 from sc2.unit import Unit
 from sc2.position import Point2
 from sc2.ids.ability_id import AbilityId
-from sc2.ids.unit_typeid import UnitTypeId
 
 import time
 import os
 import json
+import math
 import pandas as pd
-import warnings
 
 from tools.logger import setup_logger
 from tools.format import extract_code
@@ -334,12 +333,15 @@ class BasePlayer(BotAI):
                             assert target is not None, f"Unit with id {action['target_unit']} not found"
                         elif "target_position" in action:
                             target = Point2(action["target_position"])
-                            need_addon = ability in [AbilityId.TERRANBUILD_BARRACKS]
+                            need_addon = ability in [AbilityId.TERRANBUILD_BARRACKS, AbilityId.TERRANBUILD_FACTORY, AbilityId.TERRANBUILD_STARPORT]
                             if "BUILD_" in ability.name:
                                 target = await self.find_placement(ability, target, max_distance=100, random_alternative=False, addon_place=need_addon)
                             assert target is not None, f"Invalid target position: {action['target_position']}"
+                        ###### run action
+                        run_state = curr_unit(ability=ability, target=target)
+                        assert run_state, "Failed to execute command due to unknown error."
+                        ###### run action end
                         # Chat send
-                        curr_unit(ability=ability, target=target)
                         target_str = "None"
                         if isinstance(target, Unit):
                             target_str = target.name
@@ -398,11 +400,6 @@ class BasePlayer(BotAI):
                     pass
         return "\n".join(desc)
 
-    async def structures_to_text(self, structures: Units):
-        if len(structures) == 0:
-            return "[Empty]"
-        return "\n".join([await self.unit_to_text(structure) for structure in structures])
-
     def round_state_to_text(self):
         text = ""
         text += "Time: {}\n".format(self.time_formatted)
@@ -433,11 +430,25 @@ class BasePlayer(BotAI):
             scv_ids = ", ".join(map(str, scv_ids))
             scv_text = f"[{scv_ids}]SCV\nState: collecting resources automatically"
             units_text.append(scv_text)
-        other_units = units.filter(lambda unit: not mining_judge(unit))
-
+        other_units = [unit for unit in units if not mining_judge(unit)]
+        distance_to_start = lambda unit: int((unit.position.x - self.start_location.x) ** 2 + (unit.position.y - self.start_location.y) ** 2) // 4
+        other_units = sorted(other_units, key=lambda unit: (distance_to_start(unit), unit.name))
         units_text += [await self.unit_to_text(unit) for unit in other_units]
         units_text = "\n".join(units_text)
         return units_text
+    
+    async def structures_to_text(self, structures: Units):
+        if len(structures) == 0:
+            return "[Empty]"
+        structures = [s for s in structures]
+        sorted_structures = []
+        current_x, current_y = self.start_location.x, self.start_location.y
+        while structures:
+            closest_structure = min(structures, key=lambda s: math.sqrt((s.position.x - current_x) ** 2 + (s.position.y - current_y) ** 2))
+            sorted_structures.append(closest_structure)
+            structures.remove(closest_structure)
+            current_x, current_y = closest_structure.position.x, closest_structure.position.y
+        return "\n".join([await self.unit_to_text(structure) for structure in sorted_structures])
 
     async def unit_to_text(self, unit: Unit):
         text = ""
@@ -460,19 +471,20 @@ class BasePlayer(BotAI):
                 if states:
                     text += f"State: {states}\n"
 
-                assigned = unit.assigned_harvesters
-                ideal = unit.ideal_harvesters
-                surplus = unit.surplus_harvesters
-                if ideal > 0:
-                    if surplus > 0:
-                        text += f"Harvesters: {assigned}/{ideal} (no more SCV accepted, surplus {surplus})\n"
-                    elif surplus == 0:
-                        text += f"Harvesters: {assigned}/{ideal} (no more SCV accepted)\n"
-                    else:
-                        text += f"Harvesters: {assigned}/{ideal}\n"
-
-                # Production list
                 if unit.is_structure:
+                    # Supply information
+                    assigned = unit.assigned_harvesters
+                    ideal = unit.ideal_harvesters
+                    surplus = unit.surplus_harvesters
+                    if ideal > 0:
+                        if surplus > 0:
+                            text += f"Harvesters: {assigned}/{ideal} (no more SCV accepted, surplus {surplus})\n"
+                        elif surplus == 0:
+                            text += f"Harvesters: {assigned}/{ideal} (no more SCV accepted)\n"
+                        else:
+                            text += f"Harvesters: {assigned}/{ideal}\n"
+
+                    # Production list
                     production_list = []
                     unit_orders = unit.orders
                     for unit_order in unit_orders:
@@ -506,7 +518,7 @@ class BasePlayer(BotAI):
             if ability_id.name not in TerranAbility:
                 ignore_actions.append(ability_id.name)
                 print(f"Unknown ability: {ability_id.name}")
-                # pdb.set_trace()
+                import pdb; pdb.set_trace()
             elif TerranAbility[ability_id.name].get("enabled", False):
                 valid_ability_ids.append(ability_id)
         abilities = [ability_id.name for ability_id in valid_ability_ids]
@@ -545,11 +557,6 @@ class BasePlayer(BotAI):
                 states.append(f"repairing [{order_target}]{order_target_name}")
             else:
                 states.append("repairing")
-        # if unit.is_gathering:
-        #     if order_target:
-        #         states.append(f"gathering [{order_target}]{order_target_name}")
-        #     else:
-        #         states.append("gathering")
 
         if unit.is_idle:
             states.append("idle")

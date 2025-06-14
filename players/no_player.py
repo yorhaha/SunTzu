@@ -7,7 +7,4 @@ class NoPlayer(BotAI):
         super().__init__()
 
     async def run(self, iteration: int):
-        if iteration == 10:
-            import pdb; pdb.set_trace()
-        if iteration == 50:
-            import pdb; pdb.set_trace()
+        pass
