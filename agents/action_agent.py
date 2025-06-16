@@ -32,7 +32,7 @@ Your response should be an action JSON in the following format wrapped with trip
 class ActionAgent(BaseAgent):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.max_retry_attempts = 5
+        self.max_retry_attempts = 3
         self.think = []
         self.chat_history = []
 
@@ -40,6 +40,7 @@ class ActionAgent(BaseAgent):
         self.think = []
         self.chat_history = []
         prompt = create_action_prompt() + "\n\n" + construct_text({"Observation": obs_text, "Command": command})
+        prompt += "\nThink step by step and then give the action JSON."
         response, messages = self.llm_client.call(prompt=prompt, **self.generation_config, need_json=True)
         self.think.append([response])
         self.chat_history.append(messages)
@@ -53,6 +54,7 @@ class ActionAgent(BaseAgent):
                     self.think[-1].append(verification_message)
                     # print(verification_message)
                     
+                    verification_message + "\nRethink step by step and then give the action JSON."
                     response, messages = self.llm_client.call(prompt=verification_message, history=history, **self.generation_config, need_json=True)
                     self.think.append([response])
                     self.chat_history.append(messages)

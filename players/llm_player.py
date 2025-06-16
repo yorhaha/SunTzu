@@ -210,10 +210,10 @@ class LLMPlayer(BasePlayer):
                     unit.attack(target_enemy)
                 
         # 100 -> 17s
-        # decision_iteration = random.randint(8, 12)
-        # decision_minerals = random.randint(130, 200)
-        decision_iteration = 10
-        decision_minerals = 170
+        decision_iteration = random.randint(8, 12)
+        decision_minerals = random.randint(130, 200)
+        # decision_iteration = 10
+        # decision_minerals = 170
         if (
             iteration % decision_iteration == 0 and self.minerals >= decision_minerals
             or iteration == self.next_decision_time

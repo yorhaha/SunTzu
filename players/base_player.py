@@ -37,10 +37,9 @@ def load_knowledge():
         description = item["description"]
         ability_data = [item for item in game_data["Ability"] if item["name"] == ability]
         if len(ability_data) == 0:
-            # warnings.warn(f"Ignored ability: {ability}")
-            continue
-        ability_data = ability_data[0]
-        target = ability_data["target"]
+            target = TargetType.NONE
+        else:
+            target = ability_data[0]["target"]
         if not isinstance(target, str):
             if "Build" in target:
                 target = TargetType.POINT

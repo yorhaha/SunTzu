@@ -163,6 +163,8 @@ class PlanAgent(BaseAgent):
         for _ in range(self.max_refine_times):
             critic = self.critic_plan(plan, obs_text, rules)
             critic = json.loads(extract_code(critic))
+            if isinstance(critic, list):
+                critic = {"error_number": len(critic), "errors": critic}
             if critic.get("error_number", 0) == 0:
                 return plan
             critic = construct_ordered_list(critic.get("errors", []))
