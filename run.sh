@@ -7,7 +7,7 @@ python main.py \
     --difficulty VeryEasy \
     --model $MODEL_NAME \
     --ai_build RandomBuild \
-    --player_name player_test \
+    --player_name sc2agent \
     --enable_plan \
     --enable_plan_verifier \
     --enable_action_verifier

@@ -130,11 +130,14 @@ enabled,ability,description
 1,ARMORYRESEARCH_TERRANVEHICLEWEAPONSLEVEL1,"Increase the damage of Terran Factory units (Hellion, Siege Tank, Cyclone, Hellbat, and Thor)."
 1,ARMORYRESEARCH_TERRANVEHICLEWEAPONSLEVEL2,"Increase the damage of Terran Factory units (Hellion, Siege Tank, Cyclone, Hellbat, and Thor)."
 1,ARMORYRESEARCH_TERRANVEHICLEWEAPONSLEVEL3,"Increase the damage of Terran Factory units (Hellion, Siege Tank, Cyclone, Hellbat, and Thor)."
+1,ARMORYRESEARCH_TERRANVEHICLEANDSHIPPLATINGLEVEL1,"Increases the armor of Terran Factory and Starport units."
+1,ARMORYRESEARCH_TERRANVEHICLEANDSHIPPLATINGLEVEL2,"Increases the armor of Terran Factory and Starport units."
+1,ARMORYRESEARCH_TERRANVEHICLEANDSHIPPLATINGLEVEL3,"Increases the armor of Terran Factory and Starport units."
 1,BARRACKSTECHLABRESEARCH_STIMPACK,Every Marine and Marauder gain the Stimpack ability.
-1,BARRACKSTRAIN_GHOST,Train a Ghost.
-1,BARRACKSTRAIN_MARAUDER,Train a Marauder.
-1,BARRACKSTRAIN_MARINE,Train a Marine.
-1,BARRACKSTRAIN_REAPER,Train a Reaper.
+1,BARRACKSTRAIN_GHOST,"Train a Ghost, a stealthy special forces unit that can snipe high-value targets, deploy tactical nukes, and use cloaking for strategic advantage."
+1,BARRACKSTRAIN_MARAUDER,"Train a Marauder, a heavily armored infantry unit that excels against armored targets with its concussive grenades, complementing Marine forces."
+1,BARRACKSTRAIN_MARINE,"Train a Marine, a versatile, low-cost infantry unit that provides reliable ranged damage and forms the backbone of most Terran armies."
+1,BARRACKSTRAIN_REAPER,"Train a Reaper, a fast, mobile infantry unit designed for early-game harassment and scouting, capable of jumping cliffs with its jetpack."
 1,ATTACK_BATTLECRUISER,Command Battlecruiser to attack.
 1,BATTLECRUISERATTACK_ATTACKTOWARDS,Conduct mobile attacks on the target.
 1,BATTLECRUISERATTACK_ATTACKBARRAGE,Launch artillery attacks on the target.
@@ -190,8 +193,8 @@ enabled,ability,description
 0,HOLDPOSITION,
 1,KD8CHARGE_KD8CHARGE,"Explodes after a short delay, dealing 5 damage and knocking back nearby units."
 0,LOADALL_COMMANDCENTER,
-0,LOAD_BUNKER,
-0,LOAD_MEDIVAC,
+1,LOAD_BUNKER,Load a unit into a Bunker.
+0,LOAD_MEDIVAC,Load a unit into a Medivac.
 1,LOCKON_LOCKON,"Locks the Cyclone's weapons on the target unit, increasing the Cyclone's range to 9 and allowing it to move while firing. Canceled if the target moves out of range (9) or vision."
 1,MEDIVACHEAL_HEAL,Enables a Medivac to heal nearby injured units.
 1,MORPH_HELLBAT,"Transforms the Hellion into its Hellbat form, short-range defense mode."
@@ -205,6 +208,8 @@ enabled,ability,description
 1,MORPH_VIKINGASSAULTMODE,Transforms the Viking into Assault Mode where it becomes a Ground unit with a ground attack.
 1,MORPH_VIKINGFIGHTERMODE,Transforms the Viking into Fighter Mode where it becomes an Air unit with an anti-air attack.
 1,MOVE,Move to target position.
+1,RESEARCH_SMARTSERVOS,"Allows Hellions, Hellbats, Vikings, and Thors to transform quickly between combat modes."
+1,RESEARCH_CYCLONELOCKONDAMAGE,"Increases Cyclone Lock On damage. Deals 600 damage over 14 seconds to ground and flying targets."
 1,RESEARCH_BANSHEECLOAKINGFIELD,Allows Banshees to use the Cloak ability.
 1,RESEARCH_BANSHEEHYPERFLIGHTROTORS,Increases the movement speed of Banshees from 3.85 to 5.25.
 1,RESEARCH_BATTLECRUISERWEAPONREFIT,Allows Battlecruisers to use the Yamato Cannon ability.

@@ -1,5 +1,4 @@
 from agents.base_agent import BaseAgent
-from tools.llm import call_openai
 from tools.format import extract_code, construct_ordered_list
 
 import json
@@ -53,7 +52,7 @@ class RagAgent(BaseAgent):
 
     def get_queries(self, obs_text: str):
         prompt = rag_extract_query_prompt % obs_text
-        response = call_openai(prompt=prompt, **self.generation_config, need_json=True)[0]
+        response, messages = self.llm_client.call(prompt=prompt, **self.generation_config, need_json=True)
 
         queries = extract_code(response)
         queries = json.loads(queries)
@@ -66,7 +65,7 @@ class RagAgent(BaseAgent):
 
     def get_summary(self, query: str, document: str):
         prompt = rag_summary_prompt % (document, query)
-        response = call_openai(prompt=prompt, **self.generation_config, need_json=False)[0]
+        response, messages = self.llm_client.call(prompt=prompt, **self.generation_config, need_json=False)
 
         summary = response.split("<summary>")[-1].split("</summary>")[0].strip()
 
