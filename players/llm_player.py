@@ -30,6 +30,10 @@ class LLMPlayer(BasePlayer):
         self.action_verifier = self.verify_actions if self.config.enable_action_verifier else None
         
         self.next_decision_time = -1
+        
+        # SCV auto-attack settings
+        self.scv_auto_attack_distance = 2
+        self.scv_auto_attack_time = 240
 
     def get_lowest_health_enemy(self, units: Units):
         """Get the enemy unit with the lowest health."""
@@ -191,6 +195,23 @@ class LLMPlayer(BasePlayer):
 
         return suggestions
 
+    def print_current_iteration(self, iteration: int):
+        print(f"================ iteration {iteration} ================")
+        self.logging("iteration", iteration, save_trace=True)
+        self.logging("time_seconds", int(self.time), save_trace=True)
+        self.logging("minerals", self.minerals, save_trace=True)
+        self.logging("vespene", self.vespene, save_trace=True)
+        self.logging("supply_army", self.supply_army, save_trace=True)
+        self.logging("supply_workers", self.supply_workers, save_trace=True)
+        self.logging("supply_left", self.supply_left, save_trace=True)
+        self.logging("n_structures", len(self.structures), save_trace=True)
+        self.logging("n_enemy_units", len(self.enemy_units), save_trace=True)
+        self.logging("n_enemy_structures", len(self.enemy_structures), save_trace=True)
+        unit_types = set(unit.type_id for unit in self.units)
+        structure_types = set(unit.type_id for unit in self.structures)
+        self.logging("n_unit_types", len(unit_types), save_trace=True)
+        self.logging("n_structure_types", len(structure_types), save_trace=True)
+    
     async def run(self, iteration: int):
         # send idle workers to minerals or gas automatically
         await self.distribute_workers()
@@ -203,10 +224,10 @@ class LLMPlayer(BasePlayer):
                 if target:
                     unit.attack(target)
             else:
-                near_by_enemies = self.enemy_units.closer_than(10, unit.position)
-                near_by_enemies = near_by_enemies.closer_than(10, self.start_location)
+                near_by_enemies = self.enemy_units.closer_than(self.scv_auto_attack_distance, unit.position)
+                near_by_enemies = near_by_enemies.closer_than(self.scv_auto_attack_distance, self.start_location)
                 target_enemy = self.get_lowest_health_enemy(near_by_enemies)
-                if unit.type_id in [UnitTypeId.SCV] and self.time < 240 and target_enemy:
+                if unit.type_id in [UnitTypeId.SCV] and self.time < self.scv_auto_attack_time and target_enemy:
                     unit.attack(target_enemy)
                 
         # 100 -> 17s
@@ -220,21 +241,7 @@ class LLMPlayer(BasePlayer):
         ):
             self.next_decision_time = iteration + 8 * decision_iteration
 
-            print(f"================ iteration {iteration} ================")
-            self.logging("iteration", iteration, level="info", save_trace=True, print_log=True)
-            self.logging("time_seconds", int(self.time), level="info", save_trace=True, print_log=True)
-            self.logging("minerals", self.minerals, level="info", save_trace=True, print_log=True)
-            self.logging("vespene", self.vespene, level="info", save_trace=True, print_log=True)
-            self.logging("supply_army", self.supply_army, level="info", save_trace=True, print_log=True)
-            self.logging("supply_workers", self.supply_workers, level="info", save_trace=True, print_log=True)
-            self.logging("supply_left", self.supply_left, level="info", save_trace=True, print_log=True)
-            self.logging("n_structures", len(self.structures), level="info", save_trace=True, print_log=True)
-            self.logging("n_enemy_units", len(self.enemy_units), level="info", save_trace=True, print_log=True)
-            self.logging("n_enemy_structures", len(self.enemy_structures), level="info", save_trace=True, print_log=True)
-            unit_types = set(unit.type_id for unit in self.units)
-            structure_types = set(unit.type_id for unit in self.structures)
-            self.logging("n_unit_types", len(unit_types), level="info", save_trace=True, print_log=True)
-            self.logging("n_structure_types", len(structure_types), level="info", save_trace=True, print_log=True)
+            self.print_current_iteration(iteration)
 
             obs_text = await self.obs_to_text()
             if self.config.enable_rag:
