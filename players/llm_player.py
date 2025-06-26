@@ -114,7 +114,7 @@ class LLMPlayer(BasePlayer):
             suggestions.append("At least one Marauder is necessary for defensing, consider training one.")
         # 只有一座Barracks时建议建造第二座
         if self.get_total_amount(UnitTypeId.BARRACKS) == 1 and self._can_build(UnitTypeId.BARRACKS):
-            suggestions.append("Consider building a second Barracks to increase unit production.")
+            suggestions.append("Consider building a second Barracks to increase unit production with 400 minerals.")
         # 建议升级Command Center到Orbital Command
         cc = self.townhalls(UnitTypeId.COMMANDCENTER).ready
         if cc.exists:
