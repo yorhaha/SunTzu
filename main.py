@@ -67,6 +67,10 @@ def parse_args():
 
     args = parser.parse_args()
 
+    if args.enable_rag:
+        raise ValueError(
+            "RAG agent is not supported in this version. Please disable it with --enable_rag."
+        )
     if args.enable_plan_verifier and not args.enable_plan:
         raise ValueError(
             "Plan verifier requires Plan agent to be enabled. Please enable Plan agent with --enable_plan."

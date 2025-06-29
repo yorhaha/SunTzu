@@ -201,16 +201,34 @@ class LLMPlayer(BasePlayer):
         self.logging("time_seconds", int(self.time), save_trace=True)
         self.logging("minerals", self.minerals, save_trace=True)
         self.logging("vespene", self.vespene, save_trace=True)
+        
+        unit_mineral_value, unit_vespene_value = 0, 0
+        for unit in self.units:
+            unit_value = self.calculate_unit_value(unit.type_id)
+            unit_mineral_value += unit_value.minerals
+            unit_vespene_value += unit_value.vespene
+        self.logging("unit_mineral_value", unit_mineral_value, save_trace=True)
+        self.logging("unit_vespene_value", unit_vespene_value, save_trace=True)
+        
+        structure_mineral_value, structure_vespene_value = 0, 0
+        for structure in self.structures:
+            structure_value = self.calculate_unit_value(structure.type_id)
+            structure_mineral_value += structure_value.minerals
+            structure_vespene_value += structure_value.vespene
+        self.logging("structure_mineral_value", structure_mineral_value, save_trace=True)
+        self.logging("structure_vespene_value", structure_vespene_value, save_trace=True)
+        
         self.logging("supply_army", self.supply_army, save_trace=True)
         self.logging("supply_workers", self.supply_workers, save_trace=True)
         self.logging("supply_left", self.supply_left, save_trace=True)
         self.logging("n_structures", len(self.structures), save_trace=True)
-        self.logging("n_enemy_units", len(self.enemy_units), save_trace=True)
-        self.logging("n_enemy_structures", len(self.enemy_structures), save_trace=True)
+        self.logging("n_visible_enemy_units", len(self.enemy_units), save_trace=True)
+        self.logging("n_visible_enemy_structures", len(self.enemy_structures), save_trace=True)
         unit_types = set(unit.type_id for unit in self.units)
         structure_types = set(unit.type_id for unit in self.structures)
         self.logging("n_unit_types", len(unit_types), save_trace=True)
         self.logging("n_structure_types", len(structure_types), save_trace=True)
+        
     
     async def run(self, iteration: int):
         # send idle workers to minerals or gas automatically
@@ -239,16 +257,18 @@ class LLMPlayer(BasePlayer):
             iteration % decision_iteration == 0 and self.minerals >= decision_minerals
             or iteration == self.next_decision_time
         ):
-            self.next_decision_time = iteration + 8 * decision_iteration
+            self.next_decision_time = iteration + 9 * decision_iteration
 
             self.print_current_iteration(iteration)
 
             obs_text = await self.obs_to_text()
-            if self.config.enable_rag:
-                rag_summary, rag_think = self.rag_agent.run(obs_text)
-                self.logging("rag_summary", rag_summary, save_trace=True)
-                self.logging("rag_think", rag_think, save_trace=True, print_log=False)
-                obs_text += "\n\n# Hint\n" + rag_summary
+            
+            # RAG is not ready yet, so we skip it for now
+            # if self.config.enable_rag:
+            #     rag_summary, rag_think = self.rag_agent.run(obs_text)
+            #     self.logging("rag_summary", rag_summary, save_trace=True)
+            #     self.logging("rag_think", rag_think, save_trace=True, print_log=False)
+            #     obs_text += "\n\n# Hint\n" + rag_summary
 
             if self.config.enable_plan or self.config.enable_plan_verifier:
                 suggestions = self.get_suggestions()
@@ -271,3 +291,6 @@ class LLMPlayer(BasePlayer):
                 self.logging("action_think", action_think, save_trace=True, print_log=False)
 
             await self.run_actions(actions)
+            
+        elif iteration % 10 == 0:
+            self.print_current_iteration(iteration)

@@ -86,7 +86,7 @@ class BasePlayer(BotAI):
         self.resource_cost = 0
 
     def logging(self, key: str, value, level="info", save_trace=False, save_file=False, print_log=True):
-        idx = self.state.game_loop
+        idx = self.state.game_loop // 4
         if level in ["info", "warning", "error"] and print_log:
             text = f"({idx}) {key}: {str(value)}"
             if level == "info":
