@@ -5,6 +5,7 @@ from sc2.units import Units
 from sc2.unit import Unit
 from sc2.position import Point2
 from sc2.ids.ability_id import AbilityId
+from sc2.ids.unit_typeid import UnitTypeId
 
 import time
 import os
@@ -85,6 +86,8 @@ class BasePlayer(BotAI):
         self.sbr = IterativeMean()
         self.resource_cost = 0
 
+        self.miner_units = ["SCV", "Probe", "MULE", "Drone"]
+
     def logging(self, key: str, value, level="info", save_trace=False, save_file=False, print_log=True):
         idx = self.state.game_loop // 4
         if level in ["info", "warning", "error"] and print_log:
@@ -125,6 +128,23 @@ class BasePlayer(BotAI):
     def update_tag_to_health(self):
         self.tag_to_health = {unit.tag: unit.health for unit in self.units}
         self.tag_to_health.update({unit.tag: unit.health for unit in self.structures})
+    
+    def get_lowest_health_enemy(self, units: Units):
+        """Get the enemy unit with the lowest health."""
+        if not units.exists:
+            return None
+        return min(units, key=lambda unit: unit.health + unit.shield)
+
+    def _can_build(self, unit_type):
+        """辅助函数，检查是否可以且尚未开始建造某个单位/建筑。"""
+        return self.can_afford(unit_type) and not self.already_pending(unit_type)
+
+    def get_total_amount(self, unit_type: UnitTypeId):
+        """获取指定单位类型的总数量，包括正在建造的和已完成的。"""
+        unit_amount = self.units(unit_type).amount
+        structures_amount = self.structures(unit_type).amount
+        pending_amount = self.already_pending(unit_type)
+        return unit_amount + structures_amount + pending_amount
 
     async def on_step(self, iteration: int):
         if len(self.units) == 0 or len(self.structures) == 0:
@@ -226,18 +246,10 @@ class BasePlayer(BotAI):
             target_unit = self.get_unit_by_id(action["target_unit"])
             if target_unit is None:
                 return False, f"Unit with id {action['target_unit']} not found"
-            if action_name == "HARVEST_GATHER_SCV":
-                if target_unit.name not in ["MineralField", "MineralField750", "Refinery"]:
-                    return (
-                        False,
-                        f"Unit [{action['target_unit']}]{target_unit.name} cannot be harvested or has been consumed. Only mineral field and refinery can be harvested.",
-                    )
-                if target_unit.build_progress < 1.0:
-                    return False, f"Unit [{action['target_unit']}]{target_unit.name} is still building"
-                if target_unit.ideal_harvesters > 0 and target_unit.assigned_harvesters >= target_unit.ideal_harvesters:
-                    return False, f"Unit [{action['target_unit']}]{target_unit.name} is fully harvested"
 
         ### unit checks
+        if len(action["units"]) == 0:
+            return False, "`units` must not be an empty list"
         for unit_id in action["units"]:
             if not isinstance(unit_id, int):
                 return False, "`units` must be a list of integers"
@@ -296,9 +308,6 @@ class BasePlayer(BotAI):
                 next_id = (next_id + 1) % 1000
             self._tag_to_id[tag] = next_id
             self._id_to_tag[next_id] = tag
-            # self._tag_to_id[tag] = self.next_id
-            # self._id_to_tag[self.next_id] = tag
-            # self.next_id += 1
         return self._tag_to_id[tag]
 
     def id_to_tag(self, _id: int):
@@ -422,14 +431,17 @@ class BasePlayer(BotAI):
         
         units_text = []
         
-        mining_judge = lambda unit: unit.name == "SCV" and unit.is_mine and not (unit.is_constructing_scv or unit.is_repairing or unit.is_attacking)
-        scv_units = units.filter(mining_judge)
-        if len(scv_units) > 0:
-            scv_ids = [self.tag_to_id(unit.tag) for unit in scv_units]
-            scv_ids = ", ".join(map(str, scv_ids))
-            scv_text = f"[{scv_ids}]SCV\nState: collecting resources automatically"
-            units_text.append(scv_text)
-        other_units = [unit for unit in units if not mining_judge(unit)]
+        other_units = units
+        for mining_type in self.miner_units:
+            mining_judge = lambda unit: unit.name == mining_type and unit.is_mine and not (unit.is_constructing_scv or unit.is_repairing or unit.is_attacking)
+            mining_units = units.filter(mining_judge)
+            if len(mining_units) > 0:
+                mining_ids = [self.tag_to_id(unit.tag) for unit in mining_units]
+                mining_ids = ", ".join(map(str, mining_ids))
+                mining_text = f"[{mining_ids}]{mining_type}\nState: collecting resources automatically"
+                units_text.append(mining_text)
+            other_units = [unit for unit in other_units if not mining_judge(unit)]
+
         distance_to_start = lambda unit: int((unit.position.x - self.start_location.x) ** 2 + (unit.position.y - self.start_location.y) ** 2) // 4
         other_units = sorted(other_units, key=lambda unit: (distance_to_start(unit), unit.name))
         units_text += [await self.unit_to_text(unit) for unit in other_units]
@@ -477,9 +489,9 @@ class BasePlayer(BotAI):
                     surplus = unit.surplus_harvesters
                     if ideal > 0:
                         if surplus > 0:
-                            text += f"Harvesters: {assigned}/{ideal} (no more SCV accepted, surplus {surplus})\n"
+                            text += f"Harvesters: {assigned}/{ideal} (no more harvesters accepted, surplus {surplus})\n"
                         elif surplus == 0:
-                            text += f"Harvesters: {assigned}/{ideal} (no more SCV accepted)\n"
+                            text += f"Harvesters: {assigned}/{ideal} (no more harvesters accepted)\n"
                         else:
                             text += f"Harvesters: {assigned}/{ideal}\n"
 
@@ -576,7 +588,7 @@ class BasePlayer(BotAI):
     def miner_to_text(self):
         center = self.start_location
         miners = []
-        num_SCV = len([unit for unit in self.units if unit.name == "SCV"])
+        num_SCV = len([unit for unit in self.units if unit.name in self.miner_units])
         cloest_miners = self.mineral_field.closest_n_units(center, 100)
         cloest_miners = [mineral for mineral in cloest_miners if mineral.mineral_contents > 0]
         cloest_miners = cloest_miners[: 2 * num_SCV]

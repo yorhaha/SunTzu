@@ -9638,6 +9638,18 @@
             "cooldown": 0,
             "target": "None",
             "remaps_to_ability_id": 3659
+        },
+        {
+            "id": 4126,
+            "name": "ENERGYRECHARGE_ENERGYRECHARGE",
+            "cast_range": 0.0,
+            "energy_cost": 0,
+            "allow_minimap": false,
+            "allow_autocast": false,
+            "effect": [],
+            "buff": [],
+            "cooldown": 0,
+            "target": "Unit"
         }
     ],
     "Unit": [

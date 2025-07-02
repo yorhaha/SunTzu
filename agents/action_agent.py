@@ -9,8 +9,6 @@ rules = [
     "Do not give any action that is irrelevant to the command.",
     "Each of units can only be used in the whole response once at most.",
     "If a unit is already performing an action as given command, you should ignore it, instead of giving a repeated action for it.",
-    "VespeneGeyser cannot be harvested directly. Only mineral field and refinery can be harvested.",
-    "One MineralField can only be harvested by one SCV.",
     "If one command cannot be finished, just ignore it.",
     "If resource is not enough, just complete the most important part of the command.",
 ]
@@ -30,7 +28,7 @@ Your response should be an action JSON in the following format wrapped with trip
 
 
 class ActionAgent(BaseAgent):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, race: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.max_retry_attempts = 3
         self.think = []

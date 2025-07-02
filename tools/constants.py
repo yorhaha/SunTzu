@@ -23,3 +23,5 @@ map_choices = [
 ]
 
 ai_build_choices = ["RandomBuild", "Rush", "Timing", "Power", "Macro", "Air"]
+
+race_choices = ["Terran", "Protoss", "Zerg"]

@@ -130,9 +130,9 @@ enabled,ability,description
 1,ARMORYRESEARCH_TERRANVEHICLEWEAPONSLEVEL1,"Increase the damage of Terran Factory units (Hellion, Siege Tank, Cyclone, Hellbat, and Thor)."
 1,ARMORYRESEARCH_TERRANVEHICLEWEAPONSLEVEL2,"Increase the damage of Terran Factory units (Hellion, Siege Tank, Cyclone, Hellbat, and Thor)."
 1,ARMORYRESEARCH_TERRANVEHICLEWEAPONSLEVEL3,"Increase the damage of Terran Factory units (Hellion, Siege Tank, Cyclone, Hellbat, and Thor)."
-1,ARMORYRESEARCH_TERRANVEHICLEANDSHIPPLATINGLEVEL1,"Increases the armor of Terran Factory and Starport units."
-1,ARMORYRESEARCH_TERRANVEHICLEANDSHIPPLATINGLEVEL2,"Increases the armor of Terran Factory and Starport units."
-1,ARMORYRESEARCH_TERRANVEHICLEANDSHIPPLATINGLEVEL3,"Increases the armor of Terran Factory and Starport units."
+1,ARMORYRESEARCH_TERRANVEHICLEANDSHIPPLATINGLEVEL1,Increases the armor of Terran Factory and Starport units.
+1,ARMORYRESEARCH_TERRANVEHICLEANDSHIPPLATINGLEVEL2,Increases the armor of Terran Factory and Starport units.
+1,ARMORYRESEARCH_TERRANVEHICLEANDSHIPPLATINGLEVEL3,Increases the armor of Terran Factory and Starport units.
 1,BARRACKSTECHLABRESEARCH_STIMPACK,Every Marine and Marauder gain the Stimpack ability.
 1,BARRACKSTRAIN_GHOST,"Train a Ghost, a stealthy special forces unit that can snipe high-value targets, deploy tactical nukes, and use cloaking for strategic advantage."
 1,BARRACKSTRAIN_MARAUDER,"Train a Marauder, a heavily armored infantry unit that excels against armored targets with its concussive grenades, complementing Marine forces."
@@ -169,10 +169,12 @@ enabled,ability,description
 1,EFFECT_GHOSTSNIPE,Deal 25 damage to enemy biological units (50 for Psionic).
 1,EFFECT_INTERFERENCEMATRIX,Disables a target unit rendering it unable to attack or use abilities for 11 seconds. Reveals Cloaked units. Can only target mechanical and psionic units.
 1,EFFECT_MEDIVACIGNITEAFTERBURNERS,Speed boost that increases Medivac's movement speed to 5.95 and acceleration to 1400 for 4.3 seconds.
-1,EFFECT_REPAIR_MULE,Repair some unit or strcture.
-1,EFFECT_REPAIR_SCV,Repair some unit or strcture.
+0,EFFECT_REPAIR_MULE,Repair some unit or strcture.
+0,EFFECT_REPAIR_SCV,Repair some unit or strcture.
 0,EFFECT_SALVAGE,"Destroy a Bunker, returning 75 minerals."
 0,EFFECT_SPRAY_TERRAN,Spray a marker.
+0,EFFECT_SPRAY_PROTOSS,Spray a marker.
+0,EFFECT_SPRAY_ZERG,Spray a marker.
 1,EFFECT_STIM_MARAUDER,Increases the movement speed and firing rate by 50% at the cost of 20 HP.
 1,EFFECT_STIM_MARINE,Increases the movement speed and firing rate by 50% at the cost of 10 HP.
 1,EFFECT_TACTICALJUMP,"After 4 seconds, warps to the target location. Battlecruiser is invincible while warping. Stuns and puts the Battlecruiser into a 1 second vulnerability phase before it teleports. In this state, the Battlecruiser can be damaged, but Tactical Jump may not be canceled."
@@ -187,9 +189,18 @@ enabled,ability,description
 1,FACTORYTRAIN_SIEGETANK,Train a Siege Tank.
 1,FACTORYTRAIN_THOR,Train a Thor.
 1,FACTORYTRAIN_WIDOWMINE,Train a Widow Mine.
-0,HARVEST_GATHER_MULE,Let MULE start gather resources.
+0,HALT,
+0,HALT_BUILDING,
+0,HALT_TERRANBUILD,
+0,HARVEST_GATHER,
+0,HARVEST_GATHER_DRONE,
+0,HARVEST_GATHER_MULE,
+0,HARVEST_GATHER_PROBE,
+0,HARVEST_GATHER_SCV,
+0,HARVEST_RETURN,
+0,HARVEST_RETURN_DRONE,
 0,HARVEST_RETURN_MULE,
-0,HARVEST_GATHER_SCV,Let SCV start gather resources.
+0,HARVEST_RETURN_PROBE,
 0,HOLDPOSITION,
 1,KD8CHARGE_KD8CHARGE,"Explodes after a short delay, dealing 5 damage and knocking back nearby units."
 0,LOADALL_COMMANDCENTER,
@@ -209,7 +220,7 @@ enabled,ability,description
 1,MORPH_VIKINGFIGHTERMODE,Transforms the Viking into Fighter Mode where it becomes an Air unit with an anti-air attack.
 1,MOVE,Move to target position.
 1,RESEARCH_SMARTSERVOS,"Allows Hellions, Hellbats, Vikings, and Thors to transform quickly between combat modes."
-1,RESEARCH_CYCLONELOCKONDAMAGE,"Increases Cyclone Lock On damage. Deals 600 damage over 14 seconds to ground and flying targets."
+1,RESEARCH_CYCLONELOCKONDAMAGE,Increases Cyclone Lock On damage. Deals 600 damage over 14 seconds to ground and flying targets.
 1,RESEARCH_BANSHEECLOAKINGFIELD,Allows Banshees to use the Cloak ability.
 1,RESEARCH_BANSHEEHYPERFLIGHTROTORS,Increases the movement speed of Banshees from 3.85 to 5.25.
 1,RESEARCH_BATTLECRUISERWEAPONREFIT,Allows Battlecruisers to use the Yamato Cannon ability.
@@ -232,18 +243,18 @@ enabled,ability,description
 1,STARPORTTRAIN_VIKINGFIGHTER,Train a Viking Fighter.
 0,SUPPLYDROP_SUPPLYDROP,
 1,TERRANBUILD_ARMORY,Build a Armory.
-1,TERRANBUILD_BARRACKS,"Build a Barracks to produce Marine, Firebat, Ghost and Medic."
-1,TERRANBUILD_BUNKER,"Build a Bunker, a static defense building."
+1,TERRANBUILD_BARRACKS,Build a Barracks.
+1,TERRANBUILD_BUNKER,Build a Bunker.
 1,TERRANBUILD_COMMANDCENTER,Build a Command Center.
-1,TERRANBUILD_ENGINEERINGBAY,Build an Engineer Bay
+1,TERRANBUILD_ENGINEERINGBAY,Build an Engineer Bay.
 1,TERRANBUILD_FACTORY,Build a Factory.
 1,TERRANBUILD_FUSIONCORE,Build a Fusion Core.
-1,TERRANBUILD_GHOSTACADEMY,"Build a Ghost Academy, which unlocks the Ghost unit and arm itself with a Nuke."
-1,TERRANBUILD_MISSILETURRET,Build a Missile Turret to attack flying units and buildings.
+1,TERRANBUILD_GHOSTACADEMY,Build a Ghost Academy.
+1,TERRANBUILD_MISSILETURRET,Build a Missile Turret.
 1,TERRANBUILD_REFINERY,Build a Refinery on a Vespene Geyser.
-1,TERRANBUILD_SENSORTOWER,"Build a Sensor Tower, which senses any approaching uncloaked, unburrowed enemy units."
+1,TERRANBUILD_SENSORTOWER,Build a Sensor Tower.
 1,TERRANBUILD_STARPORT,Build a Starport.
-1,TERRANBUILD_SUPPLYDEPOT,Build a Supply Depot near the Command Center to increase 8 supplies.
+1,TERRANBUILD_SUPPLYDEPOT,Build a Supply Depot.
 1,TRAIN_CYCLONE,Train a Cyclone.
 1,TRAIN_HELLBAT,Train a Hellbat.
 1,UNSIEGE_UNSIEGE,Converts a Siege Tank back from Siege Mode to its regular mode.
@@ -251,3 +262,28 @@ enabled,ability,description
 1,UPGRADETOPLANETARYFORTRESS_PLANETARYFORTRESS,Enhance the defense capability of Command Center.
 1,WIDOWMINEATTACK_WIDOWMINEATTACK,Command Widow Mine to attack.
 1,YAMATO_YAMATOGUN,"Blasts a target with a devastating plasma cannon, causing 240 damage."
+1,STARPORTTECHLABRESEARCH_RESEARCHRAVENINTERFERENCEMATRIX,Allows Ravens to use the Interference Matrix ability.
+1,UNLOADALL_BUNKER,Unload all units from a Bunker.
+1,PROTOSSBUILD_ASSIMILATOR,Build an Assimilator.
+1,PROTOSSBUILD_CYBERNETICSCORE,Build a Cybernetics Core.
+1,PROTOSSBUILD_DARKSHRINE,Build a Dark Shrine.
+1,PROTOSSBUILD_FLEETBEACON,Build a Fleet Beacon.
+1,PROTOSSBUILD_FORGE,Build a Forge.
+1,PROTOSSBUILD_GATEWAY,Build a Gateway.
+1,PROTOSSBUILD_NEXUS,Build a Nexus.
+1,PROTOSSBUILD_PHOTONCANNON,Build a Photon Cannon.
+1,PROTOSSBUILD_PYLON,Build a Pylon.
+1,PROTOSSBUILD_ROBOTICSBAY,Build a Robotics Bay.
+1,PROTOSSBUILD_ROBOTICSFACILITY,Build a Robotics Facility.
+1,PROTOSSBUILD_STARGATE,Build a Protoss Stargate.
+1,PROTOSSBUILD_TEMPLARARCHIVE,Build a Templar Archive.
+1,PROTOSSBUILD_TWILIGHTCOUNCIL,Build a Twilight Council.
+1,NEXUSTRAIN_PROBE,Train a Probe.
+1,EFFECT_CHRONOBOOSTENERGYCOST,Reduce the unit production time or technological research time of the target building.
+1,EFFECT_CHRONOBOOST,Reduce the unit production time or technological research time of the target building.
+1,EFFECT_MASSRECALL,Instantly teleport the unit back to its current location.
+1,EFFECT_MASSRECALL_MOTHERSHIP,Instantly teleport the unit back to its current location.
+1,EFFECT_MASSRECALL_MOTHERSHIPCORE,Instantly teleport the unit back to its current location.
+1,EFFECT_MASSRECALL_NEXUS,Instantly teleport the unit back to its current location.
+1,EFFECT_MASSRECALL_STRATEGICRECALL,Instantly teleport the unit back to its current location.
+1,ENERGYRECHARGE_ENERGYRECHARGE,Restore energy to designated units.
