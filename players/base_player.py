@@ -226,16 +226,6 @@ class BasePlayer(BotAI):
             target_unit = self.get_unit_by_id(action["target_unit"])
             if target_unit is None:
                 return False, f"Unit with id {action['target_unit']} not found"
-            if action_name == "HARVEST_GATHER_SCV":
-                if target_unit.name not in ["MineralField", "MineralField750", "Refinery"]:
-                    return (
-                        False,
-                        f"Unit [{action['target_unit']}]{target_unit.name} cannot be harvested or has been consumed. Only mineral field and refinery can be harvested.",
-                    )
-                if target_unit.build_progress < 1.0:
-                    return False, f"Unit [{action['target_unit']}]{target_unit.name} is still building"
-                if target_unit.ideal_harvesters > 0 and target_unit.assigned_harvesters >= target_unit.ideal_harvesters:
-                    return False, f"Unit [{action['target_unit']}]{target_unit.name} is fully harvested"
 
         ### unit checks
         for unit_id in action["units"]:
@@ -258,10 +248,6 @@ class BasePlayer(BotAI):
         ### action_name check
         building_units = self.get_building_units()
         building_units = [name.lower() for name in building_units]
-        if action_name.startswith("TERRANBUILD_") or action_name.startswith("BUILD_"):
-            build_name = action_name.split("_")[1].lower()
-            if build_name in building_units:
-                return False, f"[{action['units'][0]}]{self.units[0].name} is already under construction"
         if action_name == "TERRANBUILD_SUPPLYDEPOT":
             if self.supply_cap - self.supply_used >= 7:
                 return False, "There is still space for supply depot, no need to build new Supply Depot."
@@ -521,8 +507,8 @@ class BasePlayer(BotAI):
             elif TerranAbility[ability_id.name].get("enabled", False):
                 valid_ability_ids.append(ability_id)
         abilities = [ability_id.name for ability_id in valid_ability_ids]
-        if unit.name == "SCV":
-            abilities = [a for a in abilities if a not in ["MOVE_MOVE", "TERRANBUILD_ENGINEERINGBAY", "ATTACK_ATTACK"]]
+        if unit.name == "SCV" or unit.name == "MULE":
+            abilities = [a for a in abilities if a not in ["MOVE_MOVE", "TERRANBUILD_ENGINEERINGBAY", "ATTACK_ATTACK", "EFFECT_REPAIR_SCV", "EFFECT_REPAIR_MULE"]]
         self._id_to_abilities[self.tag_to_id(unit.tag)] = abilities
         abilities = ", ".join(abilities)
 

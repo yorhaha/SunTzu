@@ -15,10 +15,6 @@ load_dotenv()
 
 
 def parse_args():
-    """
-    Usage example:
-    python main.py --player_name spb --map_name Flat32 --difficulty Medium --model Qwen2.5-32B-Instruct --ai_build RandomBuild --enable_plan --enable_plan_verifier --enable_action_verifier
-    """
     parser = ArgumentParser()
     parser.add_argument(
         "--map_name",

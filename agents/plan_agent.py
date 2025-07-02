@@ -20,23 +20,17 @@ Our strategy:
 
 default_rules = [
     "Commands should be natural language, instead of code.",
-    # "Necessary structures before 02:00: Supply Depot, Refinery, a Barracks for Marine and a Barracks for upgrading to Tech lab.",
     "Produce as many units with the strongest attack power as possible.",
-    # "Base structures development: Supply Depot -> Refinery -> 2 Barracks ...",
-    # "Attacking units development: 3 Marine -> Tech lab -> many Marauder and Marine ...",
-    # "Structure upgrade needs it to be idle first. For example, training Marine will block the building of Tech lab.",
-    # "Marauder is the key to gain victory, which needs a Tech lab based on an idle Barracks. So it's wrong to use all Barracks to train Marine. Build Marauder as soon as possible.",
-    # "Engineering Bay is not needed before 05:00.",
     "The total cost of all commands should not exceed the current resources (minerals and gas).",
     "Commands should not send workers (SCV or MULE) to gather resources because the system will do it automatically.",
     "Commands should not train too many SCVs, whose number should not exceed the capacity of CommandCenter and Refinery.",
-    # "Commands should not build a structure which is already under construction.",
     "Commands should not build redundant structures(e.g. more than 2 Barracks).",
+    # "Commands should not build redundant structures while the existing ones are idle.",
     "Commands should not use abilities that are not supported currently.",
     "Commands should not build a structure that is not needed now (e.g. build a Missile Turret but there is no enemy air unit).",
     "The production list capacity of Barracks is 5. If the list is full, do not use it to train units anymore.",
+    # "The unit production list capacity of structures is 5. If the list is full, do not add more units to it.",
     "Commands can construct a new one Supply Depot only when the remaining unused supply is less than 7.",
-    # "While being attacked, counterattack is the priority.",
 ]
 
 plan_example_prompt = """
@@ -51,15 +45,8 @@ Following are some examples:
 
 
 ############## Plan Role Prompt ###############
-def create_plan_prompt(rules: list[str] = default_rules, with_cot=True):
+def create_plan_prompt(rules: list[str] = default_rules):
     rules_prompt = "Rule checklist:\n" + construct_ordered_list(rules)
-    cot_prompt = """
-### Analysis for the current game state ###
-1. Resource analysis
-2. Technology tree analysis
-3. Our situation of being attacked and where it comes from
-4. What should we do now
-    """
     return f"""
 As a top-tier StarCraft II strategist, your task is to give one or more commands based on the current game state. Only give commands which can be executed immediately, instead of waiting for certain events.
 {plan_example_prompt}
@@ -144,7 +131,7 @@ class PlanAgent(BaseAgent):
         return response
 
     def refine_plan(self, obs_text: str, plan: list[str], critic: str, rules: list[str] = default_rules):
-        gene_prompt = create_plan_prompt(rules, with_cot=False) + "\n\n" + construct_text({"Observation": obs_text})
+        gene_prompt = create_plan_prompt(rules) + "\n\n" + construct_text({"Observation": obs_text})
         history = [
             {"role": "user", "content": gene_prompt},
             {"role": "assistant", "content": json_to_markdown(plan)},
