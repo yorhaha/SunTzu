@@ -121,6 +121,9 @@ enabled,ability,description
 1,ATTACK_ATTACKBARRAGE,Attack barrage.
 1,MOVE_MOVE,Move to target position.
 0,PATROL_PATROL,Command unit to patrol from current position to target position.
+1,ARMORYRESEARCH_TERRANSHIPPLATINGLEVEL1,"Increase the armor of Terran Air units (Viking, Liberator, Banshee, and Battlecruiser)."
+1,ARMORYRESEARCH_TERRANSHIPPLATINGLEVEL2,"Increase the armor of Terran Air units (Viking, Liberator, Banshee, and Battlecruiser)."
+1,ARMORYRESEARCH_TERRANSHIPPLATINGLEVEL3,"Increase the armor of Terran Air units (Viking, Liberator, Banshee, and Battlecruiser)."
 1,ARMORYRESEARCH_TERRANSHIPWEAPONSLEVEL1,"Increase the damage of Terran Air units (Viking, Liberator, Banshee, and Battlecruiser)."
 1,ARMORYRESEARCH_TERRANSHIPWEAPONSLEVEL2,"Increase the damage of Terran Air units (Viking, Liberator, Banshee, and Battlecruiser)."
 1,ARMORYRESEARCH_TERRANSHIPWEAPONSLEVEL3,"Increase the damage of Terran Air units (Viking, Liberator, Banshee, and Battlecruiser)."
@@ -185,10 +188,10 @@ enabled,ability,description
 1,ENGINEERINGBAYRESEARCH_TERRANINFANTRYWEAPONSLEVEL1,"Increase the damage of Terran infantry units (Ghost, Marauder, Reaper, Marine)."
 1,ENGINEERINGBAYRESEARCH_TERRANINFANTRYWEAPONSLEVEL2,"Increase the damage of Terran infantry units (Ghost, Marauder, Reaper, Marine)."
 1,ENGINEERINGBAYRESEARCH_TERRANINFANTRYWEAPONSLEVEL3,"Increase the damage of Terran infantry units (Ghost, Marauder, Reaper, Marine)."
-1,FACTORYTRAIN_HELLION,Train a Hellion.
-1,FACTORYTRAIN_SIEGETANK,Train a Siege Tank.
-1,FACTORYTRAIN_THOR,Train a Thor.
-1,FACTORYTRAIN_WIDOWMINE,Train a Widow Mine.
+1,FACTORYTRAIN_HELLION,"Train a Hellion, a fast harassment vehicle that torches swarms of light ground units."
+1,FACTORYTRAIN_SIEGETANK,"Train a Siege Tank, transforming into a stationary cannon for devastating long-range, area-of-effect ground attacks."
+1,FACTORYTRAIN_THOR,"Train a Thor, a massive and durable assault walker that specializes in destroying armored ground targets and massive air units."
+1,FACTORYTRAIN_WIDOWMINE,"Train a Widow Mine, a burrowing trap that launches a devastating missile at the first enemy unit to enter its range, dealing heavy area damage."
 0,HALT,
 0,HALT_BUILDING,
 0,HALT_TERRANBUILD,
@@ -235,12 +238,12 @@ enabled,ability,description
 1,SIEGEMODE_SIEGEMODE,"Transforms a Siege Tank into Siege Mode, increasing its attack range and damage but preventing movement."
 1,STARPORTTECHLABRESEARCH_RESEARCHDURABLEMATERIALS,"Increases the duration of Auto-Turrets and Point Defense Drones from 180 to 240 seconds, and increases the duration of the Seeker Missile from 15 to 20 Seconds."
 1,STARPORTTECHLABRESEARCH_RESEARCHMEDIVACENERGYUPGRADE,Double the energy regeneration rate of Medivac.
-1,STARPORTTRAIN_BANSHEE,Train a Banshee.
-1,STARPORTTRAIN_BATTLECRUISER,Train a Battle Cruiser.
-1,STARPORTTRAIN_LIBERATOR,Train a Liberator.
-1,STARPORTTRAIN_MEDIVAC,Train a Medivac.
-1,STARPORTTRAIN_RAVEN,Train a Raven.
-1,STARPORTTRAIN_VIKINGFIGHTER,Train a Viking Fighter.
+1,STARPORTTRAIN_BANSHEE,"Train a Banshee, a cloaked airship that excels at surprise attacks against ground targets."
+1,STARPORTTRAIN_BATTLECRUISER,"Train a Battlecruiser, a heavily-armored capital ship that can teleport across the map to deliver devastating firepower."
+1,STARPORTTRAIN_LIBERATOR,"Train a Liberator, a transforming airship that either attacks enemy aircraft or locks down a ground area with a powerful anti-ground cannon."
+1,STARPORTTRAIN_MEDIVAC,"Train a Medivac, a flying support ship that heals biological units and transports them for rapid deployment or evacuation."
+1,STARPORTTRAIN_RAVEN,"Train a Raven, a flying support craft that disrupts enemy armies with automated turrets, disabling abilities, and armor-shredding missiles."
+1,STARPORTTRAIN_VIKINGFIGHTER,"Train a Viking, a transforming fighter that provides dedicated anti-air fire from the sky or lands to engage ground targets as a walker."
 0,SUPPLYDROP_SUPPLYDROP,
 1,TERRANBUILD_ARMORY,Build a Armory.
 1,TERRANBUILD_BARRACKS,Build a Barracks.
@@ -287,3 +290,114 @@ enabled,ability,description
 1,EFFECT_MASSRECALL_NEXUS,Instantly teleport the unit back to its current location.
 1,EFFECT_MASSRECALL_STRATEGICRECALL,Instantly teleport the unit back to its current location.
 1,ENERGYRECHARGE_ENERGYRECHARGE,Restore energy to designated units.
+1,WARPGATETRAIN_ZEALOT,"Train a Zealot, a durable frontline warrior that charges to rapidly close with and attack ground enemies."
+1,WARPGATETRAIN_STALKER,"Train a Stalker, a mobile ranged warrior that can Blink to outmaneuver foes and attack both ground and air targets."
+1,WARPGATETRAIN_HIGHTEMPLAR,"Train a High Templar, a powerful spellcaster that devastates armies with Psionic Storm and neutralizes enemy casters with Feedback."
+1,WARPGATETRAIN_DARKTEMPLAR,"Train a Dark Templar, a permanently cloaked assassin that deals devastating melee damage to any ground unit that cannot detect it."
+1,WARPGATETRAIN_SENTRY,"Train a Sentry, a tactical support caster that manipulates the battlefield with Force Fields and protects allies with a Guardian Shield."
+1,GATEWAYTRAIN_ZEALOT,"Train a Zealot, a durable frontline warrior that charges to rapidly close with and attack ground enemies."
+1,GATEWAYTRAIN_STALKER,"Train a Stalker, a mobile ranged warrior that can Blink to outmaneuver foes and attack both ground and air targets."
+1,GATEWAYTRAIN_HIGHTEMPLAR,"Train a High Templar, a powerful spellcaster that devastates armies with Psionic Storm and neutralizes enemy casters with Feedback."
+1,GATEWAYTRAIN_DARKTEMPLAR,"Train a Dark Templar, a permanently cloaked assassin that deals devastating melee damage to any ground unit that cannot detect it."
+1,GATEWAYTRAIN_SENTRY,"Train a Sentry, a tactical support caster that manipulates the battlefield with Force Fields and protects allies with a Guardian Shield."
+1,STARGATETRAIN_PHOENIX,"Train a Phoenix, a swift anti-air fighter that can lift and disable single ground units."
+1,STARGATETRAIN_CARRIER,"Train a Carrier, a powerful capital ship that launches swarms of robotic Interceptors to overwhelm its targets."
+1,STARGATETRAIN_VOIDRAY,"Train a Void Ray, an assault ship whose beam focuses on a single target to rapidly ramp up its damage, melting armored units and buildings."
+1,STARGATETRAIN_ORACLE,"Train an Oracle, a swift harassment and support craft that can reveal enemy armies, trap units in stasis, and eliminate worker lines."
+1,STARGATETRAIN_TEMPEST,"Train a Tempest, a long-range artillery ship that bombards key targets from extreme distances, specializing in destroying massive air units."
+1,ROBOTICSFACILITYTRAIN_WARPPRISM,"Train a Warpprism, an aerial transport that can deploy into a mobile power field, allowing you to warp in units anywhere on the battlefield."
+1,ROBOTICSFACILITYTRAIN_OBSERVER,"Train an Observer, a permanently cloaked aerial scout that provides crucial vision and detects hidden enemy units."
+1,ROBOTICSFACILITYTRAIN_COLOSSUS,"Train a Colossus, a massive walker whose twin thermal lances incinerate large groups of ground units from a long range."
+1,ROBOTICSFACILITYTRAIN_IMMORTAL,"Train a Immortal, a heavily armored walker that demolishes armored targets and can activate a barrier to survive heavy fire."
+1,FORGERESEARCH_PROTOSSGROUNDWEAPONSLEVEL1,"Increases the attack damage of Zealots, Dragoons, Dark Templars and Archons."
+1,FORGERESEARCH_PROTOSSGROUNDWEAPONSLEVEL2,"Increases the attack damage of Zealots, Dragoons, Dark Templars and Archons."
+1,FORGERESEARCH_PROTOSSGROUNDWEAPONSLEVEL3,"Increases the attack damage of Zealots, Dragoons, Dark Templars and Archons."
+1,FORGERESEARCH_PROTOSSGROUNDARMORLEVEL1,"Increases the armor of all Protoss ground forces."
+1,FORGERESEARCH_PROTOSSGROUNDARMORLEVEL2,"Increases the armor of all Protoss ground forces."
+1,FORGERESEARCH_PROTOSSGROUNDARMORLEVEL3,"Increases the armor of all Protoss ground forces."
+1,FORGERESEARCH_PROTOSSSHIELDSLEVEL1,"Upgrades the armor of shields for all Protoss units and structures."
+1,FORGERESEARCH_PROTOSSSHIELDSLEVEL2,"Upgrades the armor of shields for all Protoss units and structures."
+1,FORGERESEARCH_PROTOSSSHIELDSLEVEL3,"Upgrades the armor of shields for all Protoss units and structures."
+1,SUPERWARPGATETRAIN_ZEALOT,"Train a Zealot, a durable frontline warrior that charges to rapidly close with and attack ground enemies."
+1,SUPERWARPGATETRAIN_STALKER,"Train a Stalker, a mobile ranged warrior that can Blink to outmaneuver foes and attack both ground and air targets."
+1,SUPERWARPGATETRAIN_IMMORTAL,"Train a Immortal, a heavily armored walker that demolishes armored targets and can activate a barrier to survive heavy fire."
+1,SUPERWARPGATETRAIN_HIGHTEMPLAR,"Train a High Templar, a powerful spellcaster that devastates armies with Psionic Storm and neutralizes enemy casters with Feedback."
+1,SUPERWARPGATETRAIN_DARKTEMPLAR,"Train a Dark Templar, a permanently cloaked assassin that deals devastating melee damage to any ground unit that cannot detect it."
+1,SUPERWARPGATETRAIN_SENTRY,"Train a Sentry, a tactical support caster that manipulates the battlefield with Force Fields and protects allies with a Guardian Shield."
+1,SUPERWARPGATETRAIN_CARRIER,"Train a Carrier, a powerful capital ship that launches swarms of robotic Interceptors to overwhelm its targets."
+1,SUPERWARPGATETRAIN_PHOENIX,"Train a Phoenix, a swift anti-air fighter that can lift and disable single ground units."
+1,SUPERWARPGATETRAIN_VOIDRAY,"Train a Void Ray, an assault ship whose beam focuses on a single target to rapidly ramp up its damage, melting armored units and buildings."
+1,SUPERWARPGATETRAIN_ARCHON,"Train an Archon, a powerful psionic warrior that unleashes massive area-of-effect damage against both ground and air units."
+1,SUPERWARPGATETRAIN_WARPINZERATUL,"Train a Warpinzeratul, a permanently cloaked assassin who can blink across the battlefield to execute key targets."
+1,SUPERWARPGATETRAIN_WARPINURUN,"Train a Warpinurun, a heroic Phoenix pilot specializing in destroying enemy air forces with a powerful energy beam."
+1,SUPERWARPGATETRAIN_WARPINMOHANDAR,"Train a Warpinmohandar, a legendary Zealot warrior who charges into battle and can cleave through multiple ground enemies at once."
+1,SUPERWARPGATETRAIN_WARPINSELENDIS,"Train a Warpinselendis, a heroic Carrier commander that launches swarms of powerful interceptors to overwhelm enemies from a safe distance."
+1,SUPERWARPGATETRAIN_WARPINSCOUT,"Train a Warpinscout, a versatile air fighter effective against both air and ground targets."
+1,SUPERWARPGATETRAIN_COLOSSUS,"Train a Colossus, a massive walker that incinerates armies of ground units from long range with its twin thermal lances."
+1,SUPERWARPGATETRAIN_WARPPRISM,"Train a Warpprism, a flying transport that can deploy into a mobile pylon, allowing you to warp in units anywhere on the map."
+TRAIN_ADEPT
+TRAIN_DISRUPTOR
+NEXUSTRAIN_PROBE
+PSISTORM_PSISTORM
+CANCEL_HANGARQUEUE5
+CANCELSLOT_HANGARQUEUE5
+BROODLORDQUEUE2_CANCEL
+BROODLORDQUEUE2_CANCELSLOT
+BUILD_INTERCEPTORS
+RESEARCH_GRAVITICBOOSTER
+RESEARCH_GRAVITICDRIVE
+RESEARCH_EXTENDEDTHERMALLANCE
+ROBOTICSBAYRESEARCH_RESEARCHIMMORTALREVIVE
+RESEARCH_PSISTORM
+1,ZERGBUILD_HATCHERY,"Train a Hatchery."
+1,ZERGBUILD_CREEPTUMOR,"Train a Creep Tumor."
+1,ZERGBUILD_EXTRACTOR,"Train a Extractor."
+1,ZERGBUILD_SPAWNINGPOOL,"Train a Spawning Pool."
+1,ZERGBUILD_EVOLUTIONCHAMBER,"Train a Evolution Chamber."
+1,ZERGBUILD_HYDRALISKDEN,"Train a Hydralisk Den."
+1,ZERGBUILD_SPIRE,"Train a Spire."
+1,ZERGBUILD_ULTRALISKCAVERN,"Train a Ultralisk Cavern."
+1,ZERGBUILD_INFESTATIONPIT,"Train a Infestation Pit."
+1,ZERGBUILD_NYDUSNETWORK,"Train a Nydus Network."
+1,ZERGBUILD_BANELINGNEST,"Train a Baneling Nest."
+1,LARVATRAIN_DRONE,"Train a Drone, a basic worker unit that gathers resources and sacrifices itself to create Zerg structures."
+1,LARVATRAIN_ZERGLING,"Train a Zergling, a cheap and extremely fast melee attacker, ideal for swarming and overwhelming enemies."
+1,LARVATRAIN_OVERLORD,"Train an Overlord, an essential Zerg supply unit, which also acts as a scout and can be upgraded to transport other units."
+1,LARVATRAIN_HYDRALISK,"Train a Hydralisk, a versatile ranged attacker effective against both ground and air units."
+1,LARVATRAIN_MUTALISK,"Train a Mutalisk, a very fast flying harasser whose glaive attack bounces between multiple enemy targets."
+1,LARVATRAIN_ULTRALISK,"Train an Ultralisk, a massive, heavily-armored late-game beast that cleaves through ground units with its powerful melee attacks."
+1,LARVATRAIN_ROACH,"Train a Roach, a durable, armored ground attacker that can rapidly regenerate health while burrowed."
+1,LARVATRAIN_INFESTOR,"Train an Infestor, a powerful spellcaster capable of disabling and damaging groups of enemies or temporarily seizing control of a single unit."
+1,LARVATRAIN_CORRUPTOR,"Train a Corruptor, a dedicated anti-air flying unit that deals bonus damage to massive targets and can morph into the powerful Brood Lord."
+1,LARVATRAIN_VIPER,"Train a Viper, a flying spellcaster that manipulates the battlefield by pulling key enemy units out of position or disabling them with clouds."
+1,INFESTEDMONSTERTRAIN_INFESTEDCIVILIAN,"Train an Infested Civilian, an expendable, slow-moving melee attacker that swarms enemies in large numbers."
+1,INFESTEDMONSTERTRAIN_INFESTEDTERRANCAMPAIGN,"Train an Infested Terran (Campaign), an expendable ranged attacker with a timed life, used to overwhelm enemy defenses."
+1,INFESTEDMONSTERTRAIN_INFESTEDABOMINATION,"Train an Infested Abomination, a volatile suicide unit that explodes upon death, dealing massive area damage to units and structures."
+1,ZERGBUILD_ROACHWARREN
+1,ZERGBUILD_SPINECRAWLER
+1,ZERGBUILD_SPORECRAWLER
+1,RESEARCH_ZERGMELEEWEAPONSLEVEL1,"Increases the attack damage of all Zerg ground/melee units."
+1,RESEARCH_ZERGMELEEWEAPONSLEVEL2,"Increases the attack damage of all Zerg ground/melee units."
+1,RESEARCH_ZERGMELEEWEAPONSLEVEL3,"Increases the attack damage of all Zerg ground/melee units."
+1,RESEARCH_ZERGGROUNDARMORLEVEL1,"Increases the armor of all Zerg ground units."
+1,RESEARCH_ZERGGROUNDARMORLEVEL2,"Increases the armor of all Zerg ground units."
+1,RESEARCH_ZERGGROUNDARMORLEVEL3,"Increases the armor of all Zerg ground units."
+1,RESEARCH_ZERGMISSILEWEAPONSLEVEL1,"Increases the attack damage of all Zerg ground/ranged units."
+1,RESEARCH_ZERGMISSILEWEAPONSLEVEL2,"Increases the attack damage of all Zerg ground/ranged units."
+1,RESEARCH_ZERGMISSILEWEAPONSLEVEL3,"Increases the attack damage of all Zerg ground/ranged units."
+1,RESEARCH_ZERGFLYERATTACKLEVEL1,"Increases the attack damage of all Zerg air units."
+1,RESEARCH_ZERGFLYERATTACKLEVEL2,"Increases the attack damage of all Zerg air units."
+1,RESEARCH_ZERGFLYERATTACKLEVEL3,"Increases the attack damage of all Zerg air units."
+1,RESEARCH_ZERGFLYERARMORLEVEL1,"Increases the armor of all Zerg air units."
+1,RESEARCH_ZERGFLYERARMORLEVEL2,"Increases the armor of all Zerg air units."
+1,RESEARCH_ZERGFLYERARMORLEVEL3,"Increases the armor of all Zerg air units."
+1,RESEARCH_ADAPTIVETALONS,"Reduces the time Lurkers take to burrow from 2 seconds to 1.07 seconds."
+1,RESEARCH_ANABOLICSYNTHESIS,"Increases the movement speed of Ultralisks off creep."
+1,RESEARCH_CENTRIFUGALHOOKS,"Increases Baneling movement speed to 4.13 (+0.63). Banelings will roll instead of running. Requires a Lair."
+1,RESEARCH_GLIALREGENERATION,"Increases Roach movement speed to 4.2 (+1.05) while unburrowed, and to 4.4 while burrowed under creep."
+1,RESEARCH_ZERGLINGMETABOLICBOOST,"Increases Zergling movement speed by 60% to 6.58 (+2.45)."
+1,RESEARCH_PNEUMATIZEDCARAPACE,"Increases the movement speed of Overlords to 3.00 and Overseers to 4.72."
+1,RESEARCH_MUSCULARAUGMENTS,"Increases the movement speed of Hydralisks."
+1,RESEARCH_GROOVEDSPINES,"Increases the attack range of Hydralisks by +1."
+1,RESEARCH_NEURALPARASITE,"Allows Infestors to use the Neural Parasite ability."
+1,RESEARCH_CHITINOUSPLATING,"Increases the armor of all Ultralisks by 2."
