@@ -172,8 +172,8 @@ class LLMPlayer(BasePlayer):
         cyber_core = self.structures(UnitTypeId.CYBERNETICSCORE).ready
         if (
             cyber_core.exists
-            and self.already_pending_upgrade(UpgradeId.WARPGATETECHNOLOGY) == 0
-            and self.can_afford(UpgradeId.WARPGATETECHNOLOGY)
+            and self.already_pending_upgrade(UpgradeId.WARPGATERESEARCH) == 0
+            and self.can_afford(UpgradeId.WARPGATERESEARCH)
         ):
             if cyber_core.idle.exists:
                 suggestions.append("Cybernetics Core is ready. Research Warpgate technology to reinforce your army faster.")
