@@ -397,3 +397,4 @@ enabled,ability,description
 1,CYBERNETICSCORERESEARCH_PROTOSSAIRARMORLEVEL3,"Upgrades the armor of Protoss air units."
 1,RESEARCH_WARPGATE,"Allows Gateways to be changed into Warp Gates."
 1,GUARDIANSHIELD_GUARDIANSHIELD,"Create a shield bubble around the Sentry that reduces the damage of all incoming ranged attacks by 2 for 15 seconds."
+0,MORPH_WARPGATE,
