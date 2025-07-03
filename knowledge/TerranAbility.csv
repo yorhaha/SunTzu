@@ -397,7 +397,6 @@ enabled,ability,description
 1,CYBERNETICSCORERESEARCH_PROTOSSAIRARMORLEVEL3,"Upgrades the armor of Protoss air units."
 1,RESEARCH_WARPGATE,"Allows Gateways to be changed into Warp Gates."
 1,GUARDIANSHIELD_GUARDIANSHIELD,"Create a shield bubble around the Sentry that reduces the damage of all incoming ranged attacks by 2 for 15 seconds."
-0,MORPH_WARPGATE,
 1,FORCEFIELD_FORCEFIELD,"Create a Force Field that blocks movement for 11 seconds."
 1,HALLUCINATION_ARCHON,"Create a fake Archon to serve as a durable scout or to draw enemy fire."
 1,HALLUCINATION_COLOSSUS,"Create a fake Colossus to serve as a durable scout or to draw enemy fire."
@@ -412,3 +411,7 @@ enabled,ability,description
 1,HALLUCINATION_ORACLE,"Create a fake Oracle to serve as a durable scout or to draw enemy fire."
 1,HALLUCINATION_DISRUPTOR,"Create a fake Disruptor to serve as a durable scout or to draw enemy fire."
 1,HALLUCINATION_ADEPT,"Create a fake Adept to serve as a durable scout or to draw enemy fire."
+1,ADEPTPHASESHIFT_ADEPTPHASESHIFT,"Activate the Adept's Phase Shift ability, allowing it to teleport to its psionic shade after a short delay, bypassing obstacles and enemy units."
+1,TRAINWARP_ADEPT,"Train an Adept, a ranged warrior that projects a psionic shade to teleport past enemy forces and harass light units."
+1,MORPH_WARPGATE,"Transforms the Gateway into a Warp Gate."
+1,MORPH_GATEWAY,"The Warpgate transforms back into a Gateway."
