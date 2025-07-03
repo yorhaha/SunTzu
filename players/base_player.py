@@ -533,8 +533,8 @@ class BasePlayer(BotAI):
             elif TerranAbility[ability_id.name].get("enabled", False):
                 valid_ability_ids.append(ability_id)
         abilities = [ability_id.name for ability_id in valid_ability_ids]
-        if unit.name == "SCV":
-            abilities = [a for a in abilities if a not in ["MOVE_MOVE", "TERRANBUILD_ENGINEERINGBAY", "ATTACK_ATTACK"]]
+        if unit.name in self.miner_units:
+            abilities = [a for a in abilities if a not in ["MOVE_MOVE",  "ATTACK_ATTACK"]]
         self._id_to_abilities[self.tag_to_id(unit.tag)] = abilities
         abilities = ", ".join(abilities)
 

@@ -249,7 +249,7 @@ enabled,ability,description
 1,TERRANBUILD_BARRACKS,Build a Barracks.
 1,TERRANBUILD_BUNKER,Build a Bunker.
 1,TERRANBUILD_COMMANDCENTER,Build a Command Center.
-1,TERRANBUILD_ENGINEERINGBAY,Build an Engineer Bay.
+0,TERRANBUILD_ENGINEERINGBAY,Build an Engineer Bay.
 1,TERRANBUILD_FACTORY,Build a Factory.
 1,TERRANBUILD_FUSIONCORE,Build a Fusion Core.
 1,TERRANBUILD_GHOSTACADEMY,Build a Ghost Academy.
@@ -396,3 +396,4 @@ enabled,ability,description
 1,CYBERNETICSCORERESEARCH_PROTOSSAIRARMORLEVEL2,"Upgrades the armor of Protoss air units."
 1,CYBERNETICSCORERESEARCH_PROTOSSAIRARMORLEVEL3,"Upgrades the armor of Protoss air units."
 1,RESEARCH_WARPGATE,"Allows Gateways to be changed into Warp Gates."
+1,GUARDIANSHIELD_GUARDIANSHIELD,"Create a shield bubble around the Sentry that reduces the damage of all incoming ranged attacks by 2 for 15 seconds."
