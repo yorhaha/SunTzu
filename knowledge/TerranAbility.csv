@@ -415,3 +415,4 @@ enabled,ability,description
 1,TRAINWARP_ADEPT,"Train an Adept, a ranged warrior that projects a psionic shade to teleport past enemy forces and harass light units."
 1,MORPH_WARPGATE,"Transforms the Gateway into a Warp Gate."
 1,MORPH_GATEWAY,"The Warpgate transforms back into a Gateway."
+1,RESEARCH_ADEPTRESONATINGGLAIVES,"Increases the attack speed of the Adept by 45%."
