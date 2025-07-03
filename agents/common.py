@@ -95,8 +95,8 @@ Core & Evolution
     Extractor: Allows Drones to harvest Vespene Gas.
 Ground Units & Defenses
     Spawning Pool: The first military structure. produce Zerglings and unlock the Spine Crawler, Roach Warren, and Baneling Nest. Researches Zergling upgrades like Metabolic Boost.
-    Spine Crawler: A static defensive structure that attacks ground units. Requires a Spawning Pool.
-    Spore Crawler: A static defensive structure that attacks air units and can detect cloaked units. Requires a Spawning Pool.
+    Spine Crawler: A static defensive structure that attacks ground units.
+    Spore Crawler: A static defensive structure that attacks air units and can detect cloaked units.
     Roach Warren: unlock the Roach unit and researches its upgrades, including Glial Reconstitution and Tunneling Claws.
     Baneling Nest: unlock the ability to morph Zerglings into Banelings and researches the Centrifugal Hooks upgrade.
     Hydralisk Den: unlock the Hydralisk unit and researches its upgrades, Grooved Spines and Muscular Augments.

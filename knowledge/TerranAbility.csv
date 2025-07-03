@@ -281,6 +281,7 @@ enabled,ability,description
 1,PROTOSSBUILD_STARGATE,Build a Protoss Stargate.
 1,PROTOSSBUILD_TEMPLARARCHIVE,Build a Templar Archive.
 1,PROTOSSBUILD_TWILIGHTCOUNCIL,Build a Twilight Council.
+1,BUILD_SHIELDBATTERY,"Build a Shield Battery to restore shields of a single friendly unit or building within 6 range."
 1,NEXUSTRAIN_PROBE,Train a Probe.
 1,EFFECT_CHRONOBOOSTENERGYCOST,Reduce the unit production time or technological research time of the target building.
 1,EFFECT_CHRONOBOOST,Reduce the unit production time or technological research time of the target building.
@@ -335,20 +336,6 @@ enabled,ability,description
 1,SUPERWARPGATETRAIN_WARPINSCOUT,"Train a Warpinscout, a versatile air fighter effective against both air and ground targets."
 1,SUPERWARPGATETRAIN_COLOSSUS,"Train a Colossus, a massive walker that incinerates armies of ground units from long range with its twin thermal lances."
 1,SUPERWARPGATETRAIN_WARPPRISM,"Train a Warpprism, a flying transport that can deploy into a mobile pylon, allowing you to warp in units anywhere on the map."
-TRAIN_ADEPT
-TRAIN_DISRUPTOR
-NEXUSTRAIN_PROBE
-PSISTORM_PSISTORM
-CANCEL_HANGARQUEUE5
-CANCELSLOT_HANGARQUEUE5
-BROODLORDQUEUE2_CANCEL
-BROODLORDQUEUE2_CANCELSLOT
-BUILD_INTERCEPTORS
-RESEARCH_GRAVITICBOOSTER
-RESEARCH_GRAVITICDRIVE
-RESEARCH_EXTENDEDTHERMALLANCE
-ROBOTICSBAYRESEARCH_RESEARCHIMMORTALREVIVE
-RESEARCH_PSISTORM
 1,ZERGBUILD_HATCHERY,"Train a Hatchery."
 1,ZERGBUILD_CREEPTUMOR,"Train a Creep Tumor."
 1,ZERGBUILD_EXTRACTOR,"Train a Extractor."
@@ -373,9 +360,9 @@ RESEARCH_PSISTORM
 1,INFESTEDMONSTERTRAIN_INFESTEDCIVILIAN,"Train an Infested Civilian, an expendable, slow-moving melee attacker that swarms enemies in large numbers."
 1,INFESTEDMONSTERTRAIN_INFESTEDTERRANCAMPAIGN,"Train an Infested Terran (Campaign), an expendable ranged attacker with a timed life, used to overwhelm enemy defenses."
 1,INFESTEDMONSTERTRAIN_INFESTEDABOMINATION,"Train an Infested Abomination, a volatile suicide unit that explodes upon death, dealing massive area damage to units and structures."
-1,ZERGBUILD_ROACHWARREN
-1,ZERGBUILD_SPINECRAWLER
-1,ZERGBUILD_SPORECRAWLER
+1,ZERGBUILD_ROACHWARREN,"Build a Roach Warren."
+1,ZERGBUILD_SPINECRAWLER,"Build a Spine Crawler."
+1,ZERGBUILD_SPORECRAWLER,"Build a Spore Crawler."
 1,RESEARCH_ZERGMELEEWEAPONSLEVEL1,"Increases the attack damage of all Zerg ground/melee units."
 1,RESEARCH_ZERGMELEEWEAPONSLEVEL2,"Increases the attack damage of all Zerg ground/melee units."
 1,RESEARCH_ZERGMELEEWEAPONSLEVEL3,"Increases the attack damage of all Zerg ground/melee units."
