@@ -3,16 +3,8 @@ from agents.base_agent import BaseAgent
 from tools.format import extract_code, json_to_markdown, construct_ordered_list
 import json
 
-
-# Define reusable prompts
-tech_tree_prompt = f"""
-Technology tree:
-{TERRANN_TECH_TREE}
-""".strip()
-
 strategy_prompt = """
 Our final aim: destroy all enemies as soon as possible.
-Our strategy:
 - Resource collection: produce SCVs; construct and gather Refinery
 - Development: build attacking units and structures
 - Attacking: concentrate forces to search and destroy enemies proactively
@@ -22,14 +14,14 @@ default_rules = [
     "Commands should be natural language, instead of code.",
     "Produce as many units with the strongest attack power as possible.",
     "The total cost of all commands should not exceed the current resources (minerals and gas).",
-    "Commands should not send workers (SCV or MULE) to gather resources because the system will do it automatically.",
+    "Commands should not send workers (SCV or MULE) to minerals/refinery because the system will do it automatically.",
     "Commands should not train too many SCVs, whose number should not exceed the capacity of CommandCenter and Refinery.",
-    "Commands should not build redundant structures(e.g. more than 2 Barracks).",
+    "Commands should not build redundant structures(e.g. 2 Refinery while one is not fully utilized).",
     # "Commands should not build redundant structures while the existing ones are idle.",
     "Commands should not use abilities that are not supported currently.",
     "Commands should not build a structure that is not needed now (e.g. build a Missile Turret but there is no enemy air unit).",
-    "The production list capacity of Barracks is 5. If the list is full, do not use it to train units anymore.",
-    # "The unit production list capacity of structures is 5. If the list is full, do not add more units to it.",
+    # "The production list capacity of Barracks is 5. If the list is full, do not use it to train units anymore.",
+    "The unit production list capacity of structures is 5. If the list is full, do not add more units to it.",
     "Commands can construct a new one Supply Depot only when the remaining unused supply is less than 7.",
 ]
 
@@ -45,19 +37,24 @@ Following are some examples:
 
 
 ############## Plan Role Prompt ###############
-def create_plan_prompt(rules: list[str] = default_rules):
+def create_plan_prompt(rules: list[str], obs_text: str):
     rules_prompt = "Rule checklist:\n" + construct_ordered_list(rules)
     return f"""
 As a top-tier StarCraft II strategist, your task is to give one or more commands based on the current game state. Only give commands which can be executed immediately, instead of waiting for certain events.
-{plan_example_prompt}
 
-{tech_tree_prompt}
-
+### Aim
 {strategy_prompt}
 
+### Current Game State
+{obs_text}
+
+### Rules
 {rules_prompt}
 
-Your commands should be a list JSON in the following format wrapped with triple backticks:
+### Examples
+{plan_example_prompt}
+
+Think step by step, and then give commands as a list JSON in the following format wrapped with triple backticks:
 ```
 [
     "<command_1>",
@@ -69,11 +66,19 @@ Your commands should be a list JSON in the following format wrapped with triple 
 
 
 ############## Plan Critic Role Prompt ###############
-def create_plan_critic_prompt(rules: list[str] = default_rules):
-    rules_prompt = "Rule checklist:\n" + construct_ordered_list(rules)
-    return (
-        """
-As a top-tier StarCraft II player, your task is to verify that they have violated given rules. If so, please point out the errors and provide suggestions for improvement or removal. If OK, just tell it to output again.
+def create_plan_critic_prompt(rules: list[str], obs_text: str, plans: list[str]):
+    rules_text = construct_ordered_list(rules)
+    plans_text = construct_ordered_list(plans)
+    return """
+As a top-tier StarCraft II player, your task is to check if the given commands for current game state violate any rules.
+
+### Current Game State
+%s
+
+### Given Commands
+%s
+
+### Rules Checklist
 %s
 
 Analyze the given rules one by one, and then provide a summary for errors at the end as follows, wrapped with triple backticks::
@@ -87,9 +92,7 @@ Analyze the given rules one by one, and then provide a summary for errors at the
     "error_number": 0/1/2/...
 }
 ```
-    """.strip()
-        % rules_prompt
-    )
+    """.strip() % (obs_text, plans_text, rules_text)
 
 
 class PlanHumanAgent(BaseAgent):
@@ -110,28 +113,21 @@ class PlanAgent(BaseAgent):
         self.chat_history = []
 
     def gene_new_plan(self, obs_text: str, rules: list[str]):
-        prompt = create_plan_prompt(rules) + "\n\n" + construct_text({"Observation": obs_text})
-        prompt += "\nEach command should be natural language like examples. Think step by step."
+        prompt = create_plan_prompt(rules, obs_text)
         response, messages = self.llm_client.call(**self.generation_config, prompt=prompt, need_json=True)
         self.think.append([response])
         self.chat_history.append(messages)
         return json.loads(extract_code(response))
 
     def critic_plan(self, plan: list[str], obs_text: str, rules: list[str] = default_rules):
-        prompt = create_plan_critic_prompt(rules) + "\n\n"
-        prompt += construct_text(
-            {
-                "Observation": obs_text,
-                "Plan": plan,
-            }
-        )
+        prompt = create_plan_critic_prompt(rules, obs_text, plan)
         response, messages = self.llm_client.call(**self.generation_config, prompt=prompt, need_json=True)
         self.think[-1].append(response)
         self.chat_history.append(messages)
         return response
 
     def refine_plan(self, obs_text: str, plan: list[str], critic: str, rules: list[str] = default_rules):
-        gene_prompt = create_plan_prompt(rules) + "\n\n" + construct_text({"Observation": obs_text})
+        gene_prompt = create_plan_prompt(rules, obs_text)
         history = [
             {"role": "user", "content": gene_prompt},
             {"role": "assistant", "content": json_to_markdown(plan)},
@@ -139,7 +135,7 @@ class PlanAgent(BaseAgent):
         prompt = (
             "Errors:\n"
             + critic
-            + "\nAnalyze every error step by step. Fix them by adding, removing, or modifying commands. Give new commands finally."
+            + "\nRethink with the given rules and errors step by step, and then give a refined plan based on the current game state."
         )
         response, messages = self.llm_client.call(**self.generation_config, prompt=prompt, history=history, need_json=True)
         self.think.append([response])

@@ -16,8 +16,6 @@ from tools.logger import setup_logger
 from tools.format import extract_code
 from tools.ops import IterativeMean
 
-ignore_actions = []
-
 
 class TargetType:
     NONE = "None"
@@ -84,6 +82,8 @@ class BasePlayer(BotAI):
 
         self.sbr = IterativeMean()
         self.resource_cost = 0
+        
+        self.miner_units = ["SCV", "Probe", "MULE", "Drone"]
 
     def logging(self, key: str, value, level="info", save_trace=False, save_file=False, print_log=True):
         idx = self.state.game_loop // 4
@@ -127,7 +127,7 @@ class BasePlayer(BotAI):
         self.tag_to_health.update({unit.tag: unit.health for unit in self.structures})
 
     async def on_step(self, iteration: int):
-        if len(self.units) == 0 or len(self.structures) == 0:
+        if len(self.units) == 0 or len(self.townhalls) == 0:
             return
         self.sbr.update(int(self.supply_used == self.supply_cap))
 
@@ -241,7 +241,7 @@ class BasePlayer(BotAI):
             if not unit.is_mine:
                 return False, f"Unit {unit_id} is not mine"
             if action_name not in self._id_to_abilities[unit_id]:
-                return False, f"[{unit_id}]{unit.name} cannot perform action {action_name} or resource is not enough"
+                return False, f"[{unit_id}]{unit.name} cannot perform action {action_name}"
             if unit.is_constructing_scv:
                 return False, f"[{unit_id}]{unit.name} is constructing, cannot perform other actions"
 
@@ -408,14 +408,25 @@ class BasePlayer(BotAI):
         
         units_text = []
         
-        mining_judge = lambda unit: unit.name == "SCV" and unit.is_mine and not (unit.is_constructing_scv or unit.is_repairing or unit.is_attacking)
-        scv_units = units.filter(mining_judge)
-        if len(scv_units) > 0:
-            scv_ids = [self.tag_to_id(unit.tag) for unit in scv_units]
-            scv_ids = ", ".join(map(str, scv_ids))
-            scv_text = f"[{scv_ids}]SCV\nState: collecting resources automatically"
-            units_text.append(scv_text)
-        other_units = [unit for unit in units if not mining_judge(unit)]
+        other_units = units
+        for mining_type in self.miner_units:
+            mining_judge = lambda unit: unit.name == mining_type and not (unit.is_constructing_scv or unit.is_repairing or unit.is_attacking)
+            mining_units = units.filter(mining_judge)
+            if len(mining_units) > 0:
+                mining_ids = [self.tag_to_id(unit.tag) for unit in mining_units]
+                mining_ids = ", ".join(map(str, mining_ids))
+                mining_text = f"[{mining_ids}]{mining_type}\nState: collecting resources automatically"
+                units_text.append(mining_text)
+            other_units = [unit for unit in other_units if not mining_judge(unit)]
+            
+            attacking_judge = lambda unit: unit.name == mining_type and unit.is_attacking
+            attacking_units = units.filter(attacking_judge)
+            if len(attacking_units) > 0:
+                attacking_ids = [self.tag_to_id(unit.tag) for unit in attacking_units]
+                attacking_ids = ", ".join(map(str, attacking_ids))
+                attacking_text = f"[{attacking_ids}]{mining_type}\nState: attacking enemies automatically"
+                units_text.append(attacking_text)
+
         distance_to_start = lambda unit: int((unit.position.x - self.start_location.x) ** 2 + (unit.position.y - self.start_location.y) ** 2) // 4
         other_units = sorted(other_units, key=lambda unit: (distance_to_start(unit), unit.name))
         units_text += [await self.unit_to_text(unit) for unit in other_units]
@@ -480,39 +491,40 @@ class BasePlayer(BotAI):
         return text.strip()
 
     async def abilities_to_text(self, units: Units):
-        unit_name_to_abilities = {}
-        text = ""
-        for unit in units:
-            if not unit.build_progress == 1.0:
-                continue
-            abilities = await self.unit_ability_to_text(unit)
-            if unit.name not in unit_name_to_abilities:
-                unit_name_to_abilities[unit.name] = abilities
-                if abilities:
-                    text += f"{unit.name}: {abilities}\n"
-
-        return text.strip()
-
-    async def unit_ability_to_text(self, unit: Unit):
-        abilities = []
-        ability_ids = await self.get_available_abilities([unit], ignore_resource_requirements=True)
-        valid_ability_ids = []
-        for ability_id in ability_ids[0]:
-            if ability_id.name == "NULL_NULL":
-                continue
-            if ability_id.name not in TerranAbility:
-                ignore_actions.append(ability_id.name)
-                print(f"Unknown ability: {ability_id.name}")
+        units = [unit for unit in units if unit.build_progress == 1.0]
+        n_units = len(units)
+        units_ability_ids = await self.get_available_abilities(units, ignore_resource_requirements=True)
+        units_ability_names = [[ability_id.name for ability_id in units_ability_ids[i]] for i in range(n_units)]
+        unit_hash_table = {}
+        for i in range(n_units):
+            unit = units[i]
+            ability_names = units_ability_names[i]
+            ability_names = [name for name in ability_names if name != "NULL_NULL"]
+            unknown_abilities = [name for name in ability_names if name not in TerranAbility]
+            if unknown_abilities:
+                print(f"Unit {unit.name} has unknown abilities: {unknown_abilities}")
                 import pdb; pdb.set_trace()
-            elif TerranAbility[ability_id.name].get("enabled", False):
-                valid_ability_ids.append(ability_id)
-        abilities = [ability_id.name for ability_id in valid_ability_ids]
-        if unit.name == "SCV" or unit.name == "MULE":
-            abilities = [a for a in abilities if a not in ["MOVE_MOVE", "TERRANBUILD_ENGINEERINGBAY", "ATTACK_ATTACK", "EFFECT_REPAIR_SCV", "EFFECT_REPAIR_MULE"]]
-        self._id_to_abilities[self.tag_to_id(unit.tag)] = abilities
-        abilities = ", ".join(abilities)
-
-        return abilities
+            if unit.name in ["SCV", "MULE"]:
+                ability_names = [name for name in ability_names if name not in ["MOVE_MOVE", "ATTACK_ATTACK"]]
+            ability_names = [name for name in ability_names if TerranAbility[name].get("enabled", False)]
+            self._id_to_abilities[self.tag_to_id(unit.tag)] = ability_names
+            
+            unit_hash = unit.name + "|" + ", ".join(ability_names)
+            if unit_hash not in unit_hash_table:
+                unit_hash_table[unit_hash] = []
+            unit_hash_table[unit_hash].append(str(self.tag_to_id(unit.tag)))
+            
+        text = ""
+        for unit_hash, ids in unit_hash_table.items():
+            unit_name, abilities = unit_hash.split("|")
+            ids = ", ".join(ids)
+            if abilities:
+                text += f"{unit_name}[{ids}]: {abilities}\n"
+        
+        text = text.strip()
+        if not text:
+            text = "[Empty]"
+        return text
 
     def unit_state_to_text(self, unit: Unit):
         order_target = unit.order_target or ""
@@ -555,7 +567,10 @@ class BasePlayer(BotAI):
             states.append("under attack")
 
         if unit.is_constructing_scv:
-            states.append("constructing")
+            if order_target:
+                states.append(f"constructing [{order_target}]{order_target_name}")
+            else:
+                states.append("constructing")
 
         return "|".join(states)
 
@@ -573,12 +588,14 @@ class BasePlayer(BotAI):
         return "Closest mineral fields: " + ", ".join(miners)
 
     def gas_to_text(self):
-        center = self.start_location
         gases = []
-        cloest_gases = self.vespene_geyser.closest_n_units(center, 100)
+        cloest_gases = self.vespene_geyser.closest_n_units(self.start_location, 100)
         cloest_gases = [gas for gas in cloest_gases if gas.vespene_contents > 0]
         cloest_gases = cloest_gases[:10]
         for gas in cloest_gases:
+            # # if there is a structure on the position, ignore it
+            # if self.structures.closer_than(0.5, gas.position):
+            #     continue
             gases.append(f"[{self.tag_to_id(gas.tag)}]({int(gas.position.x)}, {int(gas.position.y)})")
         if len(gases) == 0:
             return "No vespene geysers found"

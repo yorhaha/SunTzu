@@ -246,7 +246,7 @@ enabled,ability,description
 1,TERRANBUILD_BARRACKS,Build a Barracks.
 1,TERRANBUILD_BUNKER,"Build a Bunker, a static defense building."
 1,TERRANBUILD_COMMANDCENTER,Build a Command Center.
-1,TERRANBUILD_ENGINEERINGBAY,Build an Engineer Bay.
+0,TERRANBUILD_ENGINEERINGBAY,Build an Engineer Bay.
 1,TERRANBUILD_FACTORY,Build a Factory.
 1,TERRANBUILD_FUSIONCORE,Build a Fusion Core.
 1,TERRANBUILD_GHOSTACADEMY,Build a Ghost Academy.
