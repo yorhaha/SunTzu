@@ -161,13 +161,13 @@ enabled,ability,description
 1,BUILD_REACTOR_BARRACKS,Allows structure create 2 units simultaneously.
 1,BUILD_REACTOR_FACTORY,Allows structure create 2 units simultaneously.
 1,BUILD_REACTOR_STARPORT,Allows structure create 2 units simultaneously.
-1,BUILD_TECHLAB_BARRACKS,Unlocks Marauders and is a requirement for Ghosts.
-1,BUILD_TECHLAB_FACTORY,Unlocks Siege Tanks and is a requirement for Thors.
-1,BUILD_TECHLAB_STARPORT,Unlocks Ravens and Banshees and is a requirement for Battlecruisers.
+1,BUILD_TECHLAB_BARRACKS,Unlocks Marauder and is a requirement for Ghost.
+1,BUILD_TECHLAB_FACTORY,Unlocks Siege Tank and is a requirement for Thor.
+1,BUILD_TECHLAB_STARPORT,Unlocks Raven and Banshee and is a requirement for Battlecruiser.
 1,BURROWDOWN_WIDOWMINE,Allows the Widow Mine to bury itself and prepare for an attack
 1,BURROWUP_WIDOWMINE,Enables the Widow Mine to emerge from the ground and regain mobility.
 1,CALLDOWNMULE_CALLDOWNMULE,"Calls down a MULE, a temporary unit with a timed life of 64 seconds that can mine minerals and repair for the Terran forces."
-1,COMMANDCENTERTRAIN_SCV,Train a SCV.
+1,COMMANDCENTERTRAIN_SCV,"Train a SCV, a worker unit that gathers minerals and vespene gas and constructs buildings."
 1,EFFECT_ANTIARMORMISSILE,"Deploys a Missile which pursues the target unit, and, upon contact, reduces the armor and shield armor of affected units by 2 for 21 seconds."
 1,EFFECT_GHOSTSNIPE,Deal 25 damage to enemy biological units (50 for Psionic).
 1,EFFECT_INTERFERENCEMATRIX,Disables a target unit rendering it unable to attack or use abilities for 11 seconds. Reveals Cloaked units. Can only target mechanical and psionic units.
@@ -188,10 +188,10 @@ enabled,ability,description
 1,ENGINEERINGBAYRESEARCH_TERRANINFANTRYWEAPONSLEVEL1,"Increase the damage of Terran infantry units (Ghost, Marauder, Reaper, Marine)."
 1,ENGINEERINGBAYRESEARCH_TERRANINFANTRYWEAPONSLEVEL2,"Increase the damage of Terran infantry units (Ghost, Marauder, Reaper, Marine)."
 1,ENGINEERINGBAYRESEARCH_TERRANINFANTRYWEAPONSLEVEL3,"Increase the damage of Terran infantry units (Ghost, Marauder, Reaper, Marine)."
-1,FACTORYTRAIN_HELLION,"Train a Hellion, a fast harassment vehicle that torches swarms of light ground units."
-1,FACTORYTRAIN_SIEGETANK,"Train a Siege Tank, transforming into a stationary cannon for devastating long-range, area-of-effect ground attacks."
-1,FACTORYTRAIN_THOR,"Train a Thor, a massive and durable assault walker that specializes in destroying armored ground targets and massive air units."
-1,FACTORYTRAIN_WIDOWMINE,"Train a Widow Mine, a burrowing trap that launches a devastating missile at the first enemy unit to enter its range, dealing heavy area damage."
+1,FACTORYTRAIN_HELLION,"Train a Hellion, a fast harassment vehicle that incinerates light ground units in a line."
+1,FACTORYTRAIN_SIEGETANK,"Train a Siege Tank, a transforming artillery unit that bombards ground targets from long range with devastating area-of-effect damage."
+1,FACTORYTRAIN_THOR,"Train a Thor, a heavily-armored combat walker that excels against massive ground units and light air fleets."
+1,FACTORYTRAIN_WIDOWMINE,"Train a Widow Mine, a burrowing trap that launches a devastating missile at the first enemy ground or air unit to cross its path."
 0,HALT,
 0,HALT_BUILDING,
 0,HALT_TERRANBUILD,
@@ -238,28 +238,28 @@ enabled,ability,description
 1,SIEGEMODE_SIEGEMODE,"Transforms a Siege Tank into Siege Mode, increasing its attack range and damage but preventing movement."
 1,STARPORTTECHLABRESEARCH_RESEARCHDURABLEMATERIALS,"Increases the duration of Auto-Turrets and Point Defense Drones from 180 to 240 seconds, and increases the duration of the Seeker Missile from 15 to 20 Seconds."
 1,STARPORTTECHLABRESEARCH_RESEARCHMEDIVACENERGYUPGRADE,Double the energy regeneration rate of Medivac.
-1,STARPORTTRAIN_BANSHEE,"Train a Banshee, a cloaked airship that excels at surprise attacks against ground targets."
-1,STARPORTTRAIN_BATTLECRUISER,"Train a Battlecruiser, a heavily-armored capital ship that can teleport across the map to deliver devastating firepower."
-1,STARPORTTRAIN_LIBERATOR,"Train a Liberator, a transforming airship that either attacks enemy aircraft or locks down a ground area with a powerful anti-ground cannon."
-1,STARPORTTRAIN_MEDIVAC,"Train a Medivac, a flying support ship that heals biological units and transports them for rapid deployment or evacuation."
-1,STARPORTTRAIN_RAVEN,"Train a Raven, a flying support craft that disrupts enemy armies with automated turrets, disabling abilities, and armor-shredding missiles."
-1,STARPORTTRAIN_VIKINGFIGHTER,"Train a Viking, a transforming fighter that provides dedicated anti-air fire from the sky or lands to engage ground targets as a walker."
+1,STARPORTTRAIN_BANSHEE,"Train a Banshee, a cloaked air unit that excels at surprise attacks against ground targets."
+1,STARPORTTRAIN_BATTLECRUISER,"Train a Battle Cruiser, a powerful capital ship that can teleport across the map and unleash a devastating single-target blast."
+1,STARPORTTRAIN_LIBERATOR,"Train a Liberator, an air unit that transforms into a stationary platform to lockdown and destroy ground targets in a designated area."
+1,STARPORTTRAIN_MEDIVAC,"Train a Medivac, a flying support unit that heals biological forces and transports them across the battlefield."
+1,STARPORTTRAIN_RAVEN,"Train a Raven, a flying spellcaster that disrupts enemy armies with debilitating abilities and provides detection."
+1,STARPORTTRAIN_VIKINGFIGHTER,"Train a Viking Fighter, a transforming fighter that dominates the skies in air mode and provides ground support in assault mode."
 0,SUPPLYDROP_SUPPLYDROP,
-1,TERRANBUILD_ARMORY,Build a Armory.
-1,TERRANBUILD_BARRACKS,Build a Barracks.
-1,TERRANBUILD_BUNKER,Build a Bunker.
-1,TERRANBUILD_COMMANDCENTER,Build a Command Center.
-0,TERRANBUILD_ENGINEERINGBAY,Build an Engineer Bay.
-1,TERRANBUILD_FACTORY,Build a Factory.
-1,TERRANBUILD_FUSIONCORE,Build a Fusion Core.
-1,TERRANBUILD_GHOSTACADEMY,Build a Ghost Academy.
-1,TERRANBUILD_MISSILETURRET,Build a Missile Turret.
-1,TERRANBUILD_REFINERY,Build a Refinery on a Vespene Geyser.
-1,TERRANBUILD_SENSORTOWER,Build a Sensor Tower.
-1,TERRANBUILD_STARPORT,Build a Starport.
-1,TERRANBUILD_SUPPLYDEPOT,Build a Supply Depot.
-1,TRAIN_CYCLONE,Train a Cyclone.
-1,TRAIN_HELLBAT,Train a Hellbat.
+1,TERRANBUILD_ARMORY,"Build a Armory to unlock the Hellbat, Thor and higher-level infantry upgrades."
+1,TERRANBUILD_BARRACKS,"Build a Barracks to produce infantry units (Marine, Reaper, Marauder, Ghost)."
+1,TERRANBUILD_BUNKER,"Build a Bunker, a static defense building."
+1,TERRANBUILD_COMMANDCENTER,"Build a Command Center, the base for collecting resources."
+0,TERRANBUILD_ENGINEERINGBAY,"Build an Engineer Bay to unlock Missile Turret, Sensor Tower and Planetary Fortress."
+1,TERRANBUILD_FACTORY,"Build a Factory to produce mechanical ground units (Hellion, Widow Mine, Siege Tank, Hellbat, Thor) and unlock the Starport and Armory."
+1,TERRANBUILD_FUSIONCORE,"Build a Fusion Core to unlock Battlecruiser."
+1,TERRANBUILD_GHOSTACADEMY,"Build a Ghost Academy to unlock the Ghost unit."
+1,TERRANBUILD_MISSILETURRET,"Build a Missile Turret to attack flying units."
+1,TERRANBUILD_REFINERY,"Build a Refinery on a Vespene Geyser."
+1,TERRANBUILD_SENSORTOWER,"Build a Sensor Tower, which senses any approaching uncloaked, unburrowed enemy units."
+1,TERRANBUILD_STARPORT,"Build a Starport to produce air units (Viking, Medivac, Banshee, Raven, Battlecruiser)."
+1,TERRANBUILD_SUPPLYDEPOT,"increases supply cap and unlock the Barracks."
+1,TRAIN_CYCLONE,"Train a Cyclone, locking onto a single air or ground target to deal immense damage while moving to stay at range."
+1,TRAIN_HELLBAT,"Train a Hellbat, a tough, short-ranged walker that incinerates masses of light units with its wide flame attack."
 1,UNSIEGE_UNSIEGE,Converts a Siege Tank back from Siege Mode to its regular mode.
 1,UPGRADETOORBITAL_ORBITALCOMMAND,"Unlocks MULE (Faster Mineral Income), Extra Supplies (Doubles Supply Depot food), and use Scanner Sweep (Reveal any part of the map)."
 1,UPGRADETOPLANETARYFORTRESS_PLANETARYFORTRESS,Enhance the defense capability of Command Center.
@@ -267,16 +267,16 @@ enabled,ability,description
 1,YAMATO_YAMATOGUN,"Blasts a target with a devastating plasma cannon, causing 240 damage."
 1,STARPORTTECHLABRESEARCH_RESEARCHRAVENINTERFERENCEMATRIX,Allows Ravens to use the Interference Matrix ability.
 1,UNLOADALL_BUNKER,Unload all units from a Bunker.
-1,PROTOSSBUILD_ASSIMILATOR,Build an Assimilator.
+1,PROTOSSBUILD_ASSIMILATOR,"Build an assimilator, built on a Vespene Geyser that allows Probes to harvest gas."
 1,PROTOSSBUILD_CYBERNETICSCORE,Build a Cybernetics Core.
 1,PROTOSSBUILD_DARKSHRINE,Build a Dark Shrine.
 1,PROTOSSBUILD_FLEETBEACON,Build a Fleet Beacon.
 1,PROTOSSBUILD_FORGE,Build a Forge.
-1,PROTOSSBUILD_GATEWAY,Build a Gateway.
+1,PROTOSSBUILD_GATEWAY,Build a Gateway to training ground units.
 1,PROTOSSBUILD_NEXUS,Build a Nexus.
-1,PROTOSSBUILD_PHOTONCANNON,Build a Photon Cannon.
-1,PROTOSSBUILD_PYLON,Build a Pylon.
-1,PROTOSSBUILD_ROBOTICSBAY,Build a Robotics Bay.
+1,PROTOSSBUILD_PHOTONCANNON,"Build a Photon Cannon, a static defense structure that detects and attacks both ground and air units."
+1,PROTOSSBUILD_PYLON,"Build a Pylon, providing supply and projects a power field."
+1,PROTOSSBUILD_ROBOTICSBAY,Build a Robotics Bay to unlocks the powerful Colossus and Disruptor units.
 1,PROTOSSBUILD_ROBOTICSFACILITY,Build a Robotics Facility.
 1,PROTOSSBUILD_STARGATE,Build a Protoss Stargate.
 1,PROTOSSBUILD_TEMPLARARCHIVE,Build a Templar Archive.
@@ -336,17 +336,17 @@ enabled,ability,description
 1,SUPERWARPGATETRAIN_WARPINSCOUT,"Train a Warpinscout, a versatile air fighter effective against both air and ground targets."
 1,SUPERWARPGATETRAIN_COLOSSUS,"Train a Colossus, a massive walker that incinerates armies of ground units from long range with its twin thermal lances."
 1,SUPERWARPGATETRAIN_WARPPRISM,"Train a Warpprism, a flying transport that can deploy into a mobile pylon, allowing you to warp in units anywhere on the map."
-1,ZERGBUILD_HATCHERY,"Train a Hatchery."
-1,ZERGBUILD_CREEPTUMOR,"Train a Creep Tumor."
-1,ZERGBUILD_EXTRACTOR,"Train a Extractor."
-1,ZERGBUILD_SPAWNINGPOOL,"Train a Spawning Pool."
-1,ZERGBUILD_EVOLUTIONCHAMBER,"Train a Evolution Chamber."
-1,ZERGBUILD_HYDRALISKDEN,"Train a Hydralisk Den."
-1,ZERGBUILD_SPIRE,"Train a Spire."
-1,ZERGBUILD_ULTRALISKCAVERN,"Train a Ultralisk Cavern."
-1,ZERGBUILD_INFESTATIONPIT,"Train a Infestation Pit."
-1,ZERGBUILD_NYDUSNETWORK,"Train a Nydus Network."
-1,ZERGBUILD_BANELINGNEST,"Train a Baneling Nest."
+1,ZERGBUILD_HATCHERY,"Build a Hatchery, the central Zerg structure."
+1,ZERGBUILD_CREEPTUMOR,"Build a Creep Tumor to spread creep for vision and building."
+1,ZERGBUILD_EXTRACTOR,"Build a Extractor to harvest vespene gas."
+1,ZERGBUILD_SPAWNINGPOOL,"Build a Spawning Pool to unlock Zergling and Queen."
+1,ZERGBUILD_EVOLUTIONCHAMBER,"Build a Evolution Chamber to upgrade ground weapon and armor."
+1,ZERGBUILD_HYDRALISKDEN,"Build a Hydralisk Den to unlock Hydralisk."
+1,ZERGBUILD_SPIRE,"Build a Spire to unlock air units (Mutalisk and Corruptor)."
+1,ZERGBUILD_ULTRALISKCAVERN,"Build a Ultralisk Cavern to unlock Ultralisk."
+1,ZERGBUILD_INFESTATIONPIT,"Build a Infestation Pit to unlock Infestor and Swarm Host."
+1,ZERGBUILD_NYDUSNETWORK,"Build a Nydus Network to create a Nydus Worm at any visible location to enable rapid troop transport."
+1,ZERGBUILD_BANELINGNEST,"Build a Baneling Nest to unlock Baneling."
 1,LARVATRAIN_DRONE,"Train a Drone, a basic worker unit that gathers resources and sacrifices itself to create Zerg structures."
 1,LARVATRAIN_ZERGLING,"Train a Zergling, a cheap and extremely fast melee attacker, ideal for swarming and overwhelming enemies."
 1,LARVATRAIN_OVERLORD,"Train an Overlord, an essential Zerg supply unit, which also acts as a scout and can be upgraded to transport other units."
@@ -360,9 +360,9 @@ enabled,ability,description
 1,INFESTEDMONSTERTRAIN_INFESTEDCIVILIAN,"Train an Infested Civilian, an expendable, slow-moving melee attacker that swarms enemies in large numbers."
 1,INFESTEDMONSTERTRAIN_INFESTEDTERRANCAMPAIGN,"Train an Infested Terran (Campaign), an expendable ranged attacker with a timed life, used to overwhelm enemy defenses."
 1,INFESTEDMONSTERTRAIN_INFESTEDABOMINATION,"Train an Infested Abomination, a volatile suicide unit that explodes upon death, dealing massive area damage to units and structures."
-1,ZERGBUILD_ROACHWARREN,"Build a Roach Warren."
-1,ZERGBUILD_SPINECRAWLER,"Build a Spine Crawler."
-1,ZERGBUILD_SPORECRAWLER,"Build a Spore Crawler."
+1,ZERGBUILD_ROACHWARREN,"Build a Roach Warren to produce Roach."
+1,ZERGBUILD_SPINECRAWLER,"Build a Spine Crawler, a static defense that impales and damages ground units."
+1,ZERGBUILD_SPORECRAWLER,"Build a Spore Crawler, a static anti-air turret with detection."
 1,RESEARCH_ZERGMELEEWEAPONSLEVEL1,"Increases the attack damage of all Zerg ground/melee units."
 1,RESEARCH_ZERGMELEEWEAPONSLEVEL2,"Increases the attack damage of all Zerg ground/melee units."
 1,RESEARCH_ZERGMELEEWEAPONSLEVEL3,"Increases the attack damage of all Zerg ground/melee units."
@@ -416,3 +416,6 @@ enabled,ability,description
 1,MORPH_WARPGATE,"Transforms the Gateway into a Warp Gate."
 1,MORPH_GATEWAY,"The Warpgate transforms back into a Gateway."
 1,RESEARCH_ADEPTRESONATINGGLAIVES,"Increases the attack speed of the Adept by 45%."
+1,RESEARCH_BURROW,"Enables all Zerg ground units to use the Burrow ability. Burrow allows a unit to take cover underground, rendering it unable to attack."
+1,TRAINQUEEN_QUEEN,"Train a Queen, a vital defensive unit that injects larva into Hatchery to mass-produce army."
+1,UPGRADETOLAIR_LAIR,"Upgrade to be a Lair to unlock more units and upgrades."

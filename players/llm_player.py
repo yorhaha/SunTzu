@@ -5,6 +5,7 @@ from sc2.ids.ability_id import AbilityId
 from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.upgrade_id import UpgradeId
 from sc2.units import Units
+from sc2.ids.buff_id import BuffId
 import random
 
 
@@ -34,7 +35,7 @@ class LLMPlayer(BasePlayer):
         self.next_decision_time = -1
         
         # SCV auto-attack settings
-        self.scv_auto_attack_distance = 2
+        self.scv_auto_attack_distance = 4
         self.scv_auto_attack_time = 240
 
     def get_terran_suggestions(self):
@@ -67,7 +68,7 @@ class LLMPlayer(BasePlayer):
         if (
             self.structures(UnitTypeId.SUPPLYDEPOT).exists
             and self.get_total_amount(UnitTypeId.BARRACKS) < 1
-            and self._can_build(UnitTypeId.BARRACKS)
+            and self.structures(UnitTypeId.SUPPLYDEPOT).ready.exists
         ):
             suggestions.append("At least one Barracks is necessary for attacking units, consider building one.")
         # 没有Barracks Tech Lab时建议建造
@@ -85,27 +86,51 @@ class LLMPlayer(BasePlayer):
                 )
         # Marine数量少于2时建议建造
         if (
-            self.structures(UnitTypeId.BARRACKS).exists
+            self.structures(UnitTypeId.BARRACKS).ready.exists
             and self.get_total_amount(UnitTypeId.MARINE) < 2
             and self._can_build(UnitTypeId.MARINE)
         ):
             suggestions.append("At least 2 Marines are necessary for defensing, consider training one.")
         # 没有Marauder时建议建造
         if (
-            self.structures(UnitTypeId.BARRACKSTECHLAB).exists
+            self.structures(UnitTypeId.BARRACKSTECHLAB).ready.exists
             and self.get_total_amount(UnitTypeId.MARAUDER) < 1
             and self._can_build(UnitTypeId.MARAUDER)
         ):
             suggestions.append("At least one Marauder is necessary for defensing, consider training one.")
         # 只有一座Barracks时建议建造第二座
         if self.get_total_amount(UnitTypeId.BARRACKS) == 1 and self._can_build(UnitTypeId.BARRACKS):
-            suggestions.append("Consider building a second Barracks to increase unit production with 400 minerals.")
+            suggestions.append("Consider building a second Barracks to increase unit production.")
+        # 如果有2个兵营且没有Factory时建议建造
+        if (
+            self.structures(UnitTypeId.BARRACKS).ready.amount >= 2
+            and self.structures(UnitTypeId.BARRACKSTECHLAB).ready.exists
+            and self.get_total_amount(UnitTypeId.FACTORY) == 0
+            and self._can_build(UnitTypeId.FACTORY)
+        ):
+            suggestions.append("Consider building a Factory to unlock mechanical units.")
+        # 有Factory时建议升级TechLab
+        if (
+            self.structures(UnitTypeId.FACTORY).ready.exists
+            and self.get_total_amount(UnitTypeId.FACTORYTECHLAB) == 0
+            and self._can_build(UnitTypeId.FACTORYTECHLAB)
+        ):
+            suggestions.append("Consider upgrade Factory Tech Lab to train powerful units.")
+        if self.structures(UnitTypeId.FACTORYTECHLAB).ready.exists and self.get_total_amount(UnitTypeId.SIEGETANK) < 3:
+            suggestions.append("Consider train Siege Tank to increase your army's firepower.")
         # 建议升级Command Center到Orbital Command
         cc = self.townhalls(UnitTypeId.COMMANDCENTER).ready
         if cc.exists:
             main_cc = cc.first  # 通常主基地优先升级
             if main_cc.is_idle and self._can_build(UnitTypeId.ORBITALCOMMAND) and self.get_total_amount(UnitTypeId.SCV) >= 16:
                 suggestions.append("Upgrade Command Center to Orbital Command for better economy.")
+        # 如果只有一座Orbital Command且没有Command Center时，建议建造新的Command Center
+        if (
+            self.get_total_amount(UnitTypeId.ORBITALCOMMAND) == 1
+            and self.get_total_amount(UnitTypeId.COMMANDCENTER) == 0
+            and self._can_build(UnitTypeId.COMMANDCENTER)
+        ):
+            suggestions.append("Consider building another Command Center to expand your base at another resource location.")
         # 维持适当的Marine和Marauder比例
         marine_count = self.get_total_amount(UnitTypeId.MARINE)
         marauder_count = self.get_total_amount(UnitTypeId.MARAUDER)
@@ -221,6 +246,114 @@ class LLMPlayer(BasePlayer):
 
         return suggestions
 
+
+    def get_zerg_suggestions(self):
+        suggestions = []
+        
+        # 人口不足时建议建造Overlord
+        if (
+            self.supply_left < 3
+            and self.supply_cap < 200 # 避免在200人口时仍然提示
+            and not self.already_pending(UnitTypeId.OVERLORD)
+            and self._can_build(UnitTypeId.OVERLORD)
+        ):
+            suggestions.append("Supply is low! Morph an Overlord immediately.")
+
+        # 没有Spawning Pool时建议建造
+        if (
+            self.get_total_amount(UnitTypeId.SPAWNINGPOOL) < 1
+            and not self.already_pending(UnitTypeId.SPAWNINGPOOL)
+            and self._can_build(UnitTypeId.SPAWNINGPOOL)
+        ):
+            suggestions.append("A Spawning Pool is required to create Zerglings, build one.")
+
+        # 没有Queen时建议建造
+        # 每个基地至少一个女王用于注卵和防御
+        if (
+            self.structures(UnitTypeId.SPAWNINGPOOL).ready.exists
+            and self.get_total_amount(UnitTypeId.QUEEN) < self.townhalls.amount
+            and self._can_build(UnitTypeId.QUEEN)
+        ):
+            suggestions.append("Build a Queen for each Hatchery to inject larva and defend.")
+
+        # 有女王但基地没有注卵时建议注卵
+        queens_with_energy = self.units(UnitTypeId.QUEEN).filter(lambda q: q.energy >= 25)
+        hatcheries_needing_inject = self.townhalls.ready.filter(lambda h: not h.has_buff(BuffId.QUEENSPAWNLARVATIMER))
+        if queens_with_energy.exists and hatcheries_needing_inject.exists:
+            suggestions.append("Your Queen has energy! Use 'Inject Larva' on a Hatchery to boost production.")
+
+        # 没有Extractor时建议建造
+        if self.get_total_amount(UnitTypeId.EXTRACTOR) < 1 and self._can_build(UnitTypeId.EXTRACTOR):
+            suggestions.append("At least one Extractor is necessary for gas collection, consider building one.")
+
+        # Zergling数量少于6时建议建造
+        if (
+            self.structures(UnitTypeId.SPAWNINGPOOL).ready.exists
+            and self.get_total_amount(UnitTypeId.ZERGLING) < 6
+            and self._can_build(UnitTypeId.ZERGLING)
+        ):
+            suggestions.append("At least 6 Zerglings are necessary for early defense, consider training some.")
+
+        # 建议扩张（建造第二个基地）
+        if self.townhalls.amount < 2 and self._can_build(UnitTypeId.HATCHERY):
+            suggestions.append("Consider building a second Hatchery to expand your economy and production.")
+
+        # 建议建造Roach Warren
+        if (
+            self.structures(UnitTypeId.SPAWNINGPOOL).ready.exists
+            and self.get_total_amount(UnitTypeId.ROACHWARREN) == 0
+            and self._can_build(UnitTypeId.ROACHWARREN)
+        ):
+            suggestions.append("Consider building a Roach Warren to unlock Roaches, a strong armored unit.")
+
+        # 没有Roach时建议建造
+        if (
+            self.structures(UnitTypeId.ROACHWARREN).ready.exists
+            and self.get_total_amount(UnitTypeId.ROACH) < 5
+            and self._can_build(UnitTypeId.ROACH)
+        ):
+            suggestions.append("Roaches are strong against many early units, consider training some.")
+
+        # 建议升级到Lair (T2科技)
+        if (
+            self.structures(UnitTypeId.SPAWNINGPOOL).ready.exists
+            and self.get_total_amount(UnitTypeId.LAIR) == 0
+            and self.townhalls(UnitTypeId.HATCHERY).idle.exists
+            and self._can_build(UnitTypeId.LAIR)
+        ):
+            suggestions.append("Upgrade a Hatchery to a Lair to unlock powerful mid-game units and upgrades.")
+
+        # 有Lair时建议建造Hydralisk Den
+        if (
+            self.structures(UnitTypeId.LAIR).ready.exists
+            and self.get_total_amount(UnitTypeId.HYDRALISKDEN) == 0
+            and self._can_build(UnitTypeId.HYDRALISKDEN)
+        ):
+            suggestions.append("Build a Hydralisk Den to unlock Hydralisks, a versatile ranged unit.")
+
+        # 有Hydralisk Den时建议训练Hydralisk
+        if self.structures(UnitTypeId.HYDRALISKDEN).ready.exists and self.get_total_amount(UnitTypeId.HYDRALISK) < 5:
+            suggestions.append("Consider training Hydralisks to strengthen your army's anti-air and ranged capabilities.")
+
+        # 维持适当的Zergling和Roach比例
+        zergling_count = self.get_total_amount(UnitTypeId.ZERGLING)
+        roach_count = self.get_total_amount(UnitTypeId.ROACH)
+
+        if zergling_count + roach_count > 20:
+            # 计算蟑螂在(蟑螂+小狗)部队中的价值占比，蟑螂占2人口，小狗占0.5
+            roach_supply = roach_count * 2
+            zergling_supply = zergling_count * 0.5
+            total_supply = roach_supply + zergling_supply
+            
+            if total_supply > 0:
+                roach_ratio = roach_supply / total_supply
+                if roach_ratio < 0.3: # 蟑螂占比过低
+                    suggestions.append("Your army is Zergling-heavy. Add Roaches for a stronger frontline.")
+                elif roach_ratio > 0.8: # 蟑螂占比过高
+                    suggestions.append("Your army is Roach-heavy. Add Zerglings for more DPS and to surround enemies.")
+
+        return suggestions
+    
     def get_suggestions(self):
         suggestions = []
 
@@ -234,72 +367,18 @@ class LLMPlayer(BasePlayer):
                     f"Enemy units detected ({n_enemies} units), consider attacking them."
                 )
 
-        if self.time < 300:
-            suggestions.append(
-                "The enemy will start a fierce attack at 03:00, so you need to start producing a large number of attack units at least at 02:00."
-            )
+        if self.time < 300 and self.time > 60:
+            suggestions.append("The enemy will start a fierce attack at 03:00, so you need to start producing a large number of attack units, such as Marauder, at least at 02:30.")
+        
+        if self.minerals >= 500:
+            suggestions.append("Too much minerals! Consider spending them on expanding or developing high technology.")
 
         if self.config.own_race == "Terran":
             suggestions.extend(self.get_terran_suggestions())
         elif self.config.own_race == "Protoss":
             suggestions.extend(self.get_protoss_suggestions())
-
-        # # --- 侦测到敌方早期运营和单位 ---
-        # # 侦测到敌方攻城坦克 (Siege Tank)
-        # if self.enemy_units(UnitTypeId.SIEGETANK).exists:
-        #     suggestions.append(
-        #         "Enemy Siege Tanks detected! Consider: Producing Vikings for air superiority and vision, getting your own Siege Tanks, using Medivac drops to harass, or Banshees if their anti-air is weak (requires cloaking)."
-        #     )
-        # # 侦测到敌方大量生化部队 (Marine, Marauder)
-        # # 你可能需要更精确的条件来判断“大量”，例如单位数量或组合
-        # if self.enemy_units(UnitTypeId.MARINE).amount >= 6 or self.enemy_units(UnitTypeId.MARAUDER).amount >= 3:
-        #     suggestions.append("Significant enemy bio force (Marines/Marauders) detected! Consider: Matching with your own bio and upgrading infantry weapons/armor, producing Siege Tanks, planting Widow Mines, or using Hellions/Hellbats (with Infernal Pre-Igniter against Marines).")
-        # # 侦测到敌方维京战机 (Viking)
-        # if self.enemy_units(UnitTypeId.VIKINGFIGHTER).exists:
-        #     suggestions.append(
-        #         "Enemy Vikings detected! Consider: Producing your own Vikings to contest air control, building Missile Turrets for static defense, or using massed stimmed Marines if you have ground superiority and they overcommit to Vikings."
-        #     )
-        # if self.enemy_units(UnitTypeId.BANSHEE).exists:
-        #     suggestions.append("Enemy Banshees detected! Consider: Immediately building Missile Turrets, producing Vikings, getting a Raven for detection, or using Orbital Scans to reveal and engage.")
-        #     if not self.enemy_units(UnitTypeId.BANSHEE).first.is_cloaked: # Check if any are uncloaked to remind about cloaking
-        #         suggestions.append("Be aware enemy Banshees might get cloaking soon.")
-        # # 侦测到敌方铁鸦 (Raven)
-        # if self.enemy_units(UnitTypeId.RAVEN).exists:
-        #     suggestions.append("Enemy Ravens detected! Consider: Producing Vikings to snipe them, using Ghosts with EMP to disable them. Use scans if they cloak. Be wary of Interference Matrix and Auto-Turrets.")
-        # # 侦测到敌方战列巡航舰 (Battlecruiser)
-        # if self.enemy_units(UnitTypeId.BATTLECRUISER).exists:
-        #     suggestions.append("Enemy Battlecruisers detected! Consider: Massing Vikings, using Ravens (Anti-Armor Missile), Ghosts (EMP for Yamato/Jump), building Missile Turret clusters, or producing your own Battlecruisers for counter-Yamato.")
-        # # --- 侦测到敌方幽灵 (Ghost) ---
-        # if self.enemy_units(UnitTypeId.GHOST).exists:
-        #     suggestions.append("Enemy Ghosts detected! Consider: Producing your own Ghosts for counter-EMP or snipes, spreading your units to minimize EMP impact, using Ravens (Interference Matrix). Scout for Nuke attempts (red dot).")
-        #     # --- 侦测到敌方建筑及运营意图 ---
-
-        # # 侦测到敌方早期多个兵营 (Barracks) - 可能表示速生化部队rush
-        # # (self.time < 210 is roughly 3:30 game time)
-        # if self.enemy_structures(UnitTypeId.BARRACKS).amount >= 2 and self.time < 210:
-        #     suggestions.append("Enemy has multiple Barracks early! Prepare for bio aggression. Consider Bunkers, Siege Tanks, or matching bio production quickly.")
-        # # 侦测到敌方早期重工厂 (Factory) - 可能有恶火骚扰或坦克推进
-        # if self.enemy_structures(UnitTypeId.FACTORY).exists and self.time < 180: # Factory before 3:00
-        #     if not self.enemy_units(UnitTypeId.HELLION).exists and not self.enemy_units(UnitTypeId.SIEGETANK).exists:
-        #         suggestions.append("Early enemy Factory detected! Be prepared for Hellions or an early Siege Tank. Consider Marines and a Bunker at your natural expansion.")
-        # # 侦测到敌方早期星港 (Starport)
-        # if self.enemy_structures(UnitTypeId.STARPORT).exists and self.time < 270: # Starport before 4:30
-        #     suggestions.append("Early enemy Starport detected! Prepare for air units. Consider Missile Turrets and Vikings. Scout if it has a Tech Lab (Banshees/Ravens) or Reactor (Vikings/Medivacs).")
-        #     if self.enemy_structures(UnitTypeId.STARPORTTECHLAB).exists:
-        #         suggestions.append("Enemy Starport has a Tech Lab - high chance of Banshees or Ravens. Prioritize detection (Missile Turrets, your own Raven, Orbital Scans) and Vikings.")
-
-        # if self.minerals >= 300 and self.vespene >= 200:
-        #     suggestions.append("You have enough resource to consider expanding. Consider building a Command Center at a safe location to boost your economy.")
-        # 侦测到敌方扩张 (新的指挥中心 Command Center)
-        # 这需要更复杂的逻辑来判断是否是“新”扩张，例如通过位置或数量变化
-        # 简化版：如果敌方基地数量大于已知的主基地数量（通常为1，除非有特殊开局）
-        # if self.enemy_structures(UnitTypeId.COMMANDCENTER).amount > self.enemy_structures(UnitTypeId.COMMANDCENTER).filter(lambda x: x.is_main_base).amount if hasattr(self.enemy_structures(UnitTypeId.COMMANDCENTER).first, 'is_main_base') else self.enemy_structures(UnitTypeId.COMMANDCENTER).amount > 1 : # simplified detection
-        #     suggestions.append("Enemy expansion detected! Consider: Applying pressure with your army if you have an advantage, expanding yourself to keep up economically, or scouting their follow-up tech choices from the new base.")
-        # 扩张时机建议
-        # if (self.structures(UnitTypeId.BARRACKS).amount >= 2 and
-        #     self._can_build(UnitTypeId.COMMANDCENTER) and
-        #     not self.already_pending(UnitTypeId.COMMANDCENTER)):
-        #     suggestions.append("Consider expanding to new base for economy boost.")
+        elif self.config.own_race == "Zerg":
+            suggestions.extend(self.get_zerg_suggestions())
 
         return suggestions
 
