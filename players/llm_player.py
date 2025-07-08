@@ -34,7 +34,7 @@ class LLMPlayer(BasePlayer):
         self.next_decision_time = -1
         
         # SCV auto-attack settings
-        self.scv_auto_attack_distance = 2
+        self.scv_auto_attack_distance = 4
         self.scv_auto_attack_time = 240
 
     def get_lowest_health_enemy(self, units: Units):
@@ -125,6 +125,15 @@ class LLMPlayer(BasePlayer):
             and self._can_build(UnitTypeId.FACTORY)
         ):
             suggestions.append("Consider building a Factory to unlock mechanical units.")
+        # 有Factory时建议升级TechLab
+        if (
+            self.structures(UnitTypeId.FACTORY).ready.exists
+            and self.get_total_amount(UnitTypeId.FACTORYTECHLAB) == 0
+            and self._can_build(UnitTypeId.FACTORYTECHLAB)
+        ):
+            suggestions.append("Consider upgrade Factory Tech Lab to train powerful units.")
+        if self.structures(UnitTypeId.FACTORYTECHLAB).ready.exists and self.get_total_amount(UnitTypeId.SIEGETANK) < 3:
+            suggestions.append("Consider train Siege Tank to increase your army's firepower.")
         # 建议升级Command Center到Orbital Command
         cc = self.townhalls(UnitTypeId.COMMANDCENTER).ready
         if cc.exists:
@@ -196,140 +205,6 @@ class LLMPlayer(BasePlayer):
         self.logging("n_unit_types", len(unit_types), save_trace=True, print_log=False)
         self.logging("n_structure_types", len(structure_types), save_trace=True, print_log=False)
 
-    async def distribute_workers(self, resource_ratio: float = 2) -> None:
-        """
-        一个经过优化的工人分配函数。
-        它通过一次遍历所有工人来统计信息，然后高效地将空闲或过剩的工人重新分配到短缺的矿区或气矿。
-
-        - 性能更高：避免了嵌套循环和不必要的重复计算。
-        - 逻辑更优：优先就近分配，并能处理跨基地的工人调动。
-        - 策略清晰：基于明确的饱和度标准（矿区16个，气矿3个）进行分配。
-
-        :param resource_ratio: 期望的晶体矿/瓦斯采集工人比例。如果实际比例低于此值，优先采矿；反之，优先采气。
-        """
-        workers = [unit for unit in self.units if unit.type_id in [UnitTypeId.SCV, UnitTypeId.MULE, UnitTypeId.DRONE, UnitTypeId.PROBE]]
-        if not workers or not self.townhalls.ready:
-            return
-
-        # 1. 数据准备：缓存基地、矿区和气矿信息
-        # =================================================
-        ready_bases = self.townhalls.ready
-        ready_gas_buildings = self.gas_buildings.ready
-        
-        # 定义理想的工人数量
-        IDEAL_WORKERS_PER_GAS = 3
-        IDEAL_WORKERS_PER_BASE = 16
-
-        # 缓存每个基地附近的矿区
-        base_to_minerals: Dict[int, Set[int]] = {}
-        mineral_to_base: Dict[int, int] = {}
-        for base in ready_bases:
-            # 使用8.0的距离作为标准来关联矿区
-            nearby_minerals = self.mineral_field.closer_than(8.0, base)
-            base_to_minerals[base.tag] = {mf.tag for mf in nearby_minerals}
-            for mineral in nearby_minerals:
-                mineral_to_base[mineral.tag] = base.tag
-
-        # 2. 状态统计：一次遍历所有工人，统计每个采集点的工作人数
-        # =================================================
-        base_worker_count: Dict[int, int] = {base.tag: 0 for base in ready_bases}
-        gas_worker_count: Dict[int, int] = {gas.tag: 0 for gas in ready_gas_buildings}
-        
-        # 将所有工人分为三类：采矿、采气、其他（包括空闲、建造等）
-        mining_workers: Dict[int, List[Unit]] = {base.tag: [] for base in ready_bases}
-        gas_workers: Dict[int, List[Unit]] = {gas.tag: [] for gas in ready_gas_buildings}
-        other_workers: List[Unit] = []
-
-        for worker in workers:
-            order = worker.order_target
-            if order:
-                if order in mineral_to_base:
-                    base_tag = mineral_to_base[order]
-                    base_worker_count[base_tag] += 1
-                    mining_workers[base_tag].append(worker)
-                elif order in gas_worker_count:
-                    gas_worker_count[order] += 1
-                    gas_workers[order].append(worker)
-                else:
-                    other_workers.append(worker)
-            else:
-                other_workers.append(worker)
-
-        # 3. 识别待分配工人和空缺岗位
-        # =================================================
-        worker_pool: List[Unit] = [w for w in other_workers if w.is_idle] # 从空闲工人开始
-        deficit_jobs: List[Unit] = []
-
-        # 检查气矿的过剩与短缺
-        for gas in ready_gas_buildings:
-            difference = gas_worker_count[gas.tag] - IDEAL_WORKERS_PER_GAS
-            if difference > 0:
-                # 将多余的工人加入待分配池
-                worker_pool.extend(gas_workers[gas.tag][:difference])
-            elif difference < 0:
-                # 将空缺岗位加入列表
-                deficit_jobs.extend([gas] * -difference)
-
-        # 检查基地的过剩与短缺
-        for base in ready_bases:
-            # 确保基地附近有矿
-            if not base_to_minerals.get(base.tag):
-                continue
-            
-            num_minerals = len(base_to_minerals[base.tag])
-            ideal_for_this_base = min(IDEAL_WORKERS_PER_BASE, num_minerals * 2)
-            
-            difference = base_worker_count[base.tag] - ideal_for_this_base
-            if difference > 0:
-                worker_pool.extend(mining_workers[base.tag][:difference])
-            elif difference < 0:
-                deficit_jobs.extend([base] * -difference)
-
-        # 4. 执行分配
-        # =================================================
-        if not worker_pool or not deficit_jobs:
-            return # 没有需要移动的工人或没有空缺的岗位
-
-        # 根据资源比例决定分配优先级
-        # 注意：这里我们检查的是工人比例，而不是资源存量比例，这更直接地反映了采集效率
-        current_mineral_workers = sum(base_worker_count.values())
-        current_gas_workers = sum(gas_worker_count.values())
-        
-        # 避免除零错误
-        if current_gas_workers == 0 or current_mineral_workers / current_gas_workers < resource_ratio:
-            # 缺矿，优先分配到矿区
-            job_priority = sorted(deficit_jobs, key=lambda job: job.has_vespene)
-        else:
-            # 缺气，优先分配到气矿
-            job_priority = sorted(deficit_jobs, key=lambda job: not job.has_vespene)
-
-        # 开始分配
-        for job in job_priority:
-            if not worker_pool:
-                break
-            
-            # 找到离这个岗位最近的待分配工人
-            worker_to_assign = min(worker_pool, key=lambda w: w.distance_to(job))
-            
-            worker_pool.remove(worker_to_assign)
-            
-            if job.has_vespene:
-                worker_to_assign.gather(job)
-            else:
-                # 分配到基地时，找到该基地附近的一个矿片
-                target_mineral = self.mineral_field.filter(
-                    lambda mf: mf.tag in base_to_minerals[job.tag]
-                ).closest_to(worker_to_assign)
-                worker_to_assign.gather(target_mineral)
-
-        # 如果分配完所有岗位后仍有空闲工人（例如，所有地方都饱和了），让他们去最近的矿区
-        if worker_pool:
-            all_minerals = self.mineral_field.filter(lambda mf: any(mf.distance_to(b) <= 8 for b in ready_bases))
-            if all_minerals:
-                for worker in worker_pool:
-                    if worker.is_idle:
-                        target_mineral = all_minerals.closest_to(worker)
-                        worker.gather(target_mineral)
     
     async def run(self, iteration: int):
         # send idle workers to minerals or gas automatically
@@ -375,19 +250,12 @@ class LLMPlayer(BasePlayer):
                 suggestions = self.get_suggestions()
                 self.logging("suggestions", suggestions, save_trace=True, print_log=False)
 
-                while True:
-                    plans, plan_think, plan_chat_history = self.plan_agent.run(obs_text, verifier=self.plan_verifier, suggestions=suggestions)
-                    if '"error_number": 0' not in plan_think[-1][-1]:
-                        return
-                    break
+                plans, plan_think, plan_chat_history = self.plan_agent.run(obs_text, verifier=self.plan_verifier, suggestions=suggestions)
                 self.logging("plans", plans, save_trace=True)
                 self.logging("plan_think", plan_think, save_trace=True, print_log=False)
                 self.logging("plan_chat_history", plan_chat_history, save_trace=True, print_log=False)
 
-                # while True:
                 actions, action_think, action_chat_history = self.action_agent.run(obs_text, plans, verifier=self.action_verifier)
-                # if action_think[-1][-1] == "":
-                #     break
                 self.logging("actions", actions, save_trace=True)
                 self.logging("action_think", action_think, save_trace=True, print_log=False)
                 self.logging("action_chat_history", action_chat_history, save_trace=True, print_log=False)

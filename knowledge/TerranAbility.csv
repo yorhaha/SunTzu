@@ -164,7 +164,7 @@ enabled,ability,description
 1,BURROWDOWN_WIDOWMINE,Allows the Widow Mine to bury itself and prepare for an attack
 1,BURROWUP_WIDOWMINE,Enables the Widow Mine to emerge from the ground and regain mobility.
 1,CALLDOWNMULE_CALLDOWNMULE,"Calls down a MULE, a temporary unit with a timed life of 64 seconds that can mine minerals and repair for the Terran forces."
-1,COMMANDCENTERTRAIN_SCV,Train a SCV.
+1,COMMANDCENTERTRAIN_SCV,"Train a SCV, a worker unit that gathers minerals and vespene gas and constructs buildings."
 1,EFFECT_ANTIARMORMISSILE,"Deploys a Missile which pursues the target unit, and, upon contact, reduces the armor and shield armor of affected units by 2 for 21 seconds."
 1,EFFECT_GHOSTSNIPE,Deal 25 damage to enemy biological units (50 for Psionic).
 1,EFFECT_INTERFERENCEMATRIX,Disables a target unit rendering it unable to attack or use abilities for 11 seconds. Reveals Cloaked units. Can only target mechanical and psionic units.
@@ -185,10 +185,10 @@ enabled,ability,description
 1,ENGINEERINGBAYRESEARCH_TERRANINFANTRYWEAPONSLEVEL1,"Increase the damage of Terran infantry units (Ghost, Marauder, Reaper, Marine)."
 1,ENGINEERINGBAYRESEARCH_TERRANINFANTRYWEAPONSLEVEL2,"Increase the damage of Terran infantry units (Ghost, Marauder, Reaper, Marine)."
 1,ENGINEERINGBAYRESEARCH_TERRANINFANTRYWEAPONSLEVEL3,"Increase the damage of Terran infantry units (Ghost, Marauder, Reaper, Marine)."
-1,FACTORYTRAIN_HELLION,Train a Hellion.
-1,FACTORYTRAIN_SIEGETANK,Train a Siege Tank.
-1,FACTORYTRAIN_THOR,Train a Thor.
-1,FACTORYTRAIN_WIDOWMINE,Train a Widow Mine.
+1,FACTORYTRAIN_HELLION,"Train a Hellion, a fast harassment vehicle that incinerates light ground units in a line."
+1,FACTORYTRAIN_SIEGETANK,"Train a Siege Tank, a transforming artillery unit that bombards ground targets from long range with devastating area-of-effect damage."
+1,FACTORYTRAIN_THOR,"Train a Thor, a heavily-armored combat walker that excels against massive ground units and light air fleets."
+1,FACTORYTRAIN_WIDOWMINE,"Train a Widow Mine, a burrowing trap that launches a devastating missile at the first enemy ground or air unit to cross its path."
 0,HALT,
 0,HALT_BUILDING,
 0,HALT_TERRANBUILD,
@@ -235,12 +235,12 @@ enabled,ability,description
 1,SIEGEMODE_SIEGEMODE,"Transforms a Siege Tank into Siege Mode, increasing its attack range and damage but preventing movement."
 1,STARPORTTECHLABRESEARCH_RESEARCHDURABLEMATERIALS,"Increases the duration of Auto-Turrets and Point Defense Drones from 180 to 240 seconds, and increases the duration of the Seeker Missile from 15 to 20 Seconds."
 1,STARPORTTECHLABRESEARCH_RESEARCHMEDIVACENERGYUPGRADE,Double the energy regeneration rate of Medivac.
-1,STARPORTTRAIN_BANSHEE,Train a Banshee.
-1,STARPORTTRAIN_BATTLECRUISER,Train a Battle Cruiser.
-1,STARPORTTRAIN_LIBERATOR,Train a Liberator.
-1,STARPORTTRAIN_MEDIVAC,Train a Medivac.
-1,STARPORTTRAIN_RAVEN,Train a Raven.
-1,STARPORTTRAIN_VIKINGFIGHTER,Train a Viking Fighter.
+1,STARPORTTRAIN_BANSHEE,"Train a Banshee, a cloaked air unit that excels at surprise attacks against ground targets."
+1,STARPORTTRAIN_BATTLECRUISER,"Train a Battle Cruiser, a powerful capital ship that can teleport across the map and unleash a devastating single-target blast."
+1,STARPORTTRAIN_LIBERATOR,"Train a Liberator, an air unit that transforms into a stationary platform to lockdown and destroy ground targets in a designated area."
+1,STARPORTTRAIN_MEDIVAC,"Train a Medivac, a flying support unit that heals biological forces and transports them across the battlefield."
+1,STARPORTTRAIN_RAVEN,"Train a Raven, a flying spellcaster that disrupts enemy armies with debilitating abilities and provides detection."
+1,STARPORTTRAIN_VIKINGFIGHTER,"Train a Viking Fighter, a transforming fighter that dominates the skies in air mode and provides ground support in assault mode."
 0,SUPPLYDROP_SUPPLYDROP,
 1,TERRANBUILD_ARMORY,Build a Armory.
 1,TERRANBUILD_BARRACKS,Build a Barracks.
@@ -255,8 +255,8 @@ enabled,ability,description
 1,TERRANBUILD_SENSORTOWER,"Build a Sensor Tower, which senses any approaching uncloaked, unburrowed enemy units."
 1,TERRANBUILD_STARPORT,Build a Starport.
 1,TERRANBUILD_SUPPLYDEPOT,Build a Supply Depot near the Command Center to increase 8 supplies.
-1,TRAIN_CYCLONE,Train a Cyclone.
-1,TRAIN_HELLBAT,Train a Hellbat.
+1,TRAIN_CYCLONE,"Train a Cyclone, locking onto a single air or ground target to deal immense damage while moving to stay at range."
+1,TRAIN_HELLBAT,"Train a Hellbat, a tough, short-ranged walker that incinerates masses of light units with its wide flame attack."
 1,UNSIEGE_UNSIEGE,Converts a Siege Tank back from Siege Mode to its regular mode.
 1,UPGRADETOORBITAL_ORBITALCOMMAND,"Unlocks MULE (Faster Mineral Income), Extra Supplies (Doubles Supply Depot food), and use Scanner Sweep (Reveal any part of the map)."
 1,UPGRADETOPLANETARYFORTRESS_PLANETARYFORTRESS,Enhance the defense capability of Command Center.
