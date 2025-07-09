@@ -1,11 +1,11 @@
 from .base_player import BasePlayer
 from agents import PlanAgent, ActionAgent, RagAgent, SingleAgent
 from sc2.ids.unit_typeid import UnitTypeId
-from sc2.ids.ability_id import AbilityId
 from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.upgrade_id import UpgradeId
-from sc2.units import Units
 from sc2.ids.buff_id import BuffId
+from sc2.ids.ability_id import AbilityId
+
 import random
 
 
@@ -37,6 +37,243 @@ class LLMPlayer(BasePlayer):
         # SCV auto-attack settings
         self.scv_auto_attack_distance = 4
         self.scv_auto_attack_time = 240
+
+    async def distribute_workers(self, resource_ratio: float = 2.0) -> None:
+        """
+        根据全局矿气比分配工人，优先将工人派往采集gas。
+        会将gas_site附近采集mineral的worker调往gas_site以最大化其利用。
+        """
+        if not self.townhalls.ready or not self.workers:
+            return
+
+        # 1. 收集所有基地周围的矿点和气矿
+        mineral_patches = {
+            m for nexus in self.townhalls.ready
+            for m in self.mineral_field.closer_than(12, nexus)
+        }
+        gas_refineries = {
+            g for nexus in self.townhalls.ready
+            for g in self.gas_buildings.ready.closer_than(12, nexus)
+            if g.has_vespene
+        }
+
+        # 2. 派遣MULE（如果是人族）
+        if self.config.own_race == "Terran":
+            await self._deploy_mules(mineral_patches)
+
+        # 3. 处理gas_site超员问题，将多余的worker释放出来加入可用工人池
+        available_idle_workers = list(self.workers.idle)
+        
+        for gas_site in gas_refineries:
+            if gas_site.surplus_harvesters > 0:
+                # 找到正在采集这个gas_site的工人
+                gas_workers = []
+                for worker in self.workers.gathering:
+                    # 通过距离判断worker是否在采集这个gas_site
+                    if worker.distance_to(gas_site) < 2:
+                        gas_workers.append(worker)
+                
+                # 计算需要释放的工人数量
+                excess_count = gas_site.surplus_harvesters
+                
+                # 将多余的工人加入到可用工人池中（取前excess_count个）
+                for i in range(min(excess_count, len(gas_workers))):
+                    worker = gas_workers[i]
+                    available_idle_workers.append(worker)
+                    print(f"Marked excess worker from gas for reassignment: {gas_site}")
+
+        # 4. 统计每个点的缺工数
+        gas_tasks = {}
+        mineral_tasks = {}
+
+        # 气矿：ideal=3，surplus_harvesters<0 时表示缺工
+        for g in gas_refineries:
+            missing = max(0, -g.surplus_harvesters)
+            if missing:
+                gas_tasks[g] = missing
+
+        # 矿点：每个矿最多2个工人（不计算MULE和即将被重新分配的工人）
+        for m in mineral_patches:
+            # 统计该矿点的工人数量（不包括MULE和即将被重新分配的工人）
+            worker_count = 0
+            for worker in self.workers.gathering:
+                if (worker.distance_to(m) < 2 and 
+                    worker not in available_idle_workers):
+                    worker_count += 1
+            need = max(0, 2 - worker_count)
+            if need:
+                mineral_tasks[m] = need
+
+        # 5. 优先处理gas_sites - 从附近mineral_sites调worker + idle_workers
+        for gas_site in list(gas_tasks.keys()):
+            needed = gas_tasks[gas_site]
+            if needed <= 0:
+                continue
+            
+            # 找到这个gas_site附近正在采集mineral的workers（排除即将被重新分配的工人）
+            nearby_mineral_workers = []
+        
+            for mineral in mineral_patches:
+                # 只考虑距离gas_site较近的mineral
+                if mineral.distance_to(gas_site) < 10:  # 距离阈值可调整
+                    # 找到正在采集这个mineral的workers
+                    for worker in self.workers.gathering:
+                        # 通过距离判断worker是否在采集这个mineral，且不在重新分配列表中
+                        if (worker.distance_to(mineral) < 2 and 
+                            worker not in available_idle_workers):
+                            nearby_mineral_workers.append((worker, worker.distance_to(gas_site)))
+        
+            # 按距离gas_site的远近排序，优先调用最近的workers
+            nearby_mineral_workers.sort(key=lambda x: x[1])
+        
+            # 重新分配mineral workers到gas_site
+            reassigned = 0
+            for worker, _ in nearby_mineral_workers:
+                if reassigned >= needed:
+                    break
+                worker.gather(gas_site)
+                print(f"Reassigned worker from mineral to gas: {gas_site}")
+                reassigned += 1
+        
+            # 更新gas_site的需求
+            needed -= reassigned
+        
+            # 如果还有缺工，用idle_workers补充
+            if needed > 0 and available_idle_workers:
+                # 找到距离gas_site最近的idle_workers
+                available_idle_workers.sort(key=lambda w: w.distance_to(gas_site))
+            
+                assigned = 0
+                workers_to_remove = []
+                for worker in available_idle_workers:
+                    if assigned >= needed:
+                        break
+                    worker.gather(gas_site)
+                    print(f"Assigned idle worker to gas: {gas_site}")
+                    workers_to_remove.append(worker)
+                    assigned += 1
+            
+                # 从available_idle_workers中移除已分配的workers
+                for worker in workers_to_remove:
+                    available_idle_workers.remove(worker)
+            
+                needed -= assigned
+        
+            # 更新gas_tasks
+            gas_tasks[gas_site] = needed
+            if gas_tasks[gas_site] <= 0:
+                del gas_tasks[gas_site]
+
+        # 6. 用剩余的idle_workers填补mineral_sites
+        for worker in available_idle_workers:
+            if not mineral_tasks:
+                break
+        
+            # 选择距离最近的mineral_site
+            target = min(mineral_tasks.keys(), key=lambda s: s.distance_to(worker))
+            worker.gather(target)
+            print(f"Assigned idle worker to mineral: {target}")
+        
+            # 更新mineral_site的需求
+            mineral_tasks[target] -= 1
+            if mineral_tasks[target] <= 0:
+                del mineral_tasks[target]
+
+        # 7. 如果还有gas_site缺工且还有mineral workers可调配，进行第二轮调配
+        if gas_tasks:
+            for gas_site in list(gas_tasks.keys()):
+                needed = gas_tasks[gas_site]
+                if needed <= 0:
+                    continue
+                
+                # 扩大搜索范围，找到更远的mineral workers
+                distant_mineral_workers = []
+                for mineral in mineral_patches:
+                    if mineral.distance_to(gas_site) < 15:  # 扩大搜索范围
+                        for worker in self.workers.gathering:
+                            if (worker.distance_to(mineral) < 2 and 
+                                worker not in available_idle_workers):
+                                distant_mineral_workers.append((worker, worker.distance_to(gas_site)))
+            
+                # 按距离排序
+                distant_mineral_workers.sort(key=lambda x: x[1])
+            
+                # 重新分配
+                reassigned = 0
+                for worker, _ in distant_mineral_workers:
+                    if reassigned >= needed:
+                        break
+                    worker.gather(gas_site)
+                    print(f"Reassigned distant worker from mineral to gas: {gas_site}")
+                    reassigned += 1
+
+
+    async def _deploy_mules(self, mineral_patches) -> None:
+        """
+        部署MULE到合适的矿点
+        """
+        mule_units = self.units(UnitTypeId.MULE).idle
+        for mule in mule_units:
+            nearby_minerals = [m for m in mineral_patches if m.distance_to(mule) < 12]
+            best_mineral = self._select_best_mineral_for_mule(nearby_minerals, mule)
+            if best_mineral:
+                mule.gather(best_mineral)
+
+    def _select_best_mineral_for_mule(self, mineral_patches, orbital_command):
+        """
+        为MULE选择最佳的矿点
+        优先选择：
+        1. 资源量较多的矿点
+        2. 距离基地较近的矿点
+        3. 当前采集单位较少的矿点
+        4. 没有MULE的矿点
+        """
+        if not mineral_patches:
+            return None
+        
+        best_mineral = None
+        best_score = -1
+        
+        for mineral in mineral_patches:
+            # 计算该矿点的评分
+            score = 0
+            
+            # 资源量权重（剩余资源越多越好）
+            resource_weight = mineral.mineral_contents / 1800  # 1800是矿点的初始资源量
+            score += resource_weight * 40
+            
+            # 距离权重（距离越近越好）
+            distance_weight = 1 - (mineral.distance_to(orbital_command) / 12)
+            score += distance_weight * 20
+            
+            # 采集单位数量权重（采集单位越少越好）
+            current_harvesters = 0
+            for unit in self.units:
+                if (hasattr(unit, 'order_target') and unit.order_target == mineral.tag and 
+                    unit.type_id in [UnitTypeId.SCV, UnitTypeId.MULE]):
+                    current_harvesters += 1
+            
+            harvester_weight = max(0, 1 - current_harvesters / 4)  # 最多4个采集单位(2个SCV + 2个MULE)
+            score += harvester_weight * 30
+            
+            # 检查是否已经有MULE在这个矿点
+            mule_count = 0
+            for unit in self.units.filter(lambda u: u.type_id == UnitTypeId.MULE):
+                if hasattr(unit, 'order_target') and unit.order_target == mineral.tag:
+                    mule_count += 1
+                    
+            if mule_count >= 1:  # 每个矿点最多1个MULE
+                score -= 50
+            
+            # 优先选择资源量充足的矿点
+            if mineral.mineral_contents < 500:  # 资源量过低的矿点降低优先级
+                score -= 20
+            
+            if score > best_score:
+                best_score = score
+                best_mineral = mineral
+        
+        return best_mineral if best_score > 0 else None
 
     def get_terran_suggestions(self):
         suggestions = []
@@ -245,7 +482,6 @@ class LLMPlayer(BasePlayer):
                 suggestions.append(f"Enemy units detected ({n_enemies} units), consider attacking them with your army.")
 
         return suggestions
-
 
     def get_zerg_suggestions(self):
         suggestions = []
