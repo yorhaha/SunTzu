@@ -27,18 +27,12 @@ python main.py \
     --ai_build RandomBuild \
     --enable_plan \
     --enable_plan_verifier \
-    --enable_action_verifier
+    --enable_action_verifier \
+    --own_race Terran \
+    --enemy_race Terran
 ```
 
 See `tools/constants.py` for detailed game settings.
-
-## GUI
-
-```
-pip install streamlit
-
-streamlit run gui.py
-```
 
 ## References
 
