@@ -1,7 +1,6 @@
 from .base_player import BasePlayer
 from agents import PlanAgent, ActionAgent, RagAgent, SingleAgent
 from sc2.ids.unit_typeid import UnitTypeId
-from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.upgrade_id import UpgradeId
 from sc2.ids.buff_id import BuffId
 from sc2.ids.ability_id import AbilityId
