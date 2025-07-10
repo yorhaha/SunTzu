@@ -2,9 +2,9 @@ from sc2.bot_ai import BotAI
 from sc2.units import Units
 from sc2.unit import Unit
 from sc2.units import Units
-from sc2.unit import Unit
 from sc2.position import Point2
 from sc2.ids.ability_id import AbilityId
+from sc2.ids.unit_typeid import UnitTypeId
 
 import time
 import os
@@ -83,7 +83,7 @@ class BasePlayer(BotAI):
         self.sbr = IterativeMean()
         self.resource_cost = 0
         
-        self.miner_units = ["SCV", "Probe", "MULE", "Drone"]
+        self.miner_units = ["SCV", "Probe", "Drone"]
 
     def logging(self, key: str, value, level="info", save_trace=False, save_file=False, print_log=True):
         idx = self.state.game_loop // 4
@@ -125,7 +125,23 @@ class BasePlayer(BotAI):
     def update_tag_to_health(self):
         self.tag_to_health = {unit.tag: unit.health for unit in self.units}
         self.tag_to_health.update({unit.tag: unit.health for unit in self.structures})
+    
+    def get_lowest_health_enemy(self, units: Units):
+        """Get the enemy unit with the lowest health."""
+        if not units.exists:
+            return None
+        return min(units, key=lambda unit: unit.health + unit.shield)
 
+    def _can_build(self, unit_type):
+        """辅助函数，检查是否可以且尚未开始建造某个单位/建筑。"""
+        return self.can_afford(unit_type) and not self.already_pending(unit_type)
+
+    def get_total_amount(self, unit_type: UnitTypeId):
+        """获取指定单位类型的总数量，包括正在建造的和已完成的。"""
+        unit_amount = self.units(unit_type).amount
+        structures_amount = self.structures(unit_type).amount
+        pending_amount = self.already_pending(unit_type)
+        return unit_amount + structures_amount + pending_amount
     async def on_step(self, iteration: int):
         if len(self.units) == 0 or len(self.townhalls) == 0:
             return
@@ -228,6 +244,8 @@ class BasePlayer(BotAI):
                 return False, f"Unit with id {action['target_unit']} not found"
 
         ### unit checks
+        if len(action["units"]) == 0:
+            return False, "`units` must not be an empty list"
         for unit_id in action["units"]:
             if not isinstance(unit_id, int):
                 return False, "`units` must be a list of integers"
@@ -282,9 +300,6 @@ class BasePlayer(BotAI):
                 next_id = (next_id + 1) % 1000
             self._tag_to_id[tag] = next_id
             self._id_to_tag[next_id] = tag
-            # self._tag_to_id[tag] = self.next_id
-            # self._id_to_tag[self.next_id] = tag
-            # self.next_id += 1
         return self._tag_to_id[tag]
 
     def id_to_tag(self, _id: int):
@@ -474,9 +489,9 @@ class BasePlayer(BotAI):
                     surplus = unit.surplus_harvesters
                     if ideal > 0:
                         if surplus > 0:
-                            text += f"Harvesters: {assigned}/{ideal} (no more SCV accepted, surplus {surplus})\n"
+                            text += f"Harvesters: {assigned}/{ideal} (no more harvesters accepted, surplus {surplus})\n"
                         elif surplus == 0:
-                            text += f"Harvesters: {assigned}/{ideal} (no more SCV accepted)\n"
+                            text += f"Harvesters: {assigned}/{ideal} (no more harvesters accepted)\n"
                         else:
                             text += f"Harvesters: {assigned}/{ideal}\n"
 
@@ -504,7 +519,7 @@ class BasePlayer(BotAI):
             if unknown_abilities:
                 print(f"Unit {unit.name} has unknown abilities: {unknown_abilities}")
                 import pdb; pdb.set_trace()
-            if unit.name in ["SCV", "MULE"]:
+            if unit.name in self.miner_units:
                 ability_names = [name for name in ability_names if name not in ["MOVE_MOVE", "ATTACK_ATTACK"]]
             ability_names = [name for name in ability_names if TerranAbility[name].get("enabled", False)]
             self._id_to_abilities[self.tag_to_id(unit.tag)] = ability_names

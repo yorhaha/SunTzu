@@ -16,6 +16,7 @@ load_dotenv()
 
 def parse_args():
     parser = ArgumentParser()
+    # For competitive game settings
     parser.add_argument(
         "--map_name",
         choices=constants.map_choices,
@@ -35,6 +36,7 @@ def parse_args():
         help="AI build",
         default="RandomBuild",
     )
+    # For LLM agent settings
     parser.add_argument(
         "--player_name", type=str, help="Player name", default="default_player"
     )
@@ -48,6 +50,7 @@ def parse_args():
         action="store_true",
         help="Enable Action verifier agent",
     )
+    # For LLM API service
     parser.add_argument(
         "--base_url",
         type=str,
@@ -59,6 +62,23 @@ def parse_args():
         type=str,
         default=os.getenv("API_KEY", ""),
         help="API key for the LLM API service",
+    )
+    # For Race selection
+    parser.add_argument(
+        "--own_race",
+        choices=constants.race_choices,
+        default="Terran",
+    )
+    parser.add_argument(
+        "--enemy_race",
+        choices=constants.race_choices,
+        default="Terran",
+    )
+    # For data collection and benchmarking
+    parser.add_argument(
+        "--enable_random_decision_interval",
+        action="store_true",
+        help="Enable this to improve the data quality while collecting data. Disable this to benchmark the agent.",
     )
 
     args = parser.parse_args()
@@ -109,7 +129,7 @@ llm_config = {
 
 # Initialize players
 join_player = Computer(
-    race=Race.Terran,
+    race=getattr(Race, args.enemy_race),
     difficulty=getattr(Difficulty, difficulty),
     ai_build=getattr(AIBuild, ai_build),
 )
@@ -119,7 +139,7 @@ ai_player = LLMPlayer(
     log_path=log_path,
     **llm_config,
 )
-host_player = Bot(Race.Terran, ai_player)
+host_player = Bot(getattr(Race, args.own_race), ai_player)
 
 with open(ai_player.log_path + "/config.json", "w", encoding="utf-8") as f:
     json.dump(vars(args), f, indent=4)

@@ -1,6 +1,6 @@
 from agents.common import construct_text, format_prompt
 from agents.base_agent import BaseAgent
-from agents.plan_agent import strategy_prompt, default_rules
+# from agents.plan_agent import strategy_prompt, default_rules
 from tools.format import extract_code, constrcut_openai_qa
 import json
 

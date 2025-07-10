@@ -38,7 +38,7 @@ Give an action JSON in the following format wrapped with triple backticks:
 
 
 class ActionAgent(BaseAgent):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, race, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.max_retry_attempts = 3
         self.think = []

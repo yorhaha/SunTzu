@@ -1,31 +1,18 @@
-from agents.common import construct_text, TERRANN_TECH_TREE
 from agents.base_agent import BaseAgent
 from tools.format import extract_code, json_to_markdown, construct_ordered_list
 import json
 
 strategy_prompt = """
 Our final aim: destroy all enemies as soon as possible.
-- Resource collection: produce SCVs; construct and gather Refinery
+Our strategy:
+- Resource collection: produce workers and gather minerals and gas
 - Development: build attacking units and structures
 - Attacking: concentrate forces to search and destroy enemies proactively
 """.strip()
 
-default_rules = [
-    "Commands should be natural language, instead of code.",
-    "Produce as many units with the strongest attack power as possible.",
-    "The total cost of all commands should not exceed the current resources (minerals and gas).",
-    "Commands should not send workers (SCV or MULE) to minerals/refinery because the system will do it automatically.",
-    "Commands should not train too many SCVs, whose number should not exceed the capacity of CommandCenter and Refinery.",
-    "Commands should not build redundant structures(e.g. 2 Refinery while one is not fully utilized).",
-    # "Commands should not build redundant structures while the existing ones are idle.",
-    "Commands should not use abilities that are not supported currently.",
-    "Commands should not build a structure that is not needed now (e.g. build a Missile Turret but there is no enemy air unit).",
-    # "The production list capacity of Barracks is 5. If the list is full, do not use it to train units anymore.",
-    "The unit production list capacity of structures is 5. If the list is full, do not add more units to it.",
-    "Commands can construct a new one Supply Depot only when the remaining unused supply is less than 7.",
-]
-
-plan_example_prompt = """
+def construct_plan_example(race: str):
+    if race == "Terran":
+        return """
 Following are some examples:
 - Do nothing and just wait;
 - Train 1/2/3/... SCV/Marine/Viking/...
@@ -34,10 +21,64 @@ Following are some examples:
 - Attack visible enemies;
 - ...
 """.strip()
+    elif race == "Protoss":
+        return """
+Following are some examples:
+- Do nothing and just wait;
+- Train 1/2/3/... Probe/Stalker/Zealot/...
+- Build a Pylon;
+- Upgrade to Warp Gate;
+- Attack visible enemies;
+- ...
+""".strip()
+    elif race == "Zerg":
+        return """
+Following are some examples:
+- Do nothing and just wait;
+- Train 1/2/3/... Drone/Zergling/Hydralisk/...
+- Build a Hatchery;
+- Upgrade to Lair;
+- Attack visible enemies;
+- ...
+""".strip()
+    else:
+        raise ValueError(f"Unknown race: {race}")
 
+def construct_rules(race: str):
+    rules = [
+        "Commands should be natural language, instead of code.",
+        "Produce as many units with the strongest attack power as possible.",
+        "The total cost of all commands should not exceed the current resources (minerals and gas).",
+        "Commands should not send workers to gather resources because the system will do it automatically.",
+        "Commands should not build redundant structures while the existing ones are idle.",
+        "Commands should not use abilities that are not supported currently.",
+        "Commands should not build a structure that is not needed now (e.g. build a Missile Turret but there is no enemy air unit).",
+        "The unit production list capacity of structures is 5. If the list is full, do not add more units to it.",
+    ]
+    if race == "Terran":
+        rules += [
+            "Commands should not train too many SCVs or MULEs, whose number should not exceed the capacity of CommandCenter and Refinery.",
+            "Commands can construct a new one Supply Depot only when the remaining unused supply is less than 7.",
+        ]
+    elif race == "Protoss":
+        rules += [
+            "Commands should not train too many Probes, whose number should not exceed the capacity of Nexus and Assimilator.",
+            "Commands can construct a new one Pylon only when the remaining unused supply is less than 7.",
+            "Structures that require power must be built within Pylon's power field.",
+            "Building multiple Pylons with overlapping coverage in a small area is wasteful.",
+        ]
+    elif race == "Zerg":
+        rules += [
+            "Commands should not train too many Drones, whose number should not exceed the capacity of Hatchery and Extractor.",
+            "Commands can construct a new one Overlord only when the remaining unused supply is less than 7.",
+        ]
+    else:
+        raise ValueError(f"Unknown race: {race}")
+    return rules
 
 ############## Plan Role Prompt ###############
-def create_plan_prompt(rules: list[str], obs_text: str):
+def create_plan_prompt(race: str, rules: list[str], obs_text: str):
+    plan_example_prompt = construct_plan_example(race)
     rules_prompt = "Rule checklist:\n" + construct_ordered_list(rules)
     return f"""
 As a top-tier StarCraft II strategist, your task is to give one or more commands based on the current game state. Only give commands which can be executed immediately, instead of waiting for certain events.
@@ -95,39 +136,34 @@ Analyze the given rules one by one, and then provide a summary for errors at the
     """.strip() % (obs_text, plans_text, rules_text)
 
 
-class PlanHumanAgent(BaseAgent):
-    def run(self, obs_text: str):
-        human_plan = input("Please provide a plan: \n").strip()
-        human_plan = human_plan.split("; ") if human_plan else []
-        if not human_plan:
-            print("No valid commands provided!")
-            return []
-        return "```\n" + json.dumps(human_plan, indent=2) + "\n```"
-
-
 class PlanAgent(BaseAgent):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, race, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.race = race
+        self.rules = construct_rules(race)
+        self.plan_example = construct_plan_example(race)
+        
         self.max_refine_times = 3
         self.think = []
         self.chat_history = []
 
     def gene_new_plan(self, obs_text: str, rules: list[str]):
-        prompt = create_plan_prompt(rules, obs_text)
+        prompt = create_plan_prompt(self.race, rules, obs_text)
         response, messages = self.llm_client.call(**self.generation_config, prompt=prompt, need_json=True)
         self.think.append([response])
         self.chat_history.append(messages)
         return json.loads(extract_code(response))
 
-    def critic_plan(self, plan: list[str], obs_text: str, rules: list[str] = default_rules):
+    def critic_plan(self, plan: list[str], obs_text: str, rules: list[str]):
         prompt = create_plan_critic_prompt(rules, obs_text, plan)
         response, messages = self.llm_client.call(**self.generation_config, prompt=prompt, need_json=True)
         self.think[-1].append(response)
         self.chat_history.append(messages)
         return response
 
-    def refine_plan(self, obs_text: str, plan: list[str], critic: str, rules: list[str] = default_rules):
-        gene_prompt = create_plan_prompt(rules, obs_text)
+    def refine_plan(self, obs_text: str, plan: list[str], critic: str, rules: list[str]):
+        gene_prompt = create_plan_prompt(self.race, rules, obs_text)
         history = [
             {"role": "user", "content": gene_prompt},
             {"role": "assistant", "content": json_to_markdown(plan)},
@@ -142,7 +178,7 @@ class PlanAgent(BaseAgent):
         self.chat_history.append(messages)
         return json.loads(extract_code(response))
 
-    def refine_plan_until_ready(self, obs_text: str, plan: list[str], rules: list[str] = default_rules):
+    def refine_plan_until_ready(self, obs_text: str, plan: list[str], rules: list[str]):
         for _ in range(self.max_refine_times):
             critic = self.critic_plan(plan, obs_text, rules)
             critic = json.loads(extract_code(critic))
@@ -157,7 +193,7 @@ class PlanAgent(BaseAgent):
     def run(self, obs_text: str, verifier=None, suggestions: list[str] = []):
         self.think = []
         self.chat_history = []
-        rules = default_rules + suggestions
+        rules = self.rules + suggestions
         plan = self.gene_new_plan(obs_text, rules)
         if verifier == "llm":
             plan = self.refine_plan_until_ready(obs_text, plan, rules)
