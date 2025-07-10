@@ -3,7 +3,6 @@ from agents import PlanAgent, ActionAgent, RagAgent, SingleAgent
 from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.upgrade_id import UpgradeId
 from sc2.ids.buff_id import BuffId
-from sc2.ids.ability_id import AbilityId
 
 import random
 
@@ -205,7 +204,6 @@ class LLMPlayer(BasePlayer):
                     worker.gather(gas_site)
                     print(f"Reassigned distant worker from mineral to gas: {gas_site}")
                     reassigned += 1
-
 
     async def _deploy_mules(self, mineral_patches) -> None:
         """
@@ -474,12 +472,6 @@ class LLMPlayer(BasePlayer):
             elif ratio < 0.3: # 追猎者过多
                 suggestions.append("Increase Zealot production to create a stronger frontline for your Stalkers.")
 
-        # 发现敌人单位时建议攻击
-        if self.enemy_units.exists:
-            n_enemies = len([unit for unit in self.enemy_units if unit.name not in ["Probe", "SCV", "Drone", "MULE", "Overlord"]])
-            if n_enemies > 0:
-                suggestions.append(f"Enemy units detected ({n_enemies} units), consider attacking them with your army.")
-
         return suggestions
 
     def get_zerg_suggestions(self):
@@ -650,7 +642,7 @@ class LLMPlayer(BasePlayer):
         structure_types = set(unit.type_id for unit in self.structures)
         self.logging("n_unit_types", len(unit_types), save_trace=True)
         self.logging("n_structure_types", len(structure_types), save_trace=True)
-        
+
     
     async def run(self, iteration: int):
         # send idle workers to minerals or gas automatically
@@ -703,8 +695,6 @@ class LLMPlayer(BasePlayer):
                 self.logging("plans", plans, save_trace=True)
                 self.logging("plan_think", plan_think, save_trace=True, print_log=False)
                 self.logging("plan_chat_history", plan_chat_history, save_trace=True, print_log=False)
-
-                plans = "\n".join([f"{i + 1}. {plan}" for i, plan in enumerate(plans)])
 
                 actions, action_think, action_chat_history = self.action_agent.run(obs_text, plans, verifier=self.action_verifier)
                 self.logging("actions", actions, save_trace=True)

@@ -428,3 +428,5 @@ enabled,ability,description
 1,BEHAVIOR_GENERATECREEPON,"Start to generate Creep."
 0,BEHAVIOR_GENERATECREEPOFF,"Stop generating Creep."
 1,MORPH_OVERLORDTRANSPORT,"Upgrade to gain transport ability."
+1,RESEARCH_TUNNELINGCLAWS,"Gives Roaches the ability to move while burrowed at a speed of 2.8."
+1,RESEARCH_GLIALREGENERATION,"Increases Roach movement speed to 4.2 (+1.05) while unburrowed, and to 4.4 while burrowed under creep."

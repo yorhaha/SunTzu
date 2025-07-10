@@ -1,8 +1,7 @@
 # from agents.common import construct_text, format_prompt
 from agents.base_agent import BaseAgent
-# from agents.plan_agent import tech_tree_prompt, strategy_prompt, default_rules
-# from tools.format import extract_code, constrcut_openai_qa
-# import json
+from tools.format import extract_code, constrcut_openai_qa
+import json
 
 
 # def create_single_prompt():
