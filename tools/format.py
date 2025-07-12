@@ -5,6 +5,11 @@ from typing import List
 code_pattern = re.compile(r"```.*?\n(.*?)\n```", re.DOTALL)
 
 
+def extract_first_number(text):
+    match = re.search(r'\d+', text)
+    return int(match.group()) if match else None
+
+
 def extract_code(text):
     codes = code_pattern.findall(text)
     if codes:

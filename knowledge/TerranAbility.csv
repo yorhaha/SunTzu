@@ -167,7 +167,7 @@ enabled,ability,description
 1,BURROWDOWN_WIDOWMINE,Allows the Widow Mine to bury itself and prepare for an attack
 1,BURROWUP_WIDOWMINE,Enables the Widow Mine to emerge from the ground and regain mobility.
 1,CALLDOWNMULE_CALLDOWNMULE,"Calls down a MULE, a temporary unit with a timed life of 64 seconds that can mine minerals and repair for the Terran forces."
-1,COMMANDCENTERTRAIN_SCV,"Train a SCV, a worker unit that gathers minerals and vespene gas and constructs buildings."
+1,COMMANDCENTERTRAIN_SCV,"Train a SCV, a Terran worker."
 1,EFFECT_ANTIARMORMISSILE,"Deploys a Missile which pursues the target unit, and, upon contact, reduces the armor and shield armor of affected units by 2 for 21 seconds."
 1,EFFECT_GHOSTSNIPE,Deal 25 damage to enemy biological units (50 for Psionic).
 1,EFFECT_INTERFERENCEMATRIX,Disables a target unit rendering it unable to attack or use abilities for 11 seconds. Reveals Cloaked units. Can only target mechanical and psionic units.
@@ -248,7 +248,7 @@ enabled,ability,description
 1,TERRANBUILD_ARMORY,"Build a Armory to unlock the Hellbat, Thor and higher-level infantry upgrades."
 1,TERRANBUILD_BARRACKS,"Build a Barracks to produce infantry units (Marine, Reaper, Marauder, Ghost)."
 1,TERRANBUILD_BUNKER,"Build a Bunker, a static defense building."
-1,TERRANBUILD_COMMANDCENTER,"Build a Command Center, the base for collecting resources."
+1,TERRANBUILD_COMMANDCENTER,"Build a Command Center, the Terran base."
 0,TERRANBUILD_ENGINEERINGBAY,"Build an Engineer Bay to unlock Missile Turret, Sensor Tower and Planetary Fortress."
 1,TERRANBUILD_FACTORY,"Build a Factory to produce mechanical ground units (Hellion, Widow Mine, Siege Tank, Hellbat, Thor) and unlock the Starport and Armory."
 1,TERRANBUILD_FUSIONCORE,"Build a Fusion Core to unlock Battlecruiser."
@@ -257,7 +257,7 @@ enabled,ability,description
 1,TERRANBUILD_REFINERY,"Build a Refinery on a Vespene Geyser."
 1,TERRANBUILD_SENSORTOWER,"Build a Sensor Tower, which senses any approaching uncloaked, unburrowed enemy units."
 1,TERRANBUILD_STARPORT,"Build a Starport to produce air units (Viking, Medivac, Banshee, Raven, Battlecruiser)."
-1,TERRANBUILD_SUPPLYDEPOT,"increases supply cap and unlock the Barracks."
+1,TERRANBUILD_SUPPLYDEPOT,"Build a Supply Depot to increase 8 supplies and unlock Barracks."
 1,TRAIN_CYCLONE,"Train a Cyclone, locking onto a single air or ground target to deal immense damage while moving to stay at range."
 1,TRAIN_HELLBAT,"Train a Hellbat, a tough, short-ranged walker that incinerates masses of light units with its wide flame attack."
 1,UNSIEGE_UNSIEGE,Converts a Siege Tank back from Siege Mode to its regular mode.

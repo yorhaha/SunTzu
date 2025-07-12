@@ -13,7 +13,7 @@ import math
 import pandas as pd
 
 from tools.logger import setup_logger
-from tools.format import extract_code
+from tools.format import extract_code, extract_first_number
 from tools.ops import IterativeMean
 
 
@@ -57,13 +57,16 @@ TerranAbility = load_knowledge()
 
 
 class BasePlayer(BotAI):
-    def __init__(self, player_name, model_name, generation_config, llm_client, log_path="logs"):
+    def __init__(self, config, player_name, model_name, generation_config, llm_client, log_path="logs"):
         super().__init__()
 
+        self.config = config
         self.player_name = player_name
         self.model_name = model_name
         self.generation_config = generation_config
         self.llm_client = llm_client
+        map_size = str(extract_first_number(config.map_name))
+        self.map_name = f"{map_size}x{map_size}"
 
         time_str = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())
         self.real_model_name = self.model_name.split("/")[-1]
@@ -408,7 +411,8 @@ class BasePlayer(BotAI):
         text += "Vespene: {}\n".format(self.vespene)
         text += "Supply army: {}\n".format(self.supply_army)
         text += "Supply workers: {}\n".format(self.supply_workers)
-        text += "Supply unused: {}".format(self.supply_cap - self.supply_used)
+        text += "Supply unused: {}\n".format(self.supply_cap - self.supply_used)
+        text += "Map size: {}".format(self.map_name)
 
         return text.strip()
 
