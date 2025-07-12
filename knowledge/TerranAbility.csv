@@ -432,3 +432,5 @@ enabled,ability,description
 1,RESEARCH_GLIALREGENERATION,"Increases Roach movement speed to 4.2 (+1.05) while unburrowed, and to 4.4 while burrowed under creep."
 1,BUILD_LURKERDEN,"Morph to be a Lurker Den to enhance defense ability."
 1,RESEARCH_ADAPTIVETALONS,"Reduces the time Lurkers take to burrow from 2 seconds to 1.07 seconds."
+1,MORPH_SURVEILLANCEMODE,"Transforms the Observer to Surveillance Mode. The Observer gains 25% wider vision, but loses the ability to move."
+1,MORPH_OBSERVERMODE,"Transforms the Observer to standard Observer Mode. Allows the Observer to move at the cost of decreased sight radius."
