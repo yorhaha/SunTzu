@@ -434,3 +434,8 @@ enabled,ability,description
 1,RESEARCH_ADAPTIVETALONS,"Reduces the time Lurkers take to burrow from 2 seconds to 1.07 seconds."
 1,MORPH_SURVEILLANCEMODE,"Transforms the Observer to Surveillance Mode. The Observer gains 25% wider vision, but loses the ability to move."
 1,MORPH_OBSERVERMODE,"Transforms the Observer to standard Observer Mode. Allows the Observer to move at the cost of decreased sight radius."
+0,ATTACK_REDIRECT,
+1,SPAWNCHANGELING_SPAWNCHANGELING,"Spawn a Changeling, a small unit with timed life and no attack. When a Changeling first encounters an enemy unit, it will match that unit's color and change into a Zealot, Marine, or Zergling, depending on the enemy race."
+1,CONTAMINATE_CONTAMINATE,"The Overseer covers an enemy structure in slime. The structure will be unable to train units or research upgrades for 21 seconds."
+1,MORPH_OVERSIGHTMODE,"Grants the Overseer 25% wider vision, but removes its ability to move."
+1,RESEARCH_PNEUMATIZEDCARAPACE,"Increases the movement speed of Overlords to 3.00 and Overseers to 4.72."
