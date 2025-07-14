@@ -11,6 +11,7 @@ import os
 import json
 import math
 import pandas as pd
+import random
 
 from tools.logger import setup_logger
 from tools.format import extract_code, extract_first_number
@@ -315,6 +316,75 @@ class BasePlayer(BotAI):
     def get_unit_by_id(self, _id: int):
         tag = self.id_to_tag(_id)
         return self.get_unit_by_tag(tag)
+
+    async def find_placement(
+        self,
+        building,
+        near: Point2,
+        max_distance: int = 20,
+        random_alternative: bool = True,
+        placement_step: int = 2,
+        addon_place: bool = False,
+    ):
+        """Finds a placement location for building.
+        Example::
+            if self.townhalls:
+                cc = self.townhalls[0]
+                depot_position = await self.find_placement(UnitTypeId.SUPPLYDEPOT, near=cc)
+        :param building:
+        :param near:
+        :param max_distance:
+        :param random_alternative:
+        :param placement_step:
+        :param addon_place:"""
+        assert isinstance(building, (AbilityId, UnitTypeId))
+        assert isinstance(near, Point2), f"{near} is no Point2 object"
+        if isinstance(building, UnitTypeId):
+            building_ability = self.game_data.units[building.value].creation_ability.id
+        else:
+            building_ability = building
+        # 【修复第一步】: 如果需要检查附加建筑，提前获取补给站的建造AbilityId
+        # 这是一个标准的2x2建筑，非常适合用来检查附加建筑的空位
+        addon_check_ability = None
+        if addon_place:
+            addon_check_ability = self.game_data.units[UnitTypeId.SUPPLYDEPOT.value].creation_ability.id
+        # 检查'near'点本身
+        if await self.can_place_single(building_ability, near):
+            if not addon_place or await self.can_place_single(addon_check_ability, near.offset((2.5, -0.5))):
+                return near
+        if max_distance == 0:
+            return None
+        # 在一个方形螺旋中搜索
+        for distance in range(placement_step, max_distance, placement_step):
+            possible_positions = [
+                Point2(p).offset(near).to2
+                for p in (
+                    [(dx, -distance) for dx in range(-distance, distance + 1, placement_step)]
+                    + [(dx, distance) for dx in range(-distance, distance + 1, placement_step)]
+                    + [(-distance, dy) for dy in range(-distance, distance + 1, placement_step)]
+                    + [(distance, dy) for dy in range(-distance, distance + 1, placement_step)]
+                )
+            ]
+            
+            # 过滤出可以放置主建筑的位置
+            res = await self.client._query_building_placement_fast(building_ability, possible_positions)
+            possible = [p for r, p in zip(res, possible_positions) if r]
+            if not possible:
+                continue
+            if addon_place:
+                # 【修复第二步】: 使用正确的AbilityId来检查附加建筑的位置
+                res = await self.client._query_building_placement_fast(
+                    addon_check_ability,  # <-- 使用正确的ID
+                    [p.offset((2.5, -0.5)) for p in possible],
+                )
+                possible = [p for r, p in zip(res, possible) if r]
+            if not possible:
+                continue
+            if random_alternative:
+                return random.choice(possible)
+            return min(possible, key=lambda p: p.distance_to_point2(near))
+            
+        return None
 
     ################ run actions
     async def run_actions(self, actions):

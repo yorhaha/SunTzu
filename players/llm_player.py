@@ -595,6 +595,9 @@ class LLMPlayer(BasePlayer):
         if self.time < 300 and self.time > 60:
             suggestions.append("The enemy will start a fierce attack at 03:00, so you need to start producing a large number of attack units, such as Marauder, at least at 02:30.")
         
+        if self.time > 300 and self.supply_army > 15 and len(self.enemy_units) < 8:
+            suggestions.append("We can win the game right away! Please find and eliminate all enemies as soon as possible.")
+        
         if self.minerals >= 500:
             suggestions.append("Too much minerals! Consider spending them on expanding or developing high technology.")
 
