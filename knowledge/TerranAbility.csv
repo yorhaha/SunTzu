@@ -440,3 +440,4 @@ enabled,ability,description
 1,MORPH_OVERSIGHTMODE,"Grants the Overseer 25% wider vision, but removes its ability to move."
 1,RESEARCH_PNEUMATIZEDCARAPACE,"Increases the movement speed of Overlords to 3.00 and Overseers to 4.72."
 1,EFFECT_CORROSIVEBILE,"Launch a missile at the target location, dealing 60 damage to all units and destroying all Force Fields in the area upon impact."
+1,LOAD_OVERLORD,"The Overlord has a cargo space of 8."
