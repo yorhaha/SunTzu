@@ -66,8 +66,8 @@ def construct_rules(race: str):
             "Commands should not send Probe to gather resources because the system will do it automatically.",
             "Commands should not train too many Probes, whose number should not exceed the capacity of Nexus and Assimilator.",
             "Commands can construct a new one Pylon only when the remaining unused supply is less than 7.",
-            "Structures that require power must be built within Pylon's power field.",
-            "Building multiple Pylons with overlapping coverage in a small area is wasteful.",
+            # "Structures that require power must be built within Pylon's power field.",
+            # "Building multiple Pylons with overlapping coverage in a small area is wasteful.",
         ]
     elif race == "Zerg":
         rules += [
