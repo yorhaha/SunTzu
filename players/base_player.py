@@ -238,7 +238,7 @@ class BasePlayer(BotAI):
         ### value check
         if not isinstance(action_name, str):
             return False, "`action` must be a string"
-        if not isinstance(action["units"], list) and len(action["units"]) > 0:
+        if not (isinstance(action["units"], list) and len(action["units"]) > 0):
             return False, "`units` must be a non-empty list of integers"
         if "target_position" in action:
             if not (len(action["target_position"]) == 2 and all(isinstance(i, int) for i in action["target_position"])):
