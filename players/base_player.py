@@ -58,7 +58,7 @@ TerranAbility = load_knowledge()
 
 
 class BasePlayer(BotAI):
-    def __init__(self, config, player_name, model_name, generation_config, llm_client, log_path="logs"):
+    def __init__(self, config, player_name, model_name, generation_config, llm_client, log_path="logs", enable_logging=True):
         super().__init__()
 
         self.config = config
@@ -71,9 +71,12 @@ class BasePlayer(BotAI):
 
         time_str = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())
         self.real_model_name = self.model_name.split("/")[-1]
-        self.log_path = f"{log_path}/{self.real_model_name}/{time_str}"
-        os.makedirs(f"{self.log_path}/observation", exist_ok=True)
-        self.logger = setup_logger(f"{player_name}_{self.real_model_name}", log_dir=self.log_path)
+        
+        self.enable_logging = enable_logging
+        if enable_logging:
+            self.log_path = f"{log_path}/{self.real_model_name}/{time_str}"
+            os.makedirs(f"{self.log_path}/observation", exist_ok=True)
+            self.logger = setup_logger(f"{player_name}_{self.real_model_name}", log_dir=self.log_path)
 
         self._tag_to_id = {}
         self._id_to_tag = {}
@@ -90,6 +93,8 @@ class BasePlayer(BotAI):
         self.miner_units = ["SCV", "Probe", "Drone"]
 
     def logging(self, key: str, value, level="info", save_trace=False, save_file=False, print_log=True):
+        if not self.enable_logging:
+            return
         idx = self.state.game_loop // 4
         if level in ["info", "warning", "error"] and print_log:
             text = f"({idx}) {key}: {str(value)}"

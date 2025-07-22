@@ -702,9 +702,10 @@ class LLMPlayer(BasePlayer):
                 self.logging("action_think", action_think, save_trace=True, print_log=False)
                 self.logging("action_chat_history", action_chat_history, save_trace=True, print_log=False)
             else:
-                actions, action_think = self.agent.run(obs_text, verifier=self.action_verifier)
+                actions, action_think, action_chat_history = self.agent.run(obs_text, verifier=self.action_verifier)
                 self.logging("actions", actions, save_trace=True)
                 self.logging("action_think", action_think, save_trace=True, print_log=False)
+                self.logging("action_chat_history", action_chat_history, save_trace=True, print_log=False)
 
             await self.run_actions(actions)
             

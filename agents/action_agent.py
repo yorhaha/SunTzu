@@ -34,8 +34,6 @@ Give an action JSON in the following format wrapped with triple backticks:
 {format_prompt}
     """.strip()
 
-# Think step by step, and then give an action JSON in the following format wrapped with triple backticks:
-
 
 class ActionAgent(BaseAgent):
     def __init__(self, race: str, *args, **kwargs):
