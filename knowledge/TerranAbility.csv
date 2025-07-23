@@ -164,7 +164,18 @@ enabled,ability,description
 1,BUILD_TECHLAB_BARRACKS,Unlocks Marauder and is a requirement for Ghost.
 1,BUILD_TECHLAB_FACTORY,Unlocks Siege Tank and is a requirement for Thor.
 1,BUILD_TECHLAB_STARPORT,Unlocks Raven and Banshee and is a requirement for Battlecruiser.
-1,BURROWDOWN_WIDOWMINE,Allows the Widow Mine to bury itself and prepare for an attack
+0,BURROWDOWN_DRONE,
+0,BURROWDOWN_HYDRALISK,
+0,BURROWDOWN_ROACH,
+0,BURROWDOWN_ZERGLING,
+0,BURROWDOWN_INFESTORTERRAN,
+0,BURROWDOWN_QUEEN,
+0,BURROWDOWN_INFESTOR,
+0,BURROWDOWN_ULTRALISK,
+0,BURROWDOWN_RAVAGER,
+0,BURROWDOWN_SWARMHOST,
+0,BURROWDOWN_WIDOWMINE,
+0,BURROWDOWN_BANELING,
 1,BURROWUP_WIDOWMINE,Enables the Widow Mine to emerge from the ground and regain mobility.
 1,CALLDOWNMULE_CALLDOWNMULE,"Calls down a MULE, a temporary unit with a timed life of 64 seconds that can mine minerals and repair for the Terran forces."
 1,COMMANDCENTERTRAIN_SCV,"Train a SCV, a Terran worker."
@@ -266,7 +277,8 @@ enabled,ability,description
 1,WIDOWMINEATTACK_WIDOWMINEATTACK,Command Widow Mine to attack.
 1,YAMATO_YAMATOGUN,"Blasts a target with a devastating plasma cannon, causing 240 damage."
 1,STARPORTTECHLABRESEARCH_RESEARCHRAVENINTERFERENCEMATRIX,Allows Ravens to use the Interference Matrix ability.
-1,UNLOADALL_BUNKER,Unload all units from a Bunker.
+0,UNLOADALL_BUNKER,Unload all units from a Bunker.
+0,UNLOADALLAT_OVERLORD,
 1,PROTOSSBUILD_ASSIMILATOR,"Build an assimilator, built on a Vespene Geyser that allows Probes to harvest gas."
 1,PROTOSSBUILD_CYBERNETICSCORE,Build a Cybernetics Core.
 1,PROTOSSBUILD_DARKSHRINE,Build a Dark Shrine.
@@ -425,6 +437,7 @@ enabled,ability,description
 1,SPINECRAWLERROOT_SPINECRAWLERROOT,"Gain attack and lose mobility capability."
 1,SPORECRAWLERROOT_SPORECRAWLERROOT,"Gain attack and lose mobility capability."
 1,MORPH_OVERSEER,"Morph to Overseer to detect invisible units but lose 8 supply."
+1,MORPH_OVERSEERMODE,"Morph to Overseer to detect invisible units but lose 8 supply."
 1,BEHAVIOR_GENERATECREEPON,"Start to generate Creep."
 0,BEHAVIOR_GENERATECREEPOFF,"Stop generating Creep."
 1,MORPH_OVERLORDTRANSPORT,"Upgrade to gain transport ability."
@@ -441,3 +454,6 @@ enabled,ability,description
 1,RESEARCH_PNEUMATIZEDCARAPACE,"Increases the movement speed of Overlords to 3.00 and Overseers to 4.72."
 1,EFFECT_CORROSIVEBILE,"Launch a missile at the target location, dealing 60 damage to all units and destroying all Force Fields in the area upon impact."
 1,LOAD_OVERLORD,"The Overlord has a cargo space of 8."
+1,RESEARCH_CHARGE,"Grants the Charge ability. Also increases the movement speed of Zealots to 4.725."
+1,RESEARCH_BLINK,"Gives Stalkers the ability to teleport to a nearby target location."
+1,RESEARCH_ADEPTRESONATINGGLAIVES,"Increases the attack speed of the Adept by 45%."
