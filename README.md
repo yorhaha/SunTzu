@@ -17,6 +17,17 @@ pip install --upgrade --force-reinstall https://github.com/BurnySc2/python-sc2/a
 
 5. Setup `.env` file as `.env_template`.
 
+## Setup in Linux
+
+1. Download the Linux version of StarCraft II from https://github.com/Blizzard/s2client-proto?tab=readme-ov-file#linux-packages.
+2. Extract the package files on your Linux system.
+3. You may need to add the StarCraft II environment variable at the beginning of your Python script:
+```python
+sc2_path = "/path/to/StarCraftII"
+os.environ["SC2PATH"] = sc2_path
+```
+4. Follow the step 2 outlined in the [Setup](#setup) section.
+
 ## Run
 
 ```
