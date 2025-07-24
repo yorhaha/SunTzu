@@ -1,36 +1,82 @@
 # SC2Arena
 
-A StarCraft II battle arena for LLMs!
+### A StarCraft II Battle Arena for Large Language Models
 
-## Setup
+Pit your Large Language Model agents against each other and the built-in StarCraft II AI in a dynamic, real-time strategy environment. `SC2Arena` provides a robust framework to test the strategic planning and execution capabilities of LLMs in one of the most complex RTS games ever made.
 
-Python 3.9+ is recommended.
+</div>
 
-1. Install StarCraft II: https://starcraft2.blizzard.com/. Optional: change language to be English.
-2. Download maps from https://github.com/Blizzard/s2client-proto?tab=readme-ov-file#map-packs (Melee pack is required) and install them following the guide. The files are password protected with the password `iagreetotheeula`. 
-3. Clone repo and setup python environment: `pip install -r requirements.txt`.
-4. Setup python-sc2: https://github.com/BurnySc2/python-sc2?tab=readme-ov-file#starcraft-ii.
+## ✨ Key Features
 
-```
-pip install --upgrade --force-reinstall https://github.com/BurnySc2/python-sc2/archive/develop.zip
-```
+*   **LLM-Powered Agents:** Connect any powerful LLMs you want to try to control a player in StarCraft II.
+*   **Human-like Reasoning:** Agents can perform high-level strategic planning, verify the validity of their plans, and self-correct their actions.
+*   **Extensible Framework:** Easily add new agents, models, or custom game logic.
+*   **Detailed Configuration:** Fine-tune every aspect of the match, from map and difficulty to race and AI build strategies.
+*   **Benchmarking:** Test your agent against various built-in AI difficulty levels and builds to measure its performance.
 
-5. Setup `.env` file as `.env_template`.
+## 🚀 Getting Started
 
-## Setup in Linux
+Follow these steps to set up your local environment and start a match.
 
-1. Download the Linux version of StarCraft II from https://github.com/Blizzard/s2client-proto?tab=readme-ov-file#linux-packages.
-2. Extract the package files on your Linux system.
-3. You may need to add the StarCraft II environment variable at the beginning of your Python script:
-```python
-sc2_path = "/path/to/StarCraftII"
-os.environ["SC2PATH"] = sc2_path
-```
-4. Follow the step 2 outlined in the [Setup](#setup) section.
+### 1. Install StarCraft II 🎮
 
-## Run
+You need a local installation of the game. The free Starter Edition is sufficient.
 
-```
+*   **Windows / macOS:**
+    1.  Download and install the game from the [official StarCraft II website](https://starcraft2.blizzard.com/).
+    2.  (Optional but recommended) In the Battle.net launcher settings, change the game language to English.
+
+*   **Linux:**
+    1.  Download the Linux game package from the [s2client-proto repository](https://github.com/Blizzard/s2client-proto?tab=readme-ov-file#linux-packages).
+    2.  Set the `SC2PATH` environment variable to your installation directory.
+        ```bash
+        export SC2PATH="/path/to/StarCraftII"
+        ```
+
+### 2. Set Up Game Maps 🗺️
+
+Download the necessary map packs to run experiments.
+
+1.  Download the map packs from the [s2client-proto repository](https://github.com/Blizzard/s2client-proto?tab=readme-ov-file#map-packs). The **`Melee`** pack is required.
+2.  Create a `Maps` folder inside your StarCraft II installation directory if it doesn't exist.
+3.  Unzip `Melee.zip` into the `Maps` folder using the password `iagreetotheeula`. Your final directory structure should look like this:
+    ```
+    /path/to/StarCraftII/
+    ├── Maps/
+    │   ├── Melee/
+    │   │   ├── Flat32.SC2Map
+    │   │   ├── ... (other maps)
+    ```
+
+### 3. Configure the Agent 🤖
+
+Set up the Python environment and API keys for your LLM agent.
+
+1.  **Clone the repository and install dependencies:**
+    ```bash
+    git clone https://github.com/yorhaha/SC2Arena.git
+    cd SC2Arena
+    pip install -r requirements.txt
+    ```
+
+2.  **Configure API Keys:**
+    Create a `.env` file by copying the template:
+    ```bash
+    cp .env_template .env
+    ```
+    Now, open the `.env` file and add your LLM provider's API key and base URL.
+    ```env
+    # .env
+    API_KEY="your_api_key_here"
+    BASE_URL="https://api.example.com/v1"
+    ```
+    Alternatively, you can set these as environment variables or pass them as command-line arguments.
+
+## ▶️ Running an Experiment
+
+You are now ready to launch a match! Run `main.py` with your desired configuration.
+
+```bash
 python main.py \
     --map_name Flat32 \
     --difficulty Hard \
@@ -43,11 +89,34 @@ python main.py \
     --enemy_race Terran
 ```
 
-See `tools/constants.py` for detailed game settings.
+### Command-Line Arguments
 
-## References
+Here are some of the key parameters you can configure:
 
-- Tech tree:
-  - https://osirissc2guide.com/starcraft-2-terran-structures.html
-  - https://osirissc2guide.com/starcraft-2-protoss-structures.html
-  - https://osirissc2guide.com/starcraft-2-zerg-structures.html
+| Argument                 | Description                                                              | Default              |
+| ------------------------ | ------------------------------------------------------------------------ | -------------------- |
+| `--map_name`             | The name of the map to play on (e.g., `Flat32`, `Simple64`).             | `Flat32`             |
+| `--difficulty`           | The difficulty of the built-in AI opponent.                              | `Hard`               |
+| `--model`                | The name of the LLM to use for the agent.                                | `Qwen2.5-32B-Instruct` |
+| `--ai_build`             | The build order for the built-in AI (e.g., `Rush`, `Macro`).             | `RandomBuild`        |
+| `--own_race` / `--enemy_race` | The race for your agent and the opponent (`Terran`, `Protoss`, `Zerg`). | `Terran`             |
+| `--enable_plan`          | Enables the high-level strategic planning module for the agent.          | `False`              |
+| `--enable_plan_verifier` | Enables a module that verifies the logic of the generated plan.          | `False`              |
+| `--enable_action_verifier`| Enables a module that verifies the validity of each generated action.    | `False`              |
+
+> For a full list of available maps, races, and other settings, see `tools/constants.py`.
+
+## 🤝 How to Contribute
+
+Contributions are welcome! Whether it's adding a new agent, improving documentation, or fixing a bug, we appreciate your help.
+
+1.  **Fork** the repository.
+2.  Create a new **branch** (`git checkout -b feature/your-feature-name`).
+3.  Make your changes and **commit** them.
+4.  Push to your branch (`git push origin feature/your-feature-name`).
+5.  Open a **Pull Request**.
+
+Please feel free to open an [issue](https://github.com/yorhaha/SC2Arena/issues) to report bugs or suggest new features.
+
+---
+*StarCraft II is a trademark of Blizzard Entertainment, Inc. This project is not affiliated with or endorsed by Blizzard Entertainment.*
