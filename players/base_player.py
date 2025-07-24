@@ -109,8 +109,9 @@ class BasePlayer(BotAI):
             if idx not in self.trace:
                 self.trace[idx] = {}
             self.trace[idx][key] = value
-            with open(f"{self.log_path}/trace.json", "w", encoding="utf-8") as f:
-                json.dump(self.trace, f, indent=2, ensure_ascii=False)
+            if idx % 500 == 0:
+                with open(f"{self.log_path}/trace.json", "w", encoding="utf-8") as f:
+                    json.dump(self.trace, f, indent=2, ensure_ascii=False)
 
         if save_file:
             with open(f"{self.log_path}/observation/{idx}-{key}.txt", "w", encoding="utf-8") as f:
@@ -241,7 +242,7 @@ class BasePlayer(BotAI):
         if not (isinstance(action["units"], list) and len(action["units"]) > 0):
             return False, "`units` must be a non-empty list of integers"
         if "target_position" in action:
-            if not (len(action["target_position"]) == 2 and all(isinstance(i, int) for i in action["target_position"])):
+            if not (isinstance(action["target_position"], list) and len(action["target_position"]) == 2 and all(isinstance(i, int) for i in action["target_position"])):
                 return False, "`target_position` must be a list of two integers"
         if "target_unit" in action:
             if not isinstance(action["target_unit"], int):
@@ -291,6 +292,16 @@ class BasePlayer(BotAI):
                 return False, f"Supply is not enough for action {action_name}"
         except KeyError:
             return True, [cost.minerals, cost.vespene, 0]
+        
+        ### Protoss Pylon check
+        if self.config.own_race == "Protoss":
+            if action_name == "PROTOSSBUILD_PYLON":
+                pylons = self.units(UnitTypeId.PYLON)
+                close_pylons = pylons.closer_than(5, action["target_position"])
+ 
+                if close_pylons:
+                    close_pylons_pos = [f"({int(p.position.x)}, {int(p.position.y)})" for p in close_pylons]
+                    return False, f"Too close to other Pylons at positions: " + ", ".join(close_pylons_pos)
 
         return True, [cost.minerals, cost.vespene, supply_cost]
 
@@ -456,7 +467,8 @@ class BasePlayer(BotAI):
         obs_text = "\n\n".join([f"# {key}\n{value}" for key, value in obs.items()])
 
         self.logging("obs", obs, save_trace=True, print_log=False)
-        self.logging("obs_text", obs_text, save_file=True, print_log=False)
+        if self.enable_logging:
+            self.logging("obs_text", obs_text, save_file=True, print_log=False)
         return obs_text
 
     def get_ability_desc(self, text: str):
@@ -574,14 +586,14 @@ class BasePlayer(BotAI):
                         else:
                             text += f"Harvesters: {assigned}/{ideal}\n"
 
-                    # Production list
-                    production_list = []
-                    unit_orders = unit.orders
-                    for unit_order in unit_orders:
-                        if "Train " in unit_order.ability.friendly_name:
-                            production_list.append(unit_order.ability.friendly_name[6:])
-                    if production_list:
-                        text += f"Production list: {', '.join(production_list)}\n"
+                # Production list
+                production_list = []
+                unit_orders = unit.orders
+                for unit_order in unit_orders:
+                    if "Train " in unit_order.ability.friendly_name:
+                        production_list.append(unit_order.ability.friendly_name[6:])
+                if production_list:
+                    text += f"Production list: {', '.join(production_list)}\n"
         return text.strip()
 
     async def abilities_to_text(self, units: Units):
