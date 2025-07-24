@@ -191,6 +191,8 @@ enabled,ability,description
 0,EFFECT_SPRAY_ZERG,Spray a marker.
 1,EFFECT_STIM_MARAUDER,Increases the movement speed and firing rate by 50% at the cost of 20 HP.
 1,EFFECT_STIM_MARINE,Increases the movement speed and firing rate by 50% at the cost of 10 HP.
+1,EFFECT_STIM_MARINE_REDIRECT,Increases inner Marine movement speed and firing rate by 50% at the cost of 10 HP.
+1,EFFECT_STIM_MARAUDER_REDIRECT,Increases inner Marauder movement speed and firing rate by 50% at the cost of 20 HP.
 1,EFFECT_TACTICALJUMP,"After 4 seconds, warps to the target location. Battlecruiser is invincible while warping. Stuns and puts the Battlecruiser into a 1 second vulnerability phase before it teleports. In this state, the Battlecruiser can be damaged, but Tactical Jump may not be canceled."
 1,EMP_EMP,The Ghost fires an EMP Round that removes up to 100 shields and energy from every unit and building within the AoE. Also reveals cloaked units.
 1,ENGINEERINGBAYRESEARCH_TERRANINFANTRYARMORLEVEL1,"Increase the armor of Terran infantry units (Ghost, Marauder, Reaper, Marine, SCV)."
