@@ -459,3 +459,4 @@ enabled,ability,description
 1,RESEARCH_CHARGE,"Grants the Charge ability. Also increases the movement speed of Zealots to 4.725."
 1,RESEARCH_BLINK,"Gives Stalkers the ability to teleport to a nearby target location."
 1,RESEARCH_ADEPTRESONATINGGLAIVES,"Increases the attack speed of the Adept by 45%."
+1,EFFECT_RESTORE,"Recharges the shield of a close-by friendly Protoss unit for 119.1 shield per second."

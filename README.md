@@ -72,7 +72,7 @@ Set up the Python environment and API keys for your LLM agent.
     ```
     Alternatively, you can set these as environment variables or pass them as command-line arguments.
 
-## ▶️ Running an Experiment
+## ▶️ Running a Battle
 
 You are now ready to launch a match! Run `main.py` with your desired configuration.
 
@@ -105,6 +105,16 @@ Here are some of the key parameters you can configure:
 | `--enable_action_verifier`| Enables a module that verifies the validity of each generated action.    | `False`              |
 
 > For a full list of available maps, races, and other settings, see `tools/constants.py`.
+
+### Battle in ELO mode
+
+You can launch a battle between two AI agents and calculate their ELO score.
+
+Set up the necessary player information in `run_elo_template.py`. Then run:
+
+```
+python run_elo_template.py
+```
 
 ## 🤝 How to Contribute
 
