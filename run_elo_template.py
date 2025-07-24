@@ -7,8 +7,19 @@ import json
 from players import LLMPlayer
 from tools.llm import LLMClient
 
-MAP_NAME = "Flat48"
-RACE = "Terran"
+#######################################
+MAP_NAME = "Flat32"
+# For Agent 1
+RACE_1 = "Terran"
+MODEL_1 = ""
+BASE_URL_1 = ""
+API_KEY_1 = ""
+# For Agent 2
+RACE_2 = "Terran"
+MODEL_2 = ""
+BASE_URL_2 = ""
+API_KEY_2 = ""
+#######################################
 
 enable_random_decision_interval = False
 
@@ -19,16 +30,16 @@ class Config:
 
 config_1 = Config({
     "map_name": MAP_NAME,
-    "model_name": "Qwen2.5-7B-Instruct",
-    "player_name": "Qwen2.5-7B Agent",
+    "model_name": MODEL_1,
+    "player_name": MODEL_1 + " Agent",
     "enable_rag": False,
     "enable_plan": True,
     "enable_plan_verifier": True,
     "enable_action_verifier": True,
-    "base_url": "http://127.0.0.1:12001/v1",
-    "api_key": "sk-11223344",
-    "own_race": RACE,
-    "enemy_race": RACE,
+    "base_url": BASE_URL_1,
+    "api_key": API_KEY_1,
+    "own_race": RACE_1,
+    "enemy_race": RACE_2,
     "enable_random_decision_interval": enable_random_decision_interval,
 })
 
@@ -52,16 +63,16 @@ llm_config_1 = {
 
 config_2 = Config({
     "map_name": MAP_NAME,
-    "model_name": "Qwen2.5-7B-v2",
-    "player_name": "Qwen2.5-7B-v2 Agent",
+    "model_name": MODEL_2,
+    "player_name": MODEL_2 + " Agent",
     "enable_rag": False,
     "enable_plan": True,
     "enable_plan_verifier": True,
     "enable_action_verifier": True,
-    "base_url": "http://127.0.0.1:12004/v1",
-    "api_key": "sk-11223344",
-    "own_race": RACE,
-    "enemy_race": RACE,
+    "base_url": BASE_URL_2,
+    "api_key": API_KEY_2,
+    "own_race": RACE_2,
+    "enemy_race": RACE_1,
     "enable_random_decision_interval": enable_random_decision_interval,
 })
 
@@ -83,8 +94,8 @@ llm_config_2 = {
     ),
 }
 
-
-log_path_1 = f"logs/elo/{config_1.map_name}/{config_1.model_name} v.s. {config_2.model_name}"
+# only enable log for agent 1
+log_path_1 = f"logs/elo/{RACE_1}/{config_1.map_name}/{config_1.model_name} v.s. {config_2.model_name}"
 
 # Initialize players
 ai_player_1 = LLMPlayer(
@@ -96,7 +107,7 @@ ai_player_1 = LLMPlayer(
 ai_player_2 = LLMPlayer(
     config=config_2,
     player_name=config_2.player_name,
-    enable_logging=False,
+    enable_logging=False, # only enable log for agent 1
     **llm_config_2,
 )
 
