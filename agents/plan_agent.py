@@ -66,13 +66,13 @@ def construct_rules(race: str):
             "Commands should not send Probe to gather resources because the system will do it automatically.",
             "Commands should not train too many Probes, whose number should not exceed the capacity of Nexus and Assimilator.",
             "Commands can construct a new one Pylon only when the remaining unused supply is less than 7.",
-            "Commands should not train another Overlord if any [Egg] unit in 'Own units' has 'Production list: Overlord'.",
         ]
     elif race == "Zerg":
         rules += [
             "Commands should not send Drone to gather resources because the system will do it automatically.",
             "Commands should not train too many Drones, whose number should not exceed the capacity of Hatchery and Extractor.",
             "Commands can construct a new one Overlord only when the remaining unused supply is less than 7.",
+            "Commands should not train another Overlord if any [Egg] unit in 'Own units' has 'Production list: Overlord'.",
         ]
     else:
         raise ValueError(f"Unknown race: {race}")
