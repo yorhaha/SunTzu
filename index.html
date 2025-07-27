@@ -5,9 +5,9 @@
   <meta charset="utf-8">
   <!-- Meta tags for social media banners, these should be filled in appropriatly as they are your "business card" -->
   <!-- Replace the content tag with appropriate information -->
-  <meta name="description" content="DESCRIPTION META TAG">
-  <meta property="og:title" content="SOCIAL MEDIA TITLE TAG" />
-  <meta property="og:description" content="SOCIAL MEDIA DESCRIPTION TAG TAG" />
+  <meta name="description" content="SC2Arena: A comprehensive benchmark for evaluating LLMs in StarCraft II, supporting all races, full action spaces, and agent-vs-agent gameplay. We also introduce SC2Agent, a hierarchical agent framework with self-correction and self-improvement capabilities.">
+  <meta property="og:title" content="SC2Arena: A Comprehensive Benchmark and Agent for LLMs in StarCraft II" />
+  <meta property="og:description" content="SC2Arena is a benchmark that fully supports all playable races, low-level action spaces, and optimized text observations. SC2Agent is a hierarchical framework that integrates strategic planning and tactical execution with iterative self-correction and continuous improvement." />
   <meta property="og:url" content="URL OF THE WEBSITE" />
   <!-- Path to banner image, should be in the path listed below. Optimal dimenssions are 1200X630-->
   <meta property="og:image" content="static/image/your_banner_image.png" />
@@ -15,13 +15,13 @@
   <meta property="og:image:height" content="630" />
 
 
-  <meta name="twitter:title" content="TWITTER BANNER TITLE META TAG">
-  <meta name="twitter:description" content="TWITTER BANNER DESCRIPTION META TAG">
+  <meta name="twitter:title" content="SC2Arena: A Comprehensive Benchmark and Agent for LLMs in StarCraft II">
+  <meta name="twitter:description" content="SC2Arena is a benchmark that fully supports all playable races, low-level action spaces, and optimized text observations. SC2Agent is a hierarchical framework that integrates strategic planning and tactical execution with iterative self-correction and continuous improvement.">
   <!-- Path to banner image, should be in the path listed below. Optimal dimenssions are 1200X600-->
   <meta name="twitter:image" content="static/images/your_twitter_banner_image.png">
   <meta name="twitter:card" content="summary_large_image">
   <!-- Keywords for your paper to be indexed by-->
-  <meta name="keywords" content="KEYWORDS SHOULD BE PLACED HERE">
+  <meta name="keywords" content="Large Language Models, LLM, StarCraft II, SC2, AI Agent, Benchmark, Reinforcement Learning, Strategic Planning, Decision Making">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
@@ -52,8 +52,8 @@
       <div class="container is-max-desktop">
         <div class="columns is-centered">
           <div class="column has-text-centered">
-            <img src="static/images/favicon.ico" alt="MY ALT TEXT" style="width: 128px;height: 128px;" />
-            <h1 class="title is-1 publication-title">SC2Arena</h1>
+            <img src="static/images/favicon.ico" alt="SC2Arena Logo" style="width: 128px;height: 128px;" />
+            <h1 class="title is-1 publication-title">SC2Arena:<br/>Benchmark and Agent for StarCraft II</h1>
             <div class="is-size-5 publication-authors">
               <!-- Paper authors -->
               <span class="author-block">
@@ -124,9 +124,9 @@
   <section class="hero teaser">
     <div class="container is-max-desktop">
       <div class="hero-body">
-        <img src="static/images/sc2agent.png" alt="MY ALT TEXT" />
+        <img src="static/images/sc2agent.png" alt="SC2Agent Framework Illustration" />
         <h2 class="subtitle has-text-centered">
-          SC2Arena (LLM benchmark for StarCraft II) and SC2Agent (LLM Agent for SC2Arena)
+          We present <b>SC2Arena</b>, a comprehensive benchmark for evaluating LLMs in StarCraft II, and <b>SC2Agent</b>, a hierarchical agent framework that achieves state-of-the-art performance through self-correction and self-improvement.
         </h2>
       </div>
     </div>
@@ -194,15 +194,52 @@
   <section class="hero is-small is-light">
     <div class="hero-body">
       <div class="container">
-        <h2 class="title is-3">SC2Arena</h2>
-        <img src="static/images/sc2.png" alt="MY ALT TEXT" />
-        <h2 class="subtitle has-text-centered">
-          Description for StarCraft II
-        </h2>
-        <img src="static/images/obs_space.png" alt="MY ALT TEXT" />
-        <h2 class="subtitle has-text-centered">
-          Observation space design for SC2Arena
-        </h2>
+        <h2 class="title is-3">SC2Arena Benchmark</h2>
+        <div class="content has-text-justified">
+          <p>
+            We introduce <strong>SC2Arena</strong>, a structured, text-based benchmark designed to evaluate LLM agents in StarCraft II. It provides standardized observation and action interfaces, preserving the game's original strategic depth and complexity.
+          </p>
+        </div>
+        <img src="static/images/sc2.png" alt="StarCraft II Race Illustrations" />
+        <h3 class="subtitle has-text-centered">
+          Overview of StarCraft II and its Races
+        </h3>
+        <div class="content has-text-justified">
+          <p>
+            StarCraft II is a highly complex real-time strategy game demanding proficiency in macro-management, micro-control, and strategic decision-making under partial information. Each of its three races offers a unique playstyle:
+          </p>
+          <ul>
+            <li><strong>Terran:</strong> A versatile human race with mechanized, repairable units, known for powerful Bio-ball micro-tactics.</li>
+            <li><strong>Zerg:</strong> A swarm-based alien race that overwhelms opponents with rapidly breeding biological units, leveraging the Creep Spread mechanism for map control.</li>
+            <li><strong>Protoss:</strong> An advanced alien race with powerful, shielded units that can be warped into battle instantly via their Pylon network.</li>
+          </ul>
+          <h3 class="title is-4">Key Features and Improvements</h3>
+          <p>
+            Unlike prior benchmarks that often focus on isolated micro-management or high-level strategy, SC2Arena offers a comprehensive evaluation platform. Key improvements include:
+          </p>
+          <ul>
+            <li><strong>Full-Length Game Context:</strong> Supports complete games, combining long-term strategic planning with real-time tactical execution.</li>
+            <li><strong>All Playable Races:</strong> Full support for Terran, Zerg, and Protoss, enabling evaluation across diverse strategic matchups.</li>
+            <li><strong>Complete Low-Level Action Space:</strong> Provides precise control over all in-game actions, preserving the game's original complexity.</li>
+            <li><strong>Agent-vs-Agent Gameplay:</strong> Crucially enables direct competition between agents, facilitating robust performance assessment and ranking via an Elo system.</li>
+          </ul>
+        </div>
+        <img src="static/images/obs_space.png" alt="Observation Space Design Illustration" />
+        <h3 class="subtitle has-text-centered">
+          Optimized Observation Space for LLMs
+        </h3>
+        <div class="content has-text-justified">
+          <p>
+            To enable LLMs to play effectively, raw game states must be converted into textual observations. This presents challenges like spatial reasoning difficulty and information overload. SC2Arena addresses these with two key techniques:
+          </p>
+          <ul>
+            <li><strong>Proximity-based Unit Ordering:</strong> We enhance spatial reasoning by ordering units based on their proximity to each other, starting from the main base. This greedy nearest-neighbor approach helps the LLM infer spatial relationships and identify interactable structures (e.g., a Barracks with an attached Tech Lab).</li>
+            <li><strong>Unit Aggregation:</strong> We reduce information overload by aggregating routine units, like workers, into a single representation. This preserves core information (e.g., total number of workers, their tasks) while removing redundant details that can distract the agent from strategic decision-making.</li>
+          </ul>
+          <p>
+            These optimizations are proven to significantly improve agent performance by making the textual observations more concise and spatially aware.
+          </p>
+        </div>
       </div>
     </div>
   </section>
@@ -210,120 +247,55 @@
   <section class="hero is-small">
     <div class="hero-body">
       <div class="container">
-        <h2 class="title is-3">SC2Agent</h2>
-        <img src="static/images/plan_executor.png" alt="MY ALT TEXT" />
+        <h2 class="title is-3">SC2Agent Framework</h2>
+        <div class="content has-text-justified">
+          <p>
+            We introduce <strong>SC2Agent</strong>, a closed-loop, self-improving, and self-correcting LLM agent framework for StarCraft II. Its design allows even smaller LLMs to achieve competitive performance against challenging opponents by continuously learning from gameplay.
+          </p>
+        </div>
+        <img src="static/images/plan_executor.png" alt="SC2Agent Architecture" />
+        <div class="content has-text-justified">
+          <h3 class="title is-4">Hierarchical Self-Correction Framework</h3>
+          <p>
+            To tackle the vast action space and strict syntax requirements of StarCraft II, SC2Agent employs a two-tier architecture with integrated self-correction:
+          </p>
+          <ul>
+            <li><strong>Planner:</strong> A high-level LLM module that generates strategic commands in natural language (e.g., "Build a Barracks") based on game observations.</li>
+            <li><strong>Executor:</strong> A low-level LLM module that translates the Planner's commands into precise, executable JSON actions.</li>
+            <li><strong>Verifier:</strong> Both the Planner and Executor are equipped with Verifier modules. These LLM-based verifiers check the outputs against predefined rules (e.g., resource constraints, unit validity, JSON syntax). If an output is invalid, the Verifier provides feedback, prompting the Planner or Executor to iteratively refine its output until it is correct and feasible.</li>
+          </ul>
+          <h3 class="title is-4">Self-Improvement via Fine-tuning</h3>
+          <p>
+            A key feature of SC2Agent is its ability to learn and improve over time. This is achieved through a self-improvement loop based on Supervised Fine-Tuning (SFT):
+          </p>
+          <ul>
+            <li><strong>Data Collection:</strong> The agent collects data from its own winning game trajectories. Each data point consists of an observation, a high-level command, and the resulting low-level action.</li>
+            <li><strong>RL-Inspired Scoring:</strong> To ensure data quality, we use a scoring function inspired by reinforcement learning. It evaluates each action based on its discounted future impact on key game metrics (e.g., army value, economic output). Only actions with scores above a certain threshold are selected for training.</li>
+            <li><strong>Fine-tuning:</strong> The high-quality data is used to fine-tune the Planner, Executor, and Verifier models. This process distills strategic expertise from successful gameplay directly into the agent's models, enabling continuous performance improvement and allowing smaller models to defeat strong opponents.</li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
-
-  <!-- Image carousel -->
-  <!-- <section class="hero is-small">
-    <div class="hero-body">
-      <div class="container">
-        <div id="results-carousel" class="carousel results-carousel">
-          <div class="item">
-            <img src="static/images/carousel1.jpg" alt="MY ALT TEXT" />
-            <h2 class="subtitle has-text-centered">
-              First image description.
-            </h2>
-          </div>
-          <div class="item">
-            <img src="static/images/carousel2.jpg" alt="MY ALT TEXT" />
-            <h2 class="subtitle has-text-centered">
-              Second image description.
-            </h2>
-          </div>
-          <div class="item">
-            <img src="static/images/carousel3.jpg" alt="MY ALT TEXT" />
-            <h2 class="subtitle has-text-centered">
-              Third image description.
-            </h2>
-          </div>
-          <div class="item">
-            <img src="static/images/carousel4.jpg" alt="MY ALT TEXT" />
-            <h2 class="subtitle has-text-centered">
-              Fourth image description.
-            </h2>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section> -->
-  <!-- End image carousel -->
-
-
-
-
-  <!-- Youtube video -->
-  <!-- <section class="hero is-small is-light">
-    <div class="hero-body">
-      <div class="container">
-        <h2 class="title is-3">Video Presentation</h2>
-        <div class="columns is-centered has-text-centered">
-          <div class="column is-four-fifths">
-            <div class="publication-video">
-              <iframe src="https://www.youtube.com/embed/JkaxUblCGz0" frameborder="0" allow="autoplay; encrypted-media"
-                allowfullscreen></iframe>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section> -->
-  <!-- End youtube video -->
-
-  <!-- Paper poster -->
-  <!-- <section class="hero is-small is-light">
-    <div class="hero-body">
-      <div class="container">
-        <h2 class="title">Poster</h2>
-
-        <iframe src="static/pdfs/sample.pdf" width="100%" height="550">
-        </iframe>
-
-      </div>
-    </div>
-  </section> -->
-  <!--End paper poster -->
 
 
   <!--BibTex citation -->
   <section class="section" id="BibTeX">
     <div class="container is-max-desktop content">
       <h2 class="title">BibTeX</h2>
-      <pre><code>BibTex Code Here</code></pre>
+      <pre><code>@misc{sc2arena2025,
+    author = {Anonymous},
+    title = {SC2Arena: A Comprehensive Benchmark and Agent for LLMs in StarCraft II},
+    year = {2024},
+    publisher = {GitHub},
+    journal = {GitHub repository},
+    howpublished = {\url{YOUR_PROJECT_URL_HERE}},
+}</code></pre>
     </div>
   </section>
   <!--End BibTex citation -->
 
 
-  <!-- <footer class="footer">
-    <div class="container">
-      <div class="columns is-centered">
-        <div class="column is-8">
-          <div class="content">
-
-            <p>
-              This page was built using the <a href="https://github.com/eliahuhorwitz/Academic-project-page-template"
-                target="_blank">Academic Project Page Template</a> which was adopted from the <a
-                href="https://nerfies.github.io" target="_blank">Nerfies</a> project page.
-              You are free to borrow the source code of this website, we just ask that you link back to this page in the
-              footer. <br> This website is licensed under a <a rel="license"
-                href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative
-                Commons Attribution-ShareAlike 4.0 International License</a>.
-            </p>
-
-          </div>
-        </div>
-      </div>
-    </div>
-  </footer> -->
-
-  <!-- Statcounter tracking code -->
-
-  <!-- You can add a tracker to track page visits by creating an account at statcounter.com -->
-
-  <!-- End of Statcounter Code -->
 
 </body>
 
