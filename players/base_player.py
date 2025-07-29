@@ -233,7 +233,7 @@ class BasePlayer(BotAI):
             unused_keys = [key for key in action.keys() if key not in base_keys + ["target_position", "target_unit"]]
         ### unused keys check
         if unused_keys:
-            unused_keys = [key for key in action.keys() if key not in ["action", "units"]]
+            # unused_keys = [key for key in action.keys() if key not in ["action", "units"]]
             return False, f"Unused keys: {unused_keys}"
 
         ### value check
