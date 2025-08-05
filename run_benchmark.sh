@@ -13,12 +13,12 @@ RUNS_PER_MATCHUP=20
 
 # StarCraft II 参数
 MAP_NAME="Flat48"
-DIFFICULTY="VeryHard"
+DIFFICULTY="Harder"
 AI_BUILD="RandomBuild"
 
 # 模型和API参数
-MODEL_NAME=""
-BASE_URL=""
+MODEL_NAME="Qwen2.5-7B-Instruct"
+BASE_URL="http://127.0.0.1:12001/v1"
 API_KEY=""
 
 # Agent功能开关

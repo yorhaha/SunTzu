@@ -461,3 +461,4 @@ enabled,ability,description
 1,RESEARCH_ADEPTRESONATINGGLAIVES,"Increases the attack speed of the Adept by 45%."
 1,EFFECT_RESTORE,"Recharges the shield of a close-by friendly Protoss unit for 119.1 shield per second."
 1,SHIELDBATTERYRECHARGEEX5_SHIELDBATTERYRECHARGE,"Recharges the shield of a close-by friendly Protoss unit for 119.1 shield per second."
+1,MORPHZERGLINGTOBANELING_BANELING,"Sacrifice a Zergling to create a suicidal unit that deals splash damage."

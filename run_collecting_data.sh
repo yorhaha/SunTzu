@@ -10,9 +10,9 @@ DIFFICULTY_OPTIONS=("Medium" "MediumHard" "Hard" "Harder" "VeryHard")
 AI_BUILD_OPTIONS=("RandomBuild" "Timing" "Rush" "Macro" "Power" "Air")
 RACE_OPTIONS=("Terran" "Protoss" "Zerg")
 
-MODEL=
-BASE_URL=
-API_KEY=
+MODEL_NAME="Qwen2.5-7B-Instruct"
+BASE_URL="http://127.0.0.1:12001/v1"
+API_KEY=""
 
 # --- 主循环 ---
 # 使用 for 循环运行 N 次
