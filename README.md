@@ -54,7 +54,7 @@ Set up the Python environment and API keys for your LLM agent.
 
 1.  **Clone the repository and install dependencies:**
     ```bash
-    git clone https://github.com/yorhaha/SC2Arena.git
+    git clone https://github.com/Anonymous/SC2Arena.git
     cd SC2Arena
     pip install -r requirements.txt
     ```
@@ -126,7 +126,7 @@ Contributions are welcome! Whether it's adding a new agent, improving documentat
 4.  Push to your branch (`git push origin feature/your-feature-name`).
 5.  Open a **Pull Request**.
 
-Please feel free to open an [issue](https://github.com/yorhaha/SC2Arena/issues) to report bugs or suggest new features.
+Please feel free to open an [issue](https://github.com/Anonymous/SC2Arena/issues) to report bugs or suggest new features.
 
 ---
 *StarCraft II is a trademark of Blizzard Entertainment, Inc. This project is not affiliated with or endorsed by Blizzard Entertainment.*
