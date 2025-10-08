@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# --- 配置 ---
-# 1. 设置您希望运行的总次数
+# --- Configuration ---
+# 1. Set the total number of runs you want to execute.
 TOTAL_RUNS=100
 
-# 2. 定义所有选项的数组
+# 2. Define arrays for all available options.
 MAP_OPTIONS=("Flat32" "Flat48" "Flat64")
 DIFFICULTY_OPTIONS=("Medium" "MediumHard" "Hard" "Harder" "VeryHard")
 AI_BUILD_OPTIONS=("RandomBuild" "Timing" "Rush" "Macro" "Power" "Air")
@@ -14,27 +14,27 @@ MODEL_NAME="Qwen2.5-7B-Instruct"
 BASE_URL="http://127.0.0.1:12001/v1"
 API_KEY=""
 
-# --- 主循环 ---
-# 使用 for 循环运行 N 次
+# --- Main Loop ---
+# Use a for loop to run N times.
 for (( i=1; i<=TOTAL_RUNS; i++ ))
 do
     echo "=================================================="
-    echo "===> 开始第 $i / $TOTAL_RUNS 次运行"
+    echo "===> Starting run $i / $TOTAL_RUNS"
     echo "=================================================="
 
-    # --- 随机选择配置 ---
-    # 从数组中随机选择一个元素
-    # 语法: ARRAY[ $RANDOM % ${#ARRAY[@]} ]
-    # $RANDOM 是一个0-32767的随机数
-    # ${#ARRAY[@]} 是数组的长度
-    # % 是取模运算符，确保结果在数组索引范围内
+    # --- Select Configuration Randomly ---
+    # Randomly select an element from an array.
+    # Syntax: ARRAY[ $RANDOM % ${#ARRAY[@]} ]
+    # $RANDOM is a random integer between 0 and 32767.
+    # ${#ARRAY[@]} is the length of the array.
+    # % is the modulo operator, ensuring the result is a valid array index.
     MAP=${MAP_OPTIONS[ $RANDOM % ${#MAP_OPTIONS[@]} ]}
     DIFFICULTY=${DIFFICULTY_OPTIONS[ $RANDOM % ${#DIFFICULTY_OPTIONS[@]} ]}
     AI_BUILD=${AI_BUILD_OPTIONS[ $RANDOM % ${#AI_BUILD_OPTIONS[@]} ]}
     OWN_RACE=${RACE_OPTIONS[ $RANDOM % ${#RACE_OPTIONS[@]} ]}
     ENEMY_RACE=${RACE_OPTIONS[ $RANDOM % ${#RACE_OPTIONS[@]} ]}
 
-    # --- 执行命令 ---
+    # --- Execute Command ---
     PLAYER_NAME="sc2agent"
 
     python main.py \
@@ -55,5 +55,5 @@ do
 done
 
 echo "=================================================="
-echo "所有 ${TOTAL_RUNS} 次运行已全部完成。"
+echo "All ${TOTAL_RUNS} runs have been completed."
 echo "=================================================="
