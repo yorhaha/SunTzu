@@ -31,22 +31,12 @@ class LLMClient:
         retry_times=5,
         retry_interval=5,
         need_json=False,
-        qwen3_think_mode=False,  # For Qwen3 think mode
     ):
         messages = []
         if system_message:
             messages.append({"role": "system", "content": system_message})
         if history:
             messages.extend(history)
-        if (
-            "qwen3" in model_name.lower()
-            and not prompt.endswith("/think")
-            and not prompt.endswith("/no_think")
-        ):
-            if qwen3_think_mode:
-                prompt += "/think"
-            else:
-                prompt += "/no_think"
         messages.append({"role": "user", "content": prompt})
 
         def call_thread():
