@@ -1,5 +1,4 @@
 from sc2.bot_ai import BotAI
-from sc2.units import Units
 from sc2.unit import Unit
 from sc2.units import Units
 from sc2.position import Point2
@@ -71,7 +70,7 @@ class BasePlayer(BotAI):
 
         time_str = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())
         self.real_model_name = self.model_name.split("/")[-1]
-        
+
         self.enable_logging = enable_logging
         if enable_logging:
             self.log_path = f"{log_path}/{self.real_model_name}/{time_str}"
@@ -89,7 +88,7 @@ class BasePlayer(BotAI):
 
         self.sbr = IterativeMean()
         self.resource_cost = 0
-        
+
         self.miner_units = ["SCV", "Probe", "Drone"]
 
     def logging(self, key: str, value, level="info", save_trace=False, save_file=False, print_log=True):
@@ -123,7 +122,7 @@ class BasePlayer(BotAI):
         game_result = game_result.name
         self.logging("game_result", game_result, save_trace=True)
         self.logging("SBR", round(self.sbr.mean, 4), save_trace=True)
-        
+
         time_cost = self.time_formatted.split(":")
         time_cost = int(time_cost[0]) * 60 + int(time_cost[1])
         self.logging("time_cost", time_cost, save_trace=True)
@@ -135,7 +134,7 @@ class BasePlayer(BotAI):
     def update_tag_to_health(self):
         self.tag_to_health = {unit.tag: unit.health for unit in self.units}
         self.tag_to_health.update({unit.tag: unit.health for unit in self.structures})
-    
+
     def get_lowest_health_enemy(self, units: Units):
         """Get the enemy unit with the lowest health."""
         if not units.exists:
@@ -152,6 +151,7 @@ class BasePlayer(BotAI):
         structures_amount = self.structures(unit_type).amount
         pending_amount = self.already_pending(unit_type)
         return unit_amount + structures_amount + pending_amount
+
     async def on_step(self, iteration: int):
         if len(self.units) == 0 or len(self.townhalls) == 0:
             return
@@ -186,14 +186,14 @@ class BasePlayer(BotAI):
                 cost_minerals += message_or_cost[0]
                 cost_vespene += message_or_cost[1]
                 cost_supply += message_or_cost[2]
-        
+
         if self.minerals < cost_minerals:
             errors.append(">>>> Total actions error: minerals is not enough for executing all actions")
         if self.vespene < cost_vespene:
             errors.append(">>>> Total actions error: vespene is not enough for executing all actions")
         if self.supply_left < cost_supply:
             errors.append(">>>> Total actions error: supply is not enough for executing all actions")
-            
+
         if errors:
             return False, "\n\n".join(errors)
         return True, ""
@@ -242,7 +242,11 @@ class BasePlayer(BotAI):
         if not (isinstance(action["units"], list) and len(action["units"]) > 0):
             return False, "`units` must be a non-empty list of integers"
         if "target_position" in action:
-            if not (isinstance(action["target_position"], list) and len(action["target_position"]) == 2 and all(isinstance(i, int) for i in action["target_position"])):
+            if not (
+                isinstance(action["target_position"], list)
+                and len(action["target_position"]) == 2
+                and all(isinstance(i, int) for i in action["target_position"])
+            ):
                 return False, "`target_position` must be a list of two integers"
         if "target_unit" in action:
             if not isinstance(action["target_unit"], int):
@@ -277,11 +281,18 @@ class BasePlayer(BotAI):
         building_units = self.get_building_units()
         building_units = [name.lower() for name in building_units]
         if action_name == "TERRANBUILD_SUPPLYDEPOT":
-            if self.supply_cap - self.supply_used >= 7:
-                return False, "There is still space for supply depot, no need to build new Supply Depot."
-        
+            if self.supply_cap - self.supply_used >= 8:
+                return False, "There is still enough supply count, no need to build new Supply Depot."
+        if action_name == "PROTOSSBUILD_PYLON":
+            if self.supply_cap - self.supply_used >= 8:
+                return False, "There is still enough supply count, no need to build new Pylon."
+        if action_name == "LARVATRAIN_OVERLORD":
+            if self.supply_cap - self.supply_used >= 8:
+                return False, "There is still enough supply count, no need to build new Overlord."
+
         ### resource check
         cost = self.calculate_cost(AbilityId[action_name]) * len(action["units"])
+        supply_cost = 0
         if self.minerals < cost.minerals:
             return False, f"Minerals is not enough for action {action_name}"
         if self.vespene < cost.vespene:
@@ -291,14 +302,14 @@ class BasePlayer(BotAI):
             if self.supply_left < supply_cost:
                 return False, f"Supply is not enough for action {action_name}"
         except KeyError:
-            return True, [cost.minerals, cost.vespene, 0]
-        
+            pass
+
         ### Protoss Pylon check
         if self.config.own_race == "Protoss":
             if action_name == "PROTOSSBUILD_PYLON":
                 pylons = self.units(UnitTypeId.PYLON)
                 close_pylons = pylons.closer_than(5, action["target_position"])
- 
+
                 if close_pylons:
                     close_pylons_pos = [f"({int(p.position.x)}, {int(p.position.y)})" for p in close_pylons]
                     return False, f"Too close to other Pylons at positions: " + ", ".join(close_pylons_pos)
@@ -381,7 +392,7 @@ class BasePlayer(BotAI):
                     + [(distance, dy) for dy in range(-distance, distance + 1, placement_step)]
                 )
             ]
-            
+
             # 过滤出可以放置主建筑的位置
             res = await self.client._query_building_placement_fast(building_ability, possible_positions)
             possible = [p for r, p in zip(res, possible_positions) if r]
@@ -399,7 +410,7 @@ class BasePlayer(BotAI):
             if random_alternative:
                 return random.choice(possible)
             return min(possible, key=lambda p: p.distance_to_point2(near))
-            
+
         return None
 
     ################ run actions
@@ -428,7 +439,6 @@ class BasePlayer(BotAI):
                             assert target is not None, f"Invalid target position: {action['target_position']}"
                         ###### run action
                         run_state = curr_unit(ability=ability, target=target)
-                        assert run_state, "Failed to execute command due to unknown error."
                         ###### run action end
                         # Chat send
                         target_str = "None"
@@ -511,34 +521,36 @@ class BasePlayer(BotAI):
     async def units_to_text(self, units: Units):
         if len(units) == 0:
             return "[Empty]"
-        
+
         units_text = []
-        
+
         other_units = units
-        for mining_type in self.miner_units:
-            mining_judge = lambda unit: unit.name == mining_type and not (unit.is_constructing_scv or unit.is_repairing or unit.is_attacking)
-            mining_units = units.filter(mining_judge)
-            if len(mining_units) > 0:
-                mining_ids = [self.tag_to_id(unit.tag) for unit in mining_units]
-                mining_ids = ", ".join(map(str, mining_ids))
-                mining_text = f"[{mining_ids}]{mining_type}\nState: collecting resources automatically"
-                units_text.append(mining_text)
-            other_units = [unit for unit in other_units if not mining_judge(unit)]
-            
-            attacking_judge = lambda unit: unit.name == mining_type and unit.is_attacking
-            attacking_units = units.filter(attacking_judge)
-            if len(attacking_units) > 0:
-                attacking_ids = [self.tag_to_id(unit.tag) for unit in attacking_units]
-                attacking_ids = ", ".join(map(str, attacking_ids))
-                attacking_text = f"[{attacking_ids}]{mining_type}\nState: attacking enemies automatically"
-                units_text.append(attacking_text)
+        if units.first.is_mine:
+            for mining_type in self.miner_units:
+                mining_judge = lambda unit: unit.name == mining_type and not (unit.is_constructing_scv or unit.is_repairing or unit.is_attacking)
+                mining_units = units.filter(mining_judge)
+                if len(mining_units) > 0:
+                    mining_ids = [self.tag_to_id(unit.tag) for unit in mining_units]
+                    mining_ids = ", ".join(map(str, mining_ids))
+                    mining_text = f"[{mining_ids}]{mining_type}\nState: collecting resources automatically"
+                    units_text.append(mining_text)
+                other_units = [unit for unit in other_units if not mining_judge(unit)]
+
+                attacking_judge = lambda unit: unit.name == mining_type and unit.is_attacking
+                attacking_units = units.filter(attacking_judge)
+                if len(attacking_units) > 0:
+                    attacking_ids = [self.tag_to_id(unit.tag) for unit in attacking_units]
+                    attacking_ids = ", ".join(map(str, attacking_ids))
+                    attacking_text = f"[{attacking_ids}]{mining_type}\nState: attacking enemies automatically"
+                    units_text.append(attacking_text)
+                other_units = [unit for unit in other_units if not attacking_judge(unit)]
 
         distance_to_start = lambda unit: int((unit.position.x - self.start_location.x) ** 2 + (unit.position.y - self.start_location.y) ** 2) // 4
         other_units = sorted(other_units, key=lambda unit: (distance_to_start(unit), unit.name))
         units_text += [await self.unit_to_text(unit) for unit in other_units]
         units_text = "\n".join(units_text)
         return units_text
-    
+
     async def structures_to_text(self, structures: Units):
         if len(structures) == 0:
             return "[Empty]"
@@ -614,19 +626,19 @@ class BasePlayer(BotAI):
                 ability_names = [name for name in ability_names if name not in ["MOVE_MOVE", "ATTACK_ATTACK"]]
             ability_names = [name for name in ability_names if TerranAbility[name].get("enabled", False)]
             self._id_to_abilities[self.tag_to_id(unit.tag)] = ability_names
-            
+
             unit_hash = unit.name + "|" + ", ".join(ability_names)
             if unit_hash not in unit_hash_table:
                 unit_hash_table[unit_hash] = []
             unit_hash_table[unit_hash].append(str(self.tag_to_id(unit.tag)))
-            
+
         text = ""
         for unit_hash, ids in unit_hash_table.items():
             unit_name, abilities = unit_hash.split("|")
             ids = ", ".join(ids)
             if abilities:
                 text += f"{unit_name}[{ids}]: {abilities}\n"
-        
+
         text = text.strip()
         if not text:
             text = "[Empty]"
@@ -683,10 +695,10 @@ class BasePlayer(BotAI):
     def miner_to_text(self):
         center = self.start_location
         miners = []
-        num_SCV = len([unit for unit in self.units if unit.name == "SCV"])
+        num_workers = len([unit for unit in self.units if unit.name in self.miner_units])
         cloest_miners = self.mineral_field.closest_n_units(center, 100)
         cloest_miners = [mineral for mineral in cloest_miners if mineral.mineral_contents > 0]
-        cloest_miners = cloest_miners[: 2 * num_SCV]
+        cloest_miners = cloest_miners[: 2 * num_workers]
         for mineral in cloest_miners:
             miners.append(f"[{self.tag_to_id(mineral.tag)}]({int(mineral.position.x)}, {int(mineral.position.y)})")
         if len(miners) == 0:
