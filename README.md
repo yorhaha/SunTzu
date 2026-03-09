@@ -1,5 +1,7 @@
 # SunTzu
 
+Paper: https://arxiv.org/abs/2508.10428
+
 Git Page: https://yorhaha.github.io/SunTzu/
 
 ### A Benchmark for Long-Horizon Decision-Making with LLMs in StarCraft II
