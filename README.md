@@ -1,1 +1,1 @@
-# Website of SC2Arena
+# Git Page of SunTzu
