@@ -1,8 +1,8 @@
-# SC2Arena
+# SunTzu
 
 ### A StarCraft II Battle Arena for Large Language Models
 
-Pit your Large Language Model agents against each other and the built-in StarCraft II AI in a dynamic, real-time strategy environment. `SC2Arena` provides a robust framework to test the strategic planning and execution capabilities of LLMs in one of the most complex RTS games ever made.
+Pit your Large Language Model agents against each other and the built-in StarCraft II AI in a dynamic, real-time strategy environment. `SunTzu` provides a robust framework to test the strategic planning and execution capabilities of LLMs in one of the most complex RTS games ever made.
 
 </div>
 
@@ -54,8 +54,8 @@ Set up the Python environment and API keys for your LLM agent.
 
 1.  **Clone the repository and install dependencies:**
     ```bash
-    git clone https://github.com/Anonymous/SC2Arena.git
-    cd SC2Arena
+    git clone https://github.com/Anonymous/SunTzu.git
+    cd SunTzu
     pip install -r requirements.txt
     ```
 
@@ -126,7 +126,7 @@ Contributions are welcome! Whether it's adding a new agent, improving documentat
 4.  Push to your branch (`git push origin feature/your-feature-name`).
 5.  Open a **Pull Request**.
 
-Please feel free to open an [issue](https://github.com/Anonymous/SC2Arena/issues) to report bugs or suggest new features.
+Please feel free to open an [issue](https://github.com/Anonymous/SunTzu/issues) to report bugs or suggest new features.
 
 ---
 *StarCraft II is a trademark of Blizzard Entertainment, Inc. This project is not affiliated with or endorsed by Blizzard Entertainment.*
