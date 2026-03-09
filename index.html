@@ -2,11 +2,11 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="description" content="SunTzu is a comprehensive benchmark for evaluating LLMs in StarCraft II, supporting all races, full game context, and low-level actions. StarEvolve is a self-improving agent framework with a Planner-Executor-Verifier architecture that achieves superior performance through self-correction and fine-tuning.">
-  <meta name="keywords" content="StarCraft II, SC2, LLM, Large Language Model, Agent, Benchmark, AI Agent, Reinforcement Learning, Self-Improvement, Decision Making, StarEvolve, SunTzu">
+  <meta name="description" content="SunTzu is a novel benchmark for evaluating LLMs in long-horizon decision-making tasks, adapted from StarCraft II. A hierarchical baseline algorithm with Planner-Executor-Verifier architecture achieves self-improvement through supervised fine-tuning.">
+  <meta name="keywords" content="StarCraft II, SC2, LLM, Large Language Model, Agent, Benchmark, AI Agent, Reinforcement Learning, Self-Improvement, Decision Making, Strategic Reasoning, SunTzu">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>SunTzu and StarEvolve: Benchmark and Self-Improvement Framework for LLMs in Complex Decision-Making Tasks</title>
+  <title>SunTzu: A Strategic Reasoning Benchmark for Large Language Models</title>
 
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
         rel="stylesheet">
@@ -38,8 +38,8 @@
                         <div class="content-container">
                             <img src="./static/images/favicon.ico" alt="Logo" class="banner-image" width="150"/>
                             <div class="text-container">
-                                <h1 class="title is-1" style="word-break: keep-all;">SunTzu and StarEvolve</h1>
-                                <h2 class="subtitle is-4" style="word-break: keep-all;">A Comprehensive Benchmark and Self-Improving Framework for LLM Agents in StarCraft II</h2>
+                                <h1 class="title is-1" style="word-break: keep-all;">SunTzu</h1>
+                                <h2 class="subtitle is-4" style="word-break: keep-all;">A Strategic Reasoning Benchmark for Large Language Models</h2>
                             </div>
             </div>
             </div>
@@ -91,8 +91,8 @@
 <section class="hero teaser" style="margin-top: -16px;">
   <div class="container is-max-desktop" style="margin-top: -16px; margin-bottom: -16px;">
     <h2 class="subtitle has-text-centered">
-    </span>We introduce <strong>SunTzu</strong>, a comprehensive StarCraft II benchmark, and <strong>StarEvolve</strong>, a self-improving agent framework, to advance LLM capabilities in complex strategic decision-making.</span>
-  </h2>
+      We introduce <strong>SunTzu</strong>, a novel benchmark for evaluating LLMs in long-horizon decision-making tasks, adapted from StarCraft II. We also establish a hierarchical baseline algorithm that achieves self-improvement through supervised fine-tuning.
+    </h2>
   </div>
 </section>
 
@@ -103,8 +103,8 @@
       <div class="column is-four-fifths">
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
-          <p>Evaluating large language models (LLMs) in complex decision-making is essential for advancing AI's ability for strategic planning and real-time adaptation. However, existing benchmarks for tasks like StarCraft II fail to capture the game's full complexity, such as its complete game context, diverse action spaces, and all playable races. To address this gap, we present <strong>SunTzu</strong>, a benchmark that fully supports all playable races, low-level action spaces, and optimizes text-based observations to tackle spatial reasoning challenges.</p>
-          <p>Complementing this, we introduce <strong>StarEvolve</strong>, a hierarchical framework that integrates strategic planning with tactical execution, featuring iterative self-correction and continuous improvement via fine-tuning on high-quality gameplay data. Its key components include a Planner-Executor-Verifier structure to break down gameplay, and a scoring system for selecting high-quality training samples. Comprehensive analysis using SunTzu provides valuable insights into developing generalist agents that were not possible with previous benchmarks. Experimental results also demonstrate that our proposed StarEvolve achieves superior performance in strategic planning.</p>
+          <p>Recent advancements in decision-making algorithms, such as reinforcement learning (RL), have achieved significant breakthroughs, particularly in mastering precise control. However, these methods struggle with long-horizon decision-making tasks, which require strategic reasoning to break down into sub-tasks effectively. Conversely, Large Language Models (LLMs), trained on vast corpora, have internalized high-dimensional abstractions of world knowledge, causal relationships, and logical laws, endowing them with powerful reasoning capabilities.</p>
+          <p>To bridge the gap between traditional decision-making algorithms and high-level strategic reasoning, we introduce <strong>SunTzu</strong>, a novel benchmark adapted for LLMs within the complex, long-horizon environment of StarCraft II. Furthermore, we establish a baseline algorithm on this benchmark and evaluate state-of-the-art open-source models. Our work aims to inspire researchers to endow current algorithms with strategic reasoning capabilities, thereby advancing the field of intelligent decision-making.</p>
         </div>
       </div>
     </div>
@@ -143,10 +143,10 @@
 
 <section class="section">
   <div class="container is-max-desktop">
-    <h2 class="title is-3">SunTzu: A Comprehensive Benchmark</h2>
+    <h2 class="title is-3">SunTzu: A Strategic Reasoning Benchmark</h2>
     <div class="content has-text-justified">
       <p>
-        Existing LLM benchmarks for StarCraft II often oversimplify the game by limiting playable races, abstracting away low-level actions, or focusing only on short scenarios. This prevents a true evaluation of an agent's strategic and tactical abilities. <strong>SunTzu</strong> addresses these gaps by providing a comprehensive and challenging evaluation platform.
+        StarCraft II features a vast space of cyclic, non-transitive strategies and counter-strategies. This strategic depth arises because each race offers a distinct playstyle and unique mechanics. To bridge the gap between traditional decision-making algorithms and high-level strategic reasoning, we introduce <strong>SunTzu</strong>, a benchmark designed to evaluate LLMs in complex, long-horizon tasks.
       </p>
     </div>
     <div class="content has-text-centered">
@@ -176,35 +176,39 @@
 
 <section class="section">
   <div class="container is-max-desktop">
-    <h2 class="title is-3">StarEvolve: A Self-Improving Agent Framework</h2>
+    <h2 class="title is-3">Hierarchical Baseline Algorithm</h2>
     <div class="content has-text-justified">
       <p>
-        We propose <strong>StarEvolve</strong>, a closed-loop agent framework designed for robust decision-making and continuous learning in StarCraft II. It features a hierarchical architecture for self-correction and a fine-tuning loop for self-improvement.
+        We propose a hierarchical baseline algorithm designed to adapt LLMs to long-horizon decision-making tasks within SunTzu. It employs a hierarchical architecture that decouples strategic planning from tactical execution, enabling continuous self-improvement through supervised fine-tuning.
       </p>
     </div>
     <div class="content has-text-centered">
-      <img src="./static/images/fig3.png" alt="StarEvolve Framework Illustration" style="width: 100%;">
-      <p class="is-size-7" style="margin-top: 5px;"><i>The StarEvolve framework, showing the Planner-Executor-Verifier structure for self-correction and the SFT loop for self-improvement.</i></p>
+      <img src="./static/images/fig3.png" alt="Hierarchical Baseline Framework Illustration" style="width: 100%;">
+      <p class="is-size-7" style="margin-top: 5px;"><i>The hierarchical baseline framework, showing the Planner-Executor-Verifier structure for self-correction and the SFT loop for self-improvement.</i></p>
     </div>
     <br>
-    <h3 class="title is-4">Hierarchical Self-Correction</h3>
+    <h3 class="title is-4">Hierarchical Self-Correction Framework</h3>
     <div class="content has-text-justified">
       <p>
-        To tackle the vast action space and strict syntax requirements, StarEvolve uses a two-tier system:
+        To address the vast action space and strict syntax requirements, our baseline uses a two-tier architecture:
       </p>
       <ul>
-        <li>A high-level <b>Planner</b> generates strategic commands in natural language (e.g., "Build a Barracks").</li>
-        <li>A low-level <b>Executor</b> translates these commands into precise, executable JSON actions.</li>
+        <li><b>Planner:</b> Generates high-level strategic commands in natural language (e.g., "Build a Barracks") based on observations.</li>
+        <li><b>Executor:</b> Translates the Planner's natural language commands into executable, low-level JSON actions.</li>
       </ul>
       <p>
-        Both components are equipped with <b>Verifier</b> modules that check for errors (e.g., invalid syntax, insufficient resources) and provide feedback, allowing the agent to iteratively correct its decisions before execution.
+        Both modules incorporate <b>Verifier</b> components that facilitate iterative self-correction. If the Planner's output violates environmental constraints, its Verifier provides structured feedback for refinement. The Executor's Verifier validates JSON syntax, parameter correctness, and action feasibility, enabling the agent to iteratively correct decisions before execution.
       </p>
     </div>
     <h3 class="title is-4">Self-Improvement via Fine-Tuning</h3>
     <div class="content has-text-justified">
       <p>
-        StarEvolve continuously improves by learning from its own gameplay. We collect data from winning game trajectories and use a novel <strong>scoring function</strong> to identify high-quality decisions that lead to long-term strategic advantages. These high-quality data points are then used to fine-tune the Planner, Executor, and Verifier models, creating a powerful self-improvement loop.
+        Our baseline establishes a self-improvement loop by collecting gameplay data from winning trajectories. We design a scoring function to identify high-quality decisions that yield short-term rewards and contribute to long-term strategic advantages. These data points are used to fine-tune the Planner, Executor, and Verifier through:
       </p>
+      <ul>
+        <li><b>Verifier-guided rejection sampling:</b> Training on verified high-quality outputs while masking intermediate refinement steps.</li>
+        <li><b>Implicit contrastive learning:</b> Training the Verifier on accepted vs. rejected command pairs to capture boundaries between valid and invalid decisions.</li>
+      </ul>
     </div>
   </div>
 </section>
@@ -214,21 +218,21 @@
     <h2 class="title is-3">Results</h2>
     <div class="content has-text-justified">
       <p>
-        Our experiments show that <strong>SunTzu</strong> effectively ranks agents based on performance. The <strong>StarEvolve</strong> framework demonstrates robust performance, outperforming strong baselines. Crucially, the self-improvement loop via fine-tuning (SFT) significantly boosts the agent's win rate and efficiency, allowing smaller models to compete with and even surpass larger ones.
+        Our experiments demonstrate that <strong>SunTzu</strong> effectively evaluates LLMs in long-horizon decision-making tasks through Elo ratings and comprehensive metrics. <strong>StarEvolve</strong> achieves superior performance compared to directly applying LLMs to this environment, with the SFT-trained version reaching the highest Elo ratings across all races.
       </p>
     </div>
     <div class="content has-text-centered">
       <img src="./static/images/fig4.png" alt="Elo Rating Results" style="width: 100%;">
-      <p class="is-size-7" style="margin-top: 5px;"><i>Elo ratings of StarEvolve and baseline agents across all three races. The fine-tuned (SFT) version of our agent achieves the highest or competitive ratings.</i></p>
+      <p class="is-size-7" style="margin-top: 5px;"><i>Elo ratings of the hierarchical baseline and various LLMs across Terran, Zerg, and Protoss matchups. The fine-tuned (SFT) version achieves the highest scores.</i></p>
     </div>
     <div class="content has-text-centered">
-      <img src="./static/images/table2.png" alt="StarEvolve Performance with Different LLMs" style="width: 90%;">
-      <p class="is-size-7" style="margin-top: 5px;"><i>① Qwen2.5-7B-Instruct, ② Qwen3-8B (no think), ③ DeepSeek-V3-0324, and ①-SFT</i></p>
+      <img src="./static/images/table2.png" alt="Baseline Performance with Different LLMs" style="width: 90%;">
+      <p class="is-size-7" style="margin-top: 5px;"><i>Performance comparison across different LLM backbones. ① Qwen2.5-7B-Instruct, ② Qwen3-8B (no think), ③ DeepSeek-V3-0324, and ①-SFT (fine-tuned).</i></p>
     </div>
     <br>
     <div class="content has-text-centered">
       <img src="./static/images/fig5.png" alt="Gameplay Visualization" style="width: 100%;">
-      <p class="is-size-7" style="margin-top: 5px;"><i>Visualization of a Terran game, where our agent builds a mid-game advantage and executes a decisive final attack to secure victory.</i></p>
+      <p class="is-size-7" style="margin-top: 5px;"><i>Visualization of the baseline's strategic reasoning with Terran, showing distinct strategies for different races and the ability to build mid-game advantages into decisive victories.</i></p>
     </div>
   </div>
 </section>
@@ -237,11 +241,14 @@
 <section class="section" id="Citations">
   <div class="container is-max-desktop content">
     <h2 class="title">BibTeX Citation</h2>
-    <pre><code>@inproceedings{anonymous2025SunTzu,
-  title     = {SunTzu and StarEvolve: Benchmark and Self-Improvement Framework for LLMs in Complex Decision-Making Tasks},
-  author    = {Anonymous},
-  booktitle = {Anonymous Conference},
-  year      = {2025}
+    <pre><code>@misc{shen2025sc2arenastarevolvebenchmarkselfimprovement,
+      title={SC2Arena and StarEvolve: Benchmark and Self-Improvement Framework for LLMs in Complex Decision-Making Tasks}, 
+      author={Pengbo Shen and Yaqing Wang and Ni Mu and Yao Luan and Runpeng Xie and Senhao Yang and Lexiang Wang and Hao Hu and Shuang Xu and Yiqin Yang and Bo Xu},
+      year={2025},
+      eprint={2508.10428},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2508.10428}, 
 }</code></pre>
   </div>
 </section>
