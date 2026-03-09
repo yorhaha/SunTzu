@@ -2,23 +2,74 @@
 
 Git Page: https://yorhaha.github.io/SunTzu/
 
-### A StarCraft II Battle Arena for Large Language Models
+### A Benchmark for Long-Horizon Decision-Making with LLMs in StarCraft II
 
-Pit your Large Language Model agents against each other and the built-in StarCraft II AI in a dynamic, real-time strategy environment. `SunTzu` provides a robust framework to test the strategic planning and execution capabilities of LLMs in one of the most complex RTS games ever made.
+SunTzu is a novel benchmark designed to evaluate Large Language Models (LLMs) in complex, long-horizon decision-making tasks. Built upon StarCraft II, it provides a comprehensive platform for testing strategic reasoning capabilities of LLMs in one of the most complex real-time strategy environments.
 
-</div>
+---
+
+## 📖 Abstract
+
+Recent advancements in decision-making algorithms, such as reinforcement learning (RL), have achieved significant breakthroughs in mastering precise control. However, these methods struggle with long-horizon decision-making tasks, which require strategic reasoning to break down into sub-tasks effectively.
+
+Conversely, Large Language Models (LLMs), trained on vast corpora, have internalized high-dimensional abstractions of world knowledge, causal relationships, and logical laws, endowing them with powerful reasoning capabilities.
+
+To bridge the gap between traditional decision-making algorithms and high-level strategic reasoning, we introduce **SunTzu**, a novel benchmark adapted for LLMs within the complex, long-horizon environment.
+
+---
 
 ## ✨ Key Features
 
-*   **LLM-Powered Agents:** Connect any powerful LLMs you want to try to control a player in StarCraft II.
-*   **Human-like Reasoning:** Agents can perform high-level strategic planning, verify the validity of their plans, and self-correct their actions.
-*   **Extensible Framework:** Easily add new agents, models, or custom game logic.
-*   **Detailed Configuration:** Fine-tune every aspect of the match, from map and difficulty to race and AI build strategies.
-*   **Benchmarking:** Test your agent against various built-in AI difficulty levels and builds to measure its performance.
+*   **Full-Length Game Context:** Supports complete gameplay scenarios spanning thousands of real-time decisions
+*   **All Playable Races:** Full support for Terran, Protoss, and Zerg with unique mechanics
+*   **Complete Low-Level Actions:** Preserves the game's original strategic depth and complexity
+*   **Agent-vs-Agent Gameplay:** Enables direct competition and ELO-based ranking mechanisms
+*   **Optimized Observations:** Proximity-based unit ordering and worker aggregation reduce information overload
+*   **Hierarchical Self-Correction Framework:** Baseline algorithm with Planner, Executor, and Verifier modules
+*   **Standardized JSON Interface:** Extensible and easy-to-use API for agent development
+
+---
+
+## 🏗️ Benchmark Design
+
+![Benchmark Design](fig/benchmark_design.png)
+
+SunTzu introduces two key techniques to address challenges in long-horizon decision-making:
+
+1.  **Proximity-based Unit Ordering:** Enhances spatial reasoning via greedy nearest-neighbor unit ordering
+2.  **Unit Aggregation:** Reduces information overload by aggregating redundant units
+
+---
+
+## 🤖 Method: Hierarchical Self-Correction Framework
+
+![Method](fig/agent_illustration.png)
+
+The baseline algorithm employs a two-tier architecture:
+
+*   **Planner:** Generates high-level strategic commands in natural language
+*   **Executor:** Translates commands into executable low-level JSON actions
+*   **Verifier:** Enables iterative self-correction for both modules
+
+---
+
+## 📊 Results
+
+![ELO Results](fig/elo_results.png)
+
+### Key Findings
+
+1.  **Finding 1:** Due to cognitive overload, LLMs cannot be directly applied to long-horizon decision-making tasks.
+
+2.  **Finding 2:** Hierarchical reasoning and observation optimization can enhance the reasoning capabilities of LLMs in long-horizon decision-making tasks.
+
+3.  **Finding 3:** LLMs possess unique strategic reasoning capabilities and strong interpretability.
+
+---
 
 ## 🚀 Getting Started
 
-Follow these steps to set up your local environment and start a match.
+Follow these steps to set up your local environment and start experimenting.
 
 ### 1. Install StarCraft II 🎮
 
@@ -37,46 +88,30 @@ You need a local installation of the game. The free Starter Edition is sufficien
 
 ### 2. Set Up Game Maps 🗺️
 
-Download the necessary map packs to run experiments.
-
-1.  Download the map packs from the [s2client-proto repository](https://github.com/Blizzard/s2client-proto?tab=readme-ov-file#map-packs). The **`Melee`** pack is required.
-2.  Create a `Maps` folder inside your StarCraft II installation directory if it doesn't exist.
-3.  Unzip `Melee.zip` into the `Maps` folder using the password `iagreetotheeula`. Your final directory structure should look like this:
-    ```
-    /path/to/StarCraftII/
-    ├── Maps/
-    │   ├── Melee/
-    │   │   ├── Flat32.SC2Map
-    │   │   ├── ... (other maps)
-    ```
+1.  Download the `Melee` map pack from the [s2client-proto repository](https://github.com/Blizzard/s2client-proto?tab=readme-ov-file#map-packs).
+2.  Create a `Maps` folder inside your StarCraft II installation directory.
+3.  Unzip `Melee.zip` into the `Maps` folder.
 
 ### 3. Configure the Agent 🤖
 
-Set up the Python environment and API keys for your LLM agent.
-
 1.  **Clone the repository and install dependencies:**
     ```bash
-    git clone https://github.com/Anonymous/SunTzu.git
+    git clone https://github.com/yorhaha/SunTzu.git
     cd SunTzu
     pip install -r requirements.txt
     ```
 
 2.  **Configure API Keys:**
-    Create a `.env` file by copying the template:
     ```bash
     cp .env_template .env
     ```
-    Now, open the `.env` file and add your LLM provider's API key and base URL.
-    ```env
-    # .env
-    API_KEY="your_api_key_here"
-    BASE_URL="https://api.example.com/v1"
-    ```
-    Alternatively, you can set these as environment variables or pass them as command-line arguments.
+    Edit `.env` and add your LLM provider's API key and base URL.
+
+---
 
 ## ▶️ Running a Battle
 
-You are now ready to launch a match! Run `main.py` with your desired configuration.
+### LLMs-vs-Built-in AI
 
 ```bash
 python main.py \
@@ -91,44 +126,61 @@ python main.py \
     --enemy_race Terran
 ```
 
-### Command-Line Arguments
+### Battle in ELO mode (LLMs-vs-LLMs)
 
-Here are some of the key parameters you can configure:
-
-| Argument                 | Description                                                              | Default              |
-| ------------------------ | ------------------------------------------------------------------------ | -------------------- |
-| `--map_name`             | The name of the map to play on (e.g., `Flat32`, `Simple64`).             | `Flat32`             |
-| `--difficulty`           | The difficulty of the built-in AI opponent.                              | `Hard`               |
-| `--model`                | The name of the LLM to use for the agent.                                | `Qwen2.5-32B-Instruct` |
-| `--ai_build`             | The build order for the built-in AI (e.g., `Rush`, `Macro`).             | `RandomBuild`        |
-| `--own_race` / `--enemy_race` | The race for your agent and the opponent (`Terran`, `Protoss`, `Zerg`). | `Terran`             |
-| `--enable_plan`          | Enables the high-level strategic planning module for the agent.          | `False`              |
-| `--enable_plan_verifier` | Enables a module that verifies the logic of the generated plan.          | `False`              |
-| `--enable_action_verifier`| Enables a module that verifies the validity of each generated action.    | `False`              |
-
-> For a full list of available maps, races, and other settings, see `tools/constants.py`.
-
-### Battle in ELO mode
-
-You can launch a battle between two AI agents and calculate their ELO score.
-
-Set up the necessary player information in `run_elo_template.py`. Then run:
-
-```
+```bash
 python run_elo_template.py
 ```
+
+---
+
+## 📋 Evaluation Metrics
+
+### Performance Metrics
+| Metric | Description |
+|--------|-------------|
+| ELO | ELO Rating from agent-vs-agent matches |
+| WR | Win Rate against built-in AIs |
+| TCW | Time Cost of Winning |
+| SBR | Supply Block Ratio |
+| RUR | Resource Utilization Ratio |
+
+### Efficiency Metrics
+| Metric | Description |
+|--------|-------------|
+| TPD | Tokens Per Decision |
+| VAR | Valid Action Ratio |
+
+---
 
 ## 🤝 How to Contribute
 
 Contributions are welcome! Whether it's adding a new agent, improving documentation, or fixing a bug, we appreciate your help.
 
-1.  **Fork** the repository.
-2.  Create a new **branch** (`git checkout -b feature/your-feature-name`).
-3.  Make your changes and **commit** them.
-4.  Push to your branch (`git push origin feature/your-feature-name`).
-5.  Open a **Pull Request**.
-
-Please feel free to open an [issue](https://github.com/Anonymous/SunTzu/issues) to report bugs or suggest new features.
+1.  **Fork** the repository
+2.  Create a new **branch** (`git checkout -b feature/your-feature-name`)
+3.  Make your changes and **commit** them
+4.  Push to your branch (`git push origin feature/your-feature-name`)
+5.  Open a **Pull Request**
 
 ---
-*StarCraft II is a trademark of Blizzard Entertainment, Inc. This project is not affiliated with or endorsed by Blizzard Entertainment.*
+
+## 📄 Citation
+
+```bibtex
+@misc{shen2025sc2arenastarevolvebenchmarkselfimprovement,
+      title={SC2Arena and StarEvolve: Benchmark and Self-Improvement Framework for LLMs in Complex Decision-Making Tasks}, 
+      author={Pengbo Shen and Yaqing Wang and Ni Mu and Yao Luan and Runpeng Xie and Senhao Yang and Lexiang Wang and Hao Hu and Shuang Xu and Yiqin Yang and Bo Xu},
+      year={2025},
+      eprint={2508.10428},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2508.10428}, 
+}
+```
+
+---
+
+## ⚖️ License
+
+StarCraft II is a trademark of Blizzard Entertainment, Inc. This project is not affiliated with or endorsed by Blizzard Entertainment.
