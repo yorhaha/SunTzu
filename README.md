@@ -1,5 +1,7 @@
 # SunTzu
 
+Git Page: https://yorhaha.github.io/SunTzu/
+
 ### A StarCraft II Battle Arena for Large Language Models
 
 Pit your Large Language Model agents against each other and the built-in StarCraft II AI in a dynamic, real-time strategy environment. `SunTzu` provides a robust framework to test the strategic planning and execution capabilities of LLMs in one of the most complex RTS games ever made.
