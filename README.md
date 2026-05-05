@@ -1,8 +1,8 @@
 # SunTzu
 
-Paper: https://arxiv.org/abs/2508.10428
+Paper: TODO
 
-Git Page: https://yorhaha.github.io/SunTzu/
+Git Page: TODO
 
 ### A Benchmark for Long-Horizon Decision-Making with LLMs in StarCraft II
 
@@ -98,7 +98,7 @@ You need a local installation of the game. The free Starter Edition is sufficien
 
 1.  **Clone the repository and install dependencies:**
     ```bash
-    git clone https://github.com/yorhaha/SunTzu.git
+    git clone TODO
     cd SunTzu
     pip install -r requirements.txt
     ```
@@ -169,17 +169,7 @@ Contributions are welcome! Whether it's adding a new agent, improving documentat
 
 ## 📄 Citation
 
-```bibtex
-@misc{shen2025sc2arenastarevolvebenchmarkselfimprovement,
-      title={SC2Arena and StarEvolve: Benchmark and Self-Improvement Framework for LLMs in Complex Decision-Making Tasks}, 
-      author={Pengbo Shen and Yaqing Wang and Ni Mu and Yao Luan and Runpeng Xie and Senhao Yang and Lexiang Wang and Hao Hu and Shuang Xu and Yiqin Yang and Bo Xu},
-      year={2025},
-      eprint={2508.10428},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG},
-      url={https://arxiv.org/abs/2508.10428}, 
-}
-```
+TODO
 
 ---
 
